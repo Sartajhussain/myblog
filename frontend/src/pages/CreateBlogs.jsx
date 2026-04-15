@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setBlog } from "../redux/blogSlice";
 import { useEffect } from "react";
+import { API_BASE_URL } from "../utils/api";
 
 const CreateBlogs = () => {
 
@@ -37,7 +38,7 @@ const CreateBlogs = () => {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:8000/api/v1/blog",
+        `${API_BASE_URL}/api/v1/blog`,
         { title, category },
         {
           headers: { "Content-Type": "application/json" },

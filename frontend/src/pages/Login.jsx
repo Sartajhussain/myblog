@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { setLoading, setUser } from "../redux/authSlice";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import loginImg from "../assets/login-img.png";
+import { API_BASE_URL } from "../utils/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const Login = () => {
       dispatch(setLoading(true));
 
       const response = await axios.post(
-        "http://localhost:8000/api/v1/user/login",
+        `${API_BASE_URL}/api/v1/user/login`,
         { email, password },
         { withCredentials: true }
       );
@@ -66,7 +67,7 @@ const Login = () => {
      
 
       const res = await axios.post(
-        "http://localhost:8000/api/v1/user/forgot-password",
+        `${API_BASE_URL}/api/v1/user/forgot-password`,
         { email },
         {
           headers: { "Content-Type": "application/json" },
@@ -126,7 +127,7 @@ const Login = () => {
       dispatch(setLoading(true));
 
       const res = await axios.post(
-        "http://localhost:8000/api/v1/user/verify-otp",
+        `${API_BASE_URL}/api/v1/user/verify-otp`,
         { email, otp: finalOtp }
       );
 

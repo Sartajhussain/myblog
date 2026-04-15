@@ -84,7 +84,7 @@ const AllUser = () => {
     const getUsers = async () => {
         try {
             const { data } = await axios.get(
-                "http://localhost:8000/api/v1/user/all-users",
+                `${API_BASE_URL}/api/v1/user/all-users`,
                 {
                     withCredentials: true,
                 }

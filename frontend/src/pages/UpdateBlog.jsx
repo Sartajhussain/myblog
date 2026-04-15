@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import JoditEditor from "jodit-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { API_BASE_URL } from "../utils/api";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -114,7 +114,7 @@ const UpdateBlog = () => {
       setPublishLoading(true);
 
       const { data } = await axios.patch(
-        `http://localhost:8000/api/v1/blog/${id}/publish`,
+        `${API_BASE_URL}/api/v1/blog/${id}/publish`,
         {},
         { withCredentials: true }
       );

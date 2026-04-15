@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../utils/api";
 import {
   FaHeart,
   FaRegHeart,
@@ -41,7 +42,7 @@ const ViewBlog = ({ blog }) => {
       const fetchBlog = async () => {
         try {
           const { data } = await axios.get(
-            `http://localhost:8000/api/v1/blog/${blogId}`,
+            `${API_BASE_URL}/api/v1/blog/${blogId}`,
             { withCredentials: true }
           );
           if (data.success) {
@@ -65,7 +66,7 @@ const ViewBlog = ({ blog }) => {
       const fetchComments = async () => {
         try {
           const { data } = await axios.get(
-            `http://localhost:8000/api/v1/comment/blog/${selectedBlog._id}`,
+            `${API_BASE_URL}/api/v1/comment/blog/${selectedBlog._id}`,
             { withCredentials: true }
           );
           if (data.success) {
@@ -105,7 +106,7 @@ const ViewBlog = ({ blog }) => {
 
     try {
       const { data } = await axios.post(
-        `http://localhost:8000/api/v1/comment/${selectedBlog._id}/add-comment`,
+        `${API_BASE_URL}/api/v1/comment/${selectedBlog._id}/add-comment`,
         { text: comment },
         { withCredentials: true }
       );

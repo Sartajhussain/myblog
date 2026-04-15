@@ -7,7 +7,7 @@ import {
   FiLinkedin,
   FiGithub,
 } from "react-icons/fi";
-import userimg from "../assets/userprofile.png";
+import { API_BASE_URL } from "../utils/api";
 
 const AllUserProfile = () => {
   const [users, setUsers] = useState([]);
@@ -18,7 +18,7 @@ const AllUserProfile = () => {
   const getUsers = async () => {
     try {
       const { data } = await axios.get(
-        "http://localhost:8000/api/v1/user/all-users",
+        `${API_BASE_URL}/api/v1/user/all-users`,
         { withCredentials: true }
       );
       if (data.success) {

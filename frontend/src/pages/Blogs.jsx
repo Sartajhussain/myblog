@@ -4,7 +4,7 @@ import axios from "axios";
 import PublishedBlogSideBar from "./PublishedBlogSideBar";
 import Pagination from "./Pagination";
 
-const Blogs = () => {
+import { API_BASE_URL } from "../utils/api";
   const navigate = useNavigate();
 
   const [blogs, setBlogs] = useState([]);
@@ -19,7 +19,7 @@ const Blogs = () => {
   const fetchBlogs = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get("http://localhost:8000/api/v1/blog/feed", { withCredentials: true });
+      const { data } = await axios.get(`${API_BASE_URL}/api/v1/blog/feed`, { withCredentials: true });
       if (data.success) {
         setBlogs(data.blogs);
       }

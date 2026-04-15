@@ -13,7 +13,7 @@ const handleAddComment = async () => {
   try{
 
     const {data} = await axios.post(
-      `http://localhost:8000/api/v1/comment/${blogId}/add-comment`,
+      `${API_BASE_URL}/api/v1/comment/${blogId}/add-comment`,
       {
         text: comment
       },

@@ -18,6 +18,7 @@ import userimg from "../assets/userprofile.png";
 import { useSelector, useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { API_BASE_URL } from "../utils/api";
 import { setUser } from "../redux/authSlice.js";
 import { toggleTheme } from "../redux/themeSlice.js";
 import { Button } from "../components/ui/button";
@@ -57,7 +58,7 @@ const Navbar = () => {
   const Logout = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:8000/api/v1/user/logout",
+        `${API_BASE_URL}/api/v1/user/logout`,
         {},
         { withCredentials: true }
       );

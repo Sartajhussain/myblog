@@ -3,14 +3,14 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import BlogCard from "../components/blog/BlogCard";
 
-const PublicFeed = () => {
+import { API_BASE_URL } from "../utils/api";
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchFeed = async () => {
     try {
       const { data } = await axios.get(
-        "http://localhost:8000/api/v1/blog/feed",
+        `${API_BASE_URL}/api/v1/blog/feed`,
         { withCredentials: true }
       );
 

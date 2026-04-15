@@ -14,7 +14,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../components/ui/carousel";
-import { Badge } from "../components/ui/badge";
+import { API_BASE_URL } from "../utils/api";
 import AllUser from "./AllUser";
 
 const Home = () => {

@@ -3,7 +3,7 @@ import axios from "axios";
 import { ExternalLink } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
-const Comments = () => {
+import { API_BASE_URL } from "../utils/api";
 
   
   
@@ -19,7 +19,7 @@ const Comments = () => {
 
       const res = await axios.get( 
         
-        `http://localhost:8000/api/v1/comment/blog/my-blog/comments`,{withCredentials:true}
+        `${API_BASE_URL}/api/v1/comment/blog/my-blog/comments`,{withCredentials:true}
         
       );
 

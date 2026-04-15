@@ -1,4 +1,4 @@
-import userimg from "../assets/userprofile.png";
+import { API_BASE_URL } from "../utils/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { setUser, setLoading } from "../redux/authSlice.js";
@@ -54,7 +54,7 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:8000/api/v1/user/profile",
+        `${API_BASE_URL}/api/v1/user/profile`,
           { withCredentials: true }
         );
 
@@ -102,7 +102,7 @@ const Profile = () => {
       dispatch(setLoading(true));
 
       const res = await axios.put(
-        `http://localhost:8000/api/v1/user/profile/update`,
+        `${API_BASE_URL}/api/v1/user/profile/update`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

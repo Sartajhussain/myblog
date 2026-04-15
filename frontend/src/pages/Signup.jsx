@@ -8,6 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setLoading } from "../redux/authSlice.js";
 import { Loader2 } from "lucide-react";
 import loginImg from "../assets/login-img.png";
+import { API_BASE_URL } from "../utils/api";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -53,7 +54,7 @@ const Signup = () => {
     try {
       dispatch(setLoading(true));
       const response = await axios.post(
-        "http://localhost:8000/api/v1/user/register",
+        `${API_BASE_URL}/api/v1/user/register`,
         user,
         { headers: { "Content-Type": "application/json" }, withCredentials: true }
       );

@@ -4,7 +4,7 @@ import React, { use, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setBlog } from "../redux/blogSlice.js";
+import { API_BASE_URL } from "../utils/api";
 
 const Blog = () => {
   const dispatch = useDispatch();
@@ -14,7 +14,7 @@ const Blog = () => {
   const getOwnBlogs = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:8000/api/v1/blog/my-blogs",
+        `${API_BASE_URL}/api/v1/blog/my-blogs`,
         { withCredentials: true }
       );
       if (res.data.success) {
@@ -31,7 +31,7 @@ const deleteBlogHandler = async (id) => {
 
   try {
     const res = await fetch(
-      `http://localhost:8000/api/v1/blog/${id}`,
+      `${API_BASE_URL}/api/v1/blog/${id}`,
       {
         method: "DELETE",
         credentials: "include",
