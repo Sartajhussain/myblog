@@ -1,6 +1,7 @@
 // API Base URL configuration
-// In development: use localhost:8000
-// In production: use Render URL from environment or current domain
+// Frontend adds /api/v1 in each call, so this returns just the base domain
+// In development: http://localhost:8000
+// In production: https://blog-application-774e.onrender.com
 
 const getAPIBaseURL = () => {
   // ENV variable use karo (best practice)
@@ -10,15 +11,15 @@ const getAPIBaseURL = () => {
 
   // Development
   if (import.meta.env.DEV) {
-    return "http://localhost:8000/api/v1";
+    return "http://localhost:8000";
   }
 
-  // Production (FIXED)
+  // Production fallback - use current domain (Render URL)
   const protocol = window.location.protocol;
   const hostname = window.location.hostname;
   const port = window.location.port ? `:${window.location.port}` : "";
 
-  return `${protocol}//${hostname}${port}/api/v1`;
+  return `${protocol}//${hostname}${port}`;
 };
 
 export const API_BASE_URL = getAPIBaseURL();
