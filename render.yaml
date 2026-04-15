@@ -12,3 +12,4 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
+

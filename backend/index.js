@@ -31,12 +31,19 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/comment", commentRoutes);
 
-// ✅ Serve Frontend (VERY IMPORTANT FIX)
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
+// ✅ Serve Frontend (Static files)
+const distPath = path.join(__dirname, "../frontend/dist");
+app.use(express.static(distPath));
 
 // ✅ SPA Fallback (React Router) - Must be AFTER all API routes
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+  const indexPath = path.join(distPath, "index.html");
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error("❌ Frontend dist not found at:", indexPath);
+      res.status(500).send("Frontend not available");
+    }
+  });
 });
 
 // ✅ Start Server
