@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import BlogCard from "../components/blog/BlogCard";
-
 import { API_BASE_URL } from "../utils/api";
+
+const PublicFeed = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
