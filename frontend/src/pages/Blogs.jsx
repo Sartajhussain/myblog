@@ -5,6 +5,8 @@ import PublishedBlogSideBar from "./PublishedBlogSideBar";
 import Pagination from "./Pagination";
 
 import { API_BASE_URL } from "../utils/api";
+
+const Blogs = () => {
   const navigate = useNavigate();
 
   const [blogs, setBlogs] = useState([]);
