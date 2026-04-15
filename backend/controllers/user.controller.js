@@ -113,11 +113,11 @@ export const login = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    // 🔥 IMPORTANT: SAME CONFIG LOGIN + LOGOUT
+    // 🔥 IMPORTANT: Cookie configuration for PRODUCTION
     const cookieOptions = {
       httpOnly: true,
-      secure: false, // ⚠️ local ke liye false, production me true
-      sameSite: "lax", // ⚠️ agar frontend alag port pe hai to "none"
+      secure: process.env.NODE_ENV === "production", // true in production (HTTPS), false in dev
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // "none" for cross-origin in production
       maxAge: 24 * 60 * 60 * 1000,
     };
 
@@ -161,8 +161,8 @@ export const logout = async (_, res) => {
     res.status(200)
       .cookie("token", "", {
         httpOnly: true,
-        secure: false, // ⚠️ local me false, production me true
-        sameSite: "lax", // ya "none" agar cross-origin hai
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         expires: new Date(0),
       })
       .json({

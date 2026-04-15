@@ -17,10 +17,38 @@ const __dirname = path.dirname(__filename);
 
 const PORT = process.env.PORT || 8000;
 
-// ✅ CORS (PRODUCTION SAFE)
+// ✅ CORS Configuration - Allow production domain
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
+  "https://blog-application-774e.onrender.com",
+];
+
 app.use(cors({
-  origin: true,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, same-origin requests)
+    if (!origin) return callback(null, true);
+
+    // Check if origin is in allowlist
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // Allow any origin for development (can be restricted for production)
+    if (process.env.NODE_ENV === "development") {
+      return callback(null, true);
+    }
+
+    // Production: log blocked origin but allow for now to debug
+    console.log("⚠️ CORS request from origin:", origin);
+    callback(null, true); // Allow for debugging
+  },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 // ✅ Middlewares
