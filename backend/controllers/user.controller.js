@@ -73,7 +73,7 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // ✅ 1. Validate input
+    // ✅ Validate input
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -81,7 +81,7 @@ export const login = async (req, res) => {
       });
     }
 
-    // ✅ 2. Check user
+    // ✅ Check user
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
@@ -91,7 +91,7 @@ export const login = async (req, res) => {
       });
     }
 
-    // ✅ 3. Compare password
+    // ✅ Compare password
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -101,33 +101,33 @@ export const login = async (req, res) => {
       });
     }
 
-    // ✅ 4. JWT secret check
+    // ✅ JWT secret check
     if (!process.env.JWT_SECRET) {
       throw new Error("JWT_SECRET not defined");
     }
 
-    // ✅ 5. Generate token
+    // ✅ Generate token
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    // 🔥 IMPORTANT: Cookie configuration for PRODUCTION
+    // 🔥 FINAL COOKIE FIX (IMPORTANT)
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // true in production (HTTPS), false in dev
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // "none" for cross-origin in production
+      secure: true,        // MUST (Render HTTPS)
+      sameSite: "None",    // MUST (mobile ke liye)
       maxAge: 24 * 60 * 60 * 1000,
     };
 
-    // ✅ 6. Set cookie
+    // ✅ Set cookie
     res.cookie("token", token, cookieOptions);
 
-    // ✅ 7. Remove password from response
+    // ✅ Remove password
     user.password = undefined;
 
-    // ✅ 8. Send clean user data
+    // ✅ Response
     return res.status(200).json({
       success: true,
       message: `Welcome back ${user.firstName}`,
