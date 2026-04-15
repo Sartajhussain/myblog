@@ -7,11 +7,13 @@ import blogRoutes from "./routes/blog.routes.js";
 import commentRoutes from "./routes/comment.route.js";
 import cors from "cors";
 import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
 const app = express();
-const __dirname = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const PORT = process.env.PORT || 8000;
 
@@ -33,7 +35,11 @@ app.use("/api/v1/comment", commentRoutes);
 
 // ✅ Serve Frontend (Static files)
 const distPath = path.join(__dirname, "../frontend/dist");
-app.use(express.static(distPath));
+console.log("📁 Looking for frontend dist at:", distPath);
+
+app.use(express.static(distPath, (err) => {
+  if (err) console.error("❌ Static serve error:", err);
+}));
 
 // ✅ SPA Fallback (React Router) - Must be AFTER all API routes
 app.use((req, res) => {
