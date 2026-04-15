@@ -34,8 +34,8 @@ app.use("/api/v1/comment", commentRoutes);
 // ✅ Serve Frontend (VERY IMPORTANT FIX)
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-// ✅ SPA Fallback (React Router)
-app.get("*", (req, res) => {
+// ✅ SPA Fallback (React Router) - Must be AFTER all API routes
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
