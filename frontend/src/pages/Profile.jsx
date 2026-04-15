@@ -139,7 +139,7 @@ const Profile = () => {
   return (
     <>
       {/* ================= PROFILE ================= */}
-      <div className="min-h-screen flex items-center justify-center md:ml-64 
+      <div className="min-h-screen pt-20 pb-24 md:pb-0 md:pt-0 flex items-center justify-center md:ml-64 
 bg-gray-50 dark:bg-slate-900 
 px-4 md:px-8 py-12">
 

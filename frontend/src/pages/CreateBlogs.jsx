@@ -66,7 +66,7 @@ const CreateBlogs = () => {
 
 
   return (
-    <div className="flex items-center justify-center md:ml-72 px-4 py-12 bg-gray-50 dark:bg-gray-900">
+    <div className="flex items-center justify-center pt-24 pb-24 md:pt-12 md:pb-12 md:ml-72 px-4 py-12 bg-gray-50 dark:bg-gray-900">
       <div className="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8 md:p-10">
 
         {/* Heading */}

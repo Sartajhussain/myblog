@@ -45,7 +45,7 @@ const Comments = () => {
   }, []);
 
   return (
-    <div className="min-h-screen md:ml-[300px] p-4 mt-5 md:p-8 bg-gray-100 dark:bg-slate-900">
+    <div className="min-h-screen pt-20 pb-24 md:pb-0 md:pt-0 md:ml-[300px] p-4 md:mt-5 md:p-8 bg-gray-100 dark:bg-slate-900">
 
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow">
 

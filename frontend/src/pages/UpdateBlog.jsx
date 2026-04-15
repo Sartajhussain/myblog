@@ -172,7 +172,7 @@ const UpdateBlog = () => {
         UI
   =========================== */
   return (
-    <div className="min-h-screen md:ml-72 px-4 py-10 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen pt-20 pb-24 md:pb-0 md:pt-0 md:ml-72 px-4 py-10 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-10">
 
         {/* HEADER */}

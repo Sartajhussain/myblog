@@ -61,8 +61,8 @@ const deleteBlogHandler = async (id) => {
 
 
   return (
-    <div className="min-h-screen pt-24 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-5xl md:ml-[310px]  mx-auto bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg">
+    <div className="min-h-screen pt-24 pb-24 md:pb-0 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-5xl md:ml-[310px] mx-auto bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg">
 
         <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">
           Blog List
