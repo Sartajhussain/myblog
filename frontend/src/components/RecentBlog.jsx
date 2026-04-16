@@ -9,7 +9,8 @@ const RecentBlog = ({ blogs = [] }) => {
       {/* TITLE */}
 
       <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 text-center py-10">
-        Welcome ✨ The People of the Kingdom 
+        Welcome ✨ The People of the Kingdom
+
         <hr className="w-2/3 md:w-1/3 border-t-4 border-gray-900 mx-auto mt-4" />
       </h2>
 
@@ -34,7 +35,7 @@ const RecentBlog = ({ blogs = [] }) => {
         {/* SIDEBAR */}
 
         <BlogSideBar />
-  
+
       </div>
 
     </div>

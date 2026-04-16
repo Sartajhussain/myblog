@@ -1,24 +1,49 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { Badge } from "../components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { API_BASE_URL } from "../utils/api";
+import { setBlog } from "../redux/blogSlice";
+import userimg from "../assets/userprofile.png";
 
 const BlogSideBar = () => {
   const [email, setEmail] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const { blog = [] } = useSelector((store) => store.blog || {});
-  const { user } = useSelector((state) => state.auth);
+  const blog = useSelector((store) => store.blog?.blog || []);
+  const user = useSelector((state) => state.auth?.user);
 
-  console.log("BLOG DATA:", blog);
+  // ✅ FETCH BLOGS (MAIN FIX)
+  const getBlogs = async () => {
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/api/v1/blog`,
+        { withCredentials: true }
+      );
 
-  // ✅ FIX: safe category extraction
-  const categories = [...new Set(blog.map((item) => item.category).filter(Boolean))];
+      if (res.data.success) {
+        dispatch(setBlog(res.data.blogs || []));
+      }
+    } catch (error) {
+      console.log("SIDEBAR BLOG ERROR:", error);
+    }
+  };
 
-  // ✅ FIX: safe suggested blogs
-  const suggestedBlogs = [...blog]
-    .filter((b) => b?.thumbnail && b?.title)
+  useEffect(() => {
+    if (!blog || blog.length === 0) {
+      getBlogs();
+    }
+  }, []);
+
+  // ✅ categories
+  const categories = [...new Set(blog.map((b) => b?.category).filter(Boolean))];
+
+  // ✅ suggested blogs
+  const suggestedBlogs = blog
+    .filter((b) => b?._id && b?.title)
     .sort(() => Math.random() - 0.5)
     .slice(0, 4);
 
@@ -31,7 +56,6 @@ const BlogSideBar = () => {
       </h2>
 
       <div className="flex flex-wrap gap-2 mt-4 md:mt-5">
-
         {categories.length > 0 ? (
           categories.map((item, index) => (
             <Badge
@@ -45,12 +69,10 @@ const BlogSideBar = () => {
         ) : (
           <p className="text-sm text-gray-400">No categories found</p>
         )}
-
       </div>
 
       {/* SUBSCRIBE */}
       <div className="mt-8 md:mt-10">
-
         <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
           Subscribe
         </h3>
@@ -60,7 +82,6 @@ const BlogSideBar = () => {
         </p>
 
         <form className="flex flex-col gap-3">
-
           <input
             type="email"
             placeholder="Your email"
@@ -76,19 +97,16 @@ const BlogSideBar = () => {
           >
             Subscribe
           </button>
-
         </form>
       </div>
 
       {/* SUGGESTED BLOG */}
       <div className="mt-8 md:mt-10">
-
         <h3 className="text-sm font-semibold dark:text-white mb-4">
           Suggested Blogs
         </h3>
 
         <div className="flex flex-col gap-3">
-
           {suggestedBlogs.length > 0 ? (
             suggestedBlogs.map((item) => (
               <div
@@ -102,25 +120,25 @@ const BlogSideBar = () => {
                   }
                 }}
               >
-
                 <img
-                  src={item.thumbnail}
+                  src={item.thumbnail || userimg}
                   alt={item.title}
                   className="w-14 h-14 object-cover rounded"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = userimg;
+                  }}
                 />
 
-                <p className="text-sm font-medium line-clamp-2">
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-200 line-clamp-2">
                   {item.title}
                 </p>
-
               </div>
             ))
           ) : (
             <p className="text-sm text-gray-400">No suggested blogs</p>
           )}
-
         </div>
-
       </div>
 
     </div>
