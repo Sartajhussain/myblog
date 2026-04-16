@@ -43,19 +43,19 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
-const searchResults =
-  !search.trim()
-    ? []
-    : (blog || []).filter((b) =>
+  const searchResults =
+    !search.trim()
+      ? []
+      : (blog || []).filter((b) =>
         (b.title || "")
           .toLowerCase()
           .includes(search.trim().toLowerCase())
       );
 
-const handleClick = (id) => {
-  setSearch("");
-  navigate(`/view-blog/${id}`);
-};
+  const handleClick = (id) => {
+    setSearch("");
+    navigate(`/view-blog/${id}`);
+  };
 
 
   const Logout = async () => {
@@ -365,7 +365,7 @@ border border-gray-200 dark:border-gray-700">
           </Link>
 
           {/* Profile */}
-          {user ? (
+          {user && user._id ? (
             <Link
               to="/dashboard/profile"
               className="flex flex-col items-center text-[11px] text-gray-600 dark:text-gray-300 active:scale-95 transition"
