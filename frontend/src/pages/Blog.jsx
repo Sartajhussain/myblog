@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../utils/api";
 import { setBlog } from "../redux/blogSlice";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import userimg from "../assets/userprofile.png";
 
 const Blog = () => {
   const dispatch = useDispatch();
@@ -13,9 +14,7 @@ const Blog = () => {
   const blog = useSelector((state) => state.blog?.blog || []);
   const navigate = useNavigate();
 
-  const dummyImg = "https://via.placeholder.com/150";
-
-  // FETCH BLOGS
+  // ✅ FETCH BLOGS
   const getOwnBlogs = async () => {
     try {
       const res = await axios.get(
@@ -31,7 +30,7 @@ const Blog = () => {
     }
   };
 
-  // DELETE BLOG
+  // ✅ DELETE BLOG
   const deleteBlogHandler = async (id) => {
     if (!window.confirm("Are you sure you want to delete this blog?")) return;
 
@@ -59,6 +58,12 @@ const Blog = () => {
     } catch (err) {
       toast.error("Error deleting blog");
     }
+  };
+
+  // ✅ SAFE IMAGE HANDLER (NO LOOP ERROR)
+  const handleImageError = (e) => {
+    e.target.onerror = null;
+    e.target.src = userimg;
   };
 
   useEffect(() => {
@@ -101,12 +106,12 @@ const Blog = () => {
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-4">
 
-                        {/* ✅ IMAGE FIX */}
+                        {/* ✅ IMAGE FIX (SAFE) */}
                         <img
-                          src={b.thumbnail || dummyImg}
+                          src={b.thumbnail || userimg}
                           alt={b.title}
                           className="w-14 h-14 object-cover rounded-lg"
-                          onError={(e) => (e.target.src = dummyImg)}
+                          onError={handleImageError}
                         />
 
                         <span
@@ -131,7 +136,7 @@ const Blog = () => {
                     <td className="py-4 px-4">
                       <div className="flex gap-3">
 
-                        {/* ✅ EDIT ICON */}
+                        {/* EDIT */}
                         <button
                           className="px-3 py-1 text-sm bg-gray-700 text-white rounded-md hover:bg-black transition flex items-center gap-1"
                           onClick={() =>
@@ -141,7 +146,7 @@ const Blog = () => {
                           <FiEdit2 size={14} /> Edit
                         </button>
 
-                        {/* ✅ DELETE ICON */}
+                        {/* DELETE */}
                         <button
                           className="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 transition flex items-center gap-1"
                           onClick={() => deleteBlogHandler(b._id)}
@@ -173,10 +178,10 @@ const Blog = () => {
                 <div className="flex gap-4">
 
                   <img
-                    src={b.thumbnail || dummyImg}
+                    src={b.thumbnail || userimg}
                     alt={b.title}
                     className="w-16 h-16 object-cover rounded-lg"
-                    onError={(e) => (e.target.src = dummyImg)}
+                    onError={handleImageError}
                   />
 
                   <div className="flex-1">
