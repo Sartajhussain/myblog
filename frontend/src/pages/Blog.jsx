@@ -7,18 +7,14 @@ import { API_BASE_URL } from "../utils/api";
 import { setBlog } from "../redux/blogSlice";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import userimg from "../assets/userprofile.png";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { setBlog } from "../redux/blogSlice";
-import { API_BASE_URL } from "../utils/api";
+
 const Blog = () => {
   const dispatch = useDispatch();
-
-  const blog = useSelector((state) => state.blog?.blog || []);
   const navigate = useNavigate();
 
-  // ✅ FETCH BLOGS
+  const blog = useSelector((state) => state.blog?.blog || []);
+
+  // FETCH BLOGS
   const getOwnBlogs = async () => {
     try {
       const res = await axios.get(
@@ -34,7 +30,7 @@ const Blog = () => {
     }
   };
 
-  // ✅ DELETE BLOG
+  // DELETE BLOG
   const deleteBlogHandler = async (id) => {
     if (!window.confirm("Are you sure you want to delete this blog?")) return;
 
@@ -64,7 +60,6 @@ const Blog = () => {
     }
   };
 
-  // ✅ SAFE IMAGE HANDLER (NO LOOP ERROR)
   const handleImageError = (e) => {
     e.target.onerror = null;
     e.target.src = userimg;
@@ -110,7 +105,6 @@ const Blog = () => {
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-4">
 
-                        {/* ✅ IMAGE FIX (SAFE) */}
                         <img
                           src={b.thumbnail || userimg}
                           alt={b.title}
@@ -124,6 +118,7 @@ const Blog = () => {
                         >
                           {b.title}
                         </span>
+
                       </div>
                     </td>
 
@@ -140,7 +135,6 @@ const Blog = () => {
                     <td className="py-4 px-4">
                       <div className="flex gap-3">
 
-                        {/* EDIT */}
                         <button
                           className="px-3 py-1 text-sm bg-gray-700 text-white rounded-md hover:bg-black transition flex items-center gap-1"
                           onClick={() =>
@@ -150,7 +144,6 @@ const Blog = () => {
                           <FiEdit2 size={14} /> Edit
                         </button>
 
-                        {/* DELETE */}
                         <button
                           className="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 transition flex items-center gap-1"
                           onClick={() => deleteBlogHandler(b._id)}
