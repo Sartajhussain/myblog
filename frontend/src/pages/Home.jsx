@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import Autoplay from "embla-carousel-autoplay";
+import { Badge } from "../components/ui/badge";
 
 
 import RecentBlog from "../components/RecentBlog";
@@ -20,6 +21,7 @@ import AllUser from "./AllUser";
 const Home = () => {
   const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [api, setApi] = React.useState();
   const [current, setCurrent] = React.useState(0);
   const { user } = useSelector((state) => state.auth);
