@@ -39,10 +39,12 @@ const Home = () => {
       year: "numeric",
     });
   };
-
+  const [loading, setLoading] = useState(true);
   // ✅ FIX: Redux + Local dono me save
   const fetchBlogs = async () => {
     try {
+      setLoading(true);
+
       const { data } = await axios.get(
         `${API_BASE_URL}/api/v1/blog/feed`,
         { withCredentials: true }
@@ -51,14 +53,16 @@ const Home = () => {
       if (data?.success) {
         const blogsData = data.blogs || [];
 
-        setBlogs(blogsData);      // local state
-        dispatch(setBlog(blogsData)); // 🔥 REDUX ME SAVE
+        setBlogs(blogsData);
+        dispatch(setBlog(blogsData));
       }
+
     } catch (err) {
       console.error("FETCH BLOG ERROR:", err);
+    } finally {
+      setLoading(false); // 🔥 important
     }
   };
-
   useEffect(() => {
     fetchBlogs();
   }, []);
@@ -72,6 +76,8 @@ const Home = () => {
       setCurrent(api.selectedScrollSnap());
     });
   }, [api]);
+
+
 
   return (
     <>
@@ -158,8 +164,16 @@ const Home = () => {
         </div>
 
       </div>
+     {loading ? (
+  <div className="flex justify-center items-center py-10">
+    <div className="w-8 h-8 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+  </div>
+) : blogs.length === 0 ? (
+  <p className="text-center py-10">No Blog Found</p>
+) : (
+  <RecentBlog blogs={blogs} />
+)}
 
-      <RecentBlog blogs={blogs} />
       <AllUser />
     </>
   );
