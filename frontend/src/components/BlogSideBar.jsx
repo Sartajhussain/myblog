@@ -9,6 +9,7 @@ const BlogSideBar = () => {
   const { user } = useSelector((state) => state.auth);
   const [selectedCategory, setSelectedCategory] = useState("");
   const navigate = useNavigate();
+  
 
   console.log("BLOG DATA:", blog);
 
@@ -31,22 +32,29 @@ const BlogSideBar = () => {
       </h2>
 
       <div className="flex flex-wrap gap-2 mt-4 md:mt-5">
-        {categories.length > 0 ? (
-          categories.map((item, index) => (
-            <Badge
-              key={index}
-              onClick={() => setSelectedCategory(item)}
-              className="cursor-pointer rounded-md px-3 py-1 dark:bg-white dark:text-black capitalize bg-black text-white hover:bg-black hover:text-white"
-            >
-              {item}
-            </Badge>
-          ))
-        ) : (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            No categories found
-          </p>
-        )}
-      </div>
+
+  {categories.length > 0 ? (
+    categories.map((item, index) => (
+      <Badge
+        key={index}
+        onClick={() => setSelectedCategory(item)}
+        className={`cursor-pointer rounded-md px-3 py-1 capitalize transition
+        ${
+          selectedCategory === item
+            ? "bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
+            : "bg-black text-white dark:bg-white dark:text-black hover:opacity-80"
+        }`}
+      >
+        {item}
+      </Badge>
+    ))
+  ) : (
+    <p className="text-sm text-gray-500 dark:text-gray-400">
+      No categories found
+    </p>
+  )}
+
+</div>
 
       {/* SUBSCRIBE */}
       <div className="mt-8 md:mt-10">

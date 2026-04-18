@@ -1,5 +1,9 @@
 import User from "../models/user.model.js";
+import { sendMail } from "../utils/sendMail.js";
 
+// ==========================
+// FORGOT PASSWORD (SEND OTP)
+// ==========================
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -20,25 +24,26 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
-    // 🔥 OTP generate
+    // OTP generate
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     user.otp = otp;
-    user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 min
+    user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 min expiry
 
     await user.save();
 
-    console.log("OTP:", otp); // 🔥 testing ke liye
+    // 🔥 SEND EMAIL
+    await sendMail(user.email, otp);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "OTP sent to email (check console)",
+      message: "OTP sent to email",
     });
 
   } catch (err) {
     console.log("FORGOT ERROR:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error",
     });
@@ -46,6 +51,9 @@ export const forgotPassword = async (req, res) => {
 };
 
 
+// ==========================
+// VERIFY OTP
+// ==========================
 export const verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -66,7 +74,7 @@ export const verifyOTP = async (req, res) => {
       });
     }
 
-    // 🔥 OTP match check
+    // check OTP
     if (user.otp !== otp) {
       return res.status(400).json({
         success: false,
@@ -74,7 +82,7 @@ export const verifyOTP = async (req, res) => {
       });
     }
 
-    // 🔥 Expiry check
+    // check expiry
     if (user.otpExpires < Date.now()) {
       return res.status(400).json({
         success: false,
@@ -82,20 +90,20 @@ export const verifyOTP = async (req, res) => {
       });
     }
 
-    // 🔥 clear OTP
+    // clear OTP
     user.otp = null;
     user.otpExpires = null;
     await user.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "OTP verified successfully",
     });
 
   } catch (err) {
-    console.log("VERIFY OTP ERROR:", err);
+    console.log("VERIFY ERROR:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error",
     });

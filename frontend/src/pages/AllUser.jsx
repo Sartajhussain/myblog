@@ -121,7 +121,8 @@ const AllUser = () => {
 
                 <h2
                     className="flex justify-center mt-6 text-sm cursor-pointer underline text-white"
-                    onClick={() => navigate("/AllUserProfile")}
+                    onClick={() => navigate
+                      ("/AllUserProfile")}
                 >
                     View All User Profile
                 </h2>
@@ -168,25 +169,25 @@ const AllUser = () => {
 
             {selectedUser.instagram && (
               <a href={selectedUser.instagram} target="_blank">
-                <FiInstagram />
+                <FiInstagram className="text-pink-500"/>
               </a>
             )}
 
             {selectedUser.linkedin && (
               <a href={selectedUser.linkedin} target="_blank">
-                <FiLinkedin />
+                <FiLinkedin className="text-[#0A66C2]" />
               </a>
             )}
 
             {selectedUser.github && (
               <a href={selectedUser.github} target="_blank">
-                <FiGithub />
+                <FiGithub  className="text-black"/>
               </a>
             )}
 
             {selectedUser.facebook && (
               <a href={selectedUser.facebook} target="_blank">
-                <FiFacebook />
+                <FiFacebook className="text-[#1877F2]"/>
               </a>
             )}
 
