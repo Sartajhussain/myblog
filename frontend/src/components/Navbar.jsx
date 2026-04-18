@@ -315,10 +315,9 @@ border border-gray-200 dark:border-gray-700
 
           {/* Mobile Hamburger */}
           <div className="md:hidden">
-            onClick={() => {
-              setIsOpen(false);
-              navigate(user ? "/dashboard/profile" : "/login");
-            }}
+            <button onClick={() => setIsOpen(true)}>
+              <FiMenu className="w-7 h-7" />
+            </button>
           </div>
         </div>
       </div>
@@ -414,7 +413,7 @@ border border-gray-200 dark:border-gray-700
           <div className="flex items-center gap-3"
             onClick={() => {
               setIsOpen(false);
-              navigate('/login');
+              navigate( user ? "/dashboard/profile" : "/login");
             }}
 
           >
