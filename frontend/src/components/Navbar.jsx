@@ -107,18 +107,24 @@ const Navbar = () => {
 
               {/* SEARCH RESULTS */}
               {search && searchResults?.length > 0 && (
-                <div className="absolute mt-2 w-full md:w-[300px] 
+                <div
+                  className="
+absolute mt-2 z-50
+left-1/2 -translate-x-1/2 w-[90vw]  
+md:left-0 md:translate-x-0 md:w-[300px]
 bg-white dark:bg-gray-800 
-shadow-lg rounded-lg overflow-hidden z-50 
-border border-gray-200 dark:border-gray-700">
+shadow-lg rounded-lg overflow-hidden 
+border border-gray-200 dark:border-gray-700
+"
+                >
 
                   {searchResults.slice(0, 5).map((item) => (
                     <div
                       key={item._id}
                       onClick={() => handleClick(item._id)}
                       className="flex items-center gap-3 p-3 cursor-pointer
-      hover:bg-gray-100 dark:hover:bg-gray-700
-      transition"
+        hover:bg-gray-100 dark:hover:bg-gray-700
+        transition"
                     >
                       <img
                         src={item.thumbnail}
@@ -127,7 +133,7 @@ border border-gray-200 dark:border-gray-700">
                       />
 
                       <p className="text-sm font-medium line-clamp-1 
-      text-gray-800 dark:text-gray-200">
+        text-gray-800 dark:text-gray-200">
                         {item.title}
                       </p>
                     </div>
@@ -309,9 +315,10 @@ border border-gray-200 dark:border-gray-700">
 
           {/* Mobile Hamburger */}
           <div className="md:hidden">
-            <button onClick={() => setIsOpen(true)}>
-              <FiMenu className="w-7 h-7" />
-            </button>
+            onClick={() => {
+              setIsOpen(false);
+              navigate(user ? "/dashboard/profile" : "/login");
+            }}
           </div>
         </div>
       </div>

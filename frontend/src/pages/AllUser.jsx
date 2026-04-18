@@ -71,9 +71,9 @@ const AllUser = () => {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
             }}
-            className="min-h-screen py-10"
+            className="min-h-[250px] md:min-h-screen py-6 md:py-10"
         >
-            <div className="w-full md:max-w-6xl mx-auto py-10 px-4">
+            <div className="w-full md:max-w-6xl mx-auto py-0 md:py-10 px-4">
 
                 <h2 className="text-4xl md:text-5xl font-bold text-gray-100 text-center py-10">
                     Our Authors
