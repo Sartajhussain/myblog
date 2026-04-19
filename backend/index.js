@@ -5,11 +5,12 @@ import connectDb from "./database/db.js";
 import userRoutes from "./routes/user.routes.js";
 import blogRoutes from "./routes/blog.routes.js";
 import commentRoutes from "./routes/comment.route.js";
+import contactRoutes from "./routes/contactRoutes.js";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-import contactRoutes from "./routes/contactRoutes.js";
 import rateLimit from "express-rate-limit";
+import fs from "fs";
 
 dotenv.config();
 
@@ -36,7 +37,6 @@ app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
-    if (NODE_ENV === "development") return callback(null, true);
     callback(null, true);
   },
   credentials: true,
@@ -70,37 +70,34 @@ app.use("/api/v1/comment", commentRoutes);
 app.use("/api/v1/contact", contactLimiter, contactRoutes);
 
 // ==============================
-// FRONTEND SAFE SERVE (IMPORTANT FIX)
+// FRONTEND (FIXED SAFE VERSION)
 // ==============================
 
 const distPath = path.join(__dirname, "../frontend/dist");
+const indexPath = path.join(distPath, "index.html");
 
-// 👉 sirf tab serve karo jab dist exist kare
-if (NODE_ENV === "production" && fsExists(distPath)) {
+// static files serve always
+app.use(express.static(distPath));
 
-  app.use(express.static(distPath));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(distPath, "index.html"));
-  });
-
-} else {
-  console.log("⚠️ Frontend not served (dev mode or dist missing)");
-}
-
-// ==============================
-// helper check
-// ==============================
-import fs from "fs";
-function fsExists(p) {
-  return fs.existsSync(p);
-}
+// SPA fallback (React Router)
+app.get("*", (req, res) => {
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    console.log("❌ Frontend not built. Run npm run build");
+    res.status(404).send("Frontend not available");
+  }
+});
 
 // ==============================
 // START SERVER
 // ==============================
 app.listen(PORT, async () => {
-  await connectDb();
-  console.log(`✅ Server running on port ${PORT}`);
-  console.log(`🌍 Mode: ${NODE_ENV}`);
+  try {
+    await connectDb();
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`🌍 Mode: ${NODE_ENV}`);
+  } catch (error) {
+    console.error("❌ DB Connection Failed:", error);
+  }
 });
