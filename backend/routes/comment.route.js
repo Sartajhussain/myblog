@@ -1,15 +1,35 @@
+// routes/comment.route.js
+
 import express from "express";
-import { addComment, likeComment, addReply, getComments, deleteComment, updateComment } 
-from "../controllers/comment.controller.js";
+import {
+  addComment,
+  likeComment,
+  addReply,
+  getComments,
+  deleteComment,
+  updateComment,
+  getAllComments
+} from "../controllers/comment.controller.js";
+
 import { isAuthenticated } from "../middleware/isAuthenticated.js";
 
 const router = express.Router();
 
-router.post("/:id/add-comment",isAuthenticated, addComment);
-router.put("/:commentId",isAuthenticated, updateComment);
-router.delete("/:commentId",isAuthenticated, deleteComment);
+// ================= COMMENTS =================
+router.post("/:id/add-comment", isAuthenticated, addComment);
+
+// 🔥 IMPORTANT (Dashboard use karega)
+router.get("/all", isAuthenticated, getAllComments);
+
+// Blog specific
+router.get("/blog/:blogId", getComments);
+
+// Update / Delete
+router.put("/:commentId", isAuthenticated, updateComment);
+router.delete("/:commentId", isAuthenticated, deleteComment);
+
+// Extra
 router.post("/reply", addReply);
 router.post("/like/:commentId", likeComment);
-router.get("/blog/:blogId", getComments);
 
 export default router;

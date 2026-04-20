@@ -59,7 +59,7 @@ const App = () => {
           <Route path="create-blogs" element={<CreateBlogs />} />
 
           {/* ✅ IMPORTANT FIX (MATCH PARAM NAME) */}
-          <Route path="write-blog/:blogId" element={<UpdateBlog />} />
+          <Route path="/dashboard/write-blog/:blogId" element={<UpdateBlog />} />
 
         </Route>
 
