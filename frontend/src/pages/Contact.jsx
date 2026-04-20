@@ -22,12 +22,15 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (loading) return; // 🔥 prevent double click
+
     try {
       setLoading(true);
 
       const res = await axios.post(
         "https://blog-application-774e.onrender.com/api/v1/contact",
-        form
+        form,
+        { timeout: 10000 } // optional but good
       );
 
       if (res.data.success) {
@@ -44,14 +47,14 @@ const Contact = () => {
 
     } catch (error) {
       console.log("FULL ERROR:", error);
-      console.log("RESPONSE:", error?.response);
-      console.log("MESSAGE:", error?.message);
 
       toast.error(
         error?.response?.data?.message ||
         error?.message ||
-        "Network error (mobile issue)"
+        "Network error"
       );
+    } finally {
+      setLoading(false); // 🔥 MOST IMPORTANT FIX
     }
   };
 
@@ -65,7 +68,6 @@ const Contact = () => {
       rounded-2xl shadow-xl p-6 
       border border-gray-200 dark:border-slate-700">
 
-        {/* Heading */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Feedback & Suggestions
@@ -76,10 +78,8 @@ const Contact = () => {
           </p>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Name */}
           <div className="grid grid-cols-2 gap-3">
             <input
               type="text"
@@ -102,7 +102,6 @@ const Contact = () => {
             />
           </div>
 
-          {/* Email */}
           <input
             type="email"
             name="email"
@@ -113,7 +112,6 @@ const Contact = () => {
             required
           />
 
-          {/* Message */}
           <textarea
             rows="3"
             name="message"
@@ -124,7 +122,6 @@ const Contact = () => {
             required
           />
 
-          {/* Button */}
           <button
             type="submit"
             disabled={loading}
@@ -142,6 +139,7 @@ const Contact = () => {
               "Send Message"
             )}
           </button>
+
           {successMsg && (
             <p className="text-green-600 text-sm text-center mt-2">
               {successMsg}
@@ -151,7 +149,6 @@ const Contact = () => {
         </form>
       </div>
 
-      {/* INPUT STYLE */}
       <style>{`
         .input {
           width: 100%;
