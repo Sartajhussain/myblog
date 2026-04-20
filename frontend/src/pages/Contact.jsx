@@ -26,7 +26,7 @@ const Contact = () => {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:8000/api/v1/contact",
+        "https://blog-application-774e.onrender.com/api/v1/contact",
         form
       );
 
@@ -43,9 +43,15 @@ const Contact = () => {
       }
 
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Something went wrong");
-    } finally {
-      setLoading(false);
+      console.log("FULL ERROR:", error);
+      console.log("RESPONSE:", error?.response);
+      console.log("MESSAGE:", error?.message);
+
+      toast.error(
+        error?.response?.data?.message ||
+        error?.message ||
+        "Network error (mobile issue)"
+      );
     }
   };
 

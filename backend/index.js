@@ -36,7 +36,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:5173",
   "http://127.0.0.1:5174",
-  "https://blog-application-774e.onrender.com", // frontend live URL (agar same ho)
+  "https://blog-application-774e.onrender.com"
 ];
 
 app.use(
@@ -49,7 +49,7 @@ app.use(
       }
 
       console.log("❌ Blocked CORS origin:", origin);
-      return callback(null, true); // safe allow (you can tighten later)
+      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
   })
