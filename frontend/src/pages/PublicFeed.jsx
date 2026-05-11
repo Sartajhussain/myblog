@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import BlogCard from "../components/blog/BlogCard";
+import Skeleton from "../components/Skeleton";
 import { API_BASE_URL } from "../utils/api";
 
 const PublicFeed = () => {
@@ -30,21 +31,20 @@ const PublicFeed = () => {
   return (
     <div className="min-h-screen mt-[30px] bg-gray-50 dark:bg-gray-900 px-4 py-10 relative">
 
-      {/* 🔥 Loading GIF Overlay */}
-     {loading && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
-    <div className="w-16 h-16 border-4 border-gray-300 dark:border-gray-700 border-t-black dark:border-t-white rounded-full animate-spin"></div>
-  </div>
-)}
-
       <div className="max-w-3xl mx-auto space-y-10">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Public Feed
         </h1>
 
-        {blogs.map((blog) => (
-          <BlogCard key={blog._id} blog={blog}  />
-        ))}
+        {loading ? (
+          <div className="space-y-6">
+            <Skeleton type="blogCard" count={4} />
+          </div>
+        ) : (
+          blogs.map((blog) => (
+            <BlogCard key={blog._id} blog={blog}  />
+          ))
+        )}
       </div>
     </div>
   );

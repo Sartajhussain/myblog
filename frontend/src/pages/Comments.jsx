@@ -4,7 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { API_BASE_URL } from "../utils/api";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import Skeleton from "../components/Skeleton";
 
 const Comments = () => {
   const [allComments, setAllComments] = useState([]);
@@ -36,6 +36,7 @@ const Comments = () => {
 
   useEffect(() => {
     fetchComments();
+    window.scrollTo(0, 0);
   }, [page]);
 
   return (
@@ -52,9 +53,8 @@ bg-gray-50 dark:bg-slate-950">
 
         {/* ================= LOADING ================= */}
         {loading ? (
-          <div className="p-6 flex flex-col items-center gap-2 text-gray-500">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <p className="text-xs">Loading comments...</p>
+          <div className="p-6 space-y-4">
+            <Skeleton type="comment" count={5} />
           </div>
         ) : allComments.length === 0 ? (
           <div className="p-6 text-center text-gray-500 text-sm">

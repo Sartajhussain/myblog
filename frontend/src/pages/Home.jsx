@@ -4,6 +4,7 @@ import axios from "axios";
 import { useSelector, useDispatch } from "react-redux"; // ✅ ADD
 import Autoplay from "embla-carousel-autoplay";
 import { Badge } from "../components/ui/badge";
+import Skeleton from "../components/Skeleton";
 
 import RecentBlog from "../components/RecentBlog";
 import { Card, CardContent } from "../components/ui/card";
@@ -77,6 +78,16 @@ const Home = () => {
     });
   }, [api]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-10">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <Skeleton type="blogCard" count={3} />
+          <Skeleton type="blogCard" count={1} />
+        </div>
+      </div>
+    );
+  }
 
 
   return (
@@ -164,15 +175,17 @@ const Home = () => {
         </div>
 
       </div>
-     {loading ? (
-  <div className="flex justify-center items-center py-10">
-    <div className="w-8 h-8 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
-  </div>
-) : blogs.length === 0 ? (
-  <p className="text-center py-10">No Blog Found</p>
-) : (
-  <RecentBlog blogs={blogs} />
-)}
+      {loading ? (
+        <div className="py-10">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-8">
+            <Skeleton type="blogCard" count={3} />
+          </div>
+        </div>
+      ) : blogs.length === 0 ? (
+        <p className="text-center py-10">No Blog Found</p>
+      ) : (
+        <RecentBlog blogs={blogs} />
+      )}
 
       <AllUser />
     </>

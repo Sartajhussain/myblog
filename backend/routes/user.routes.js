@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllUsers, login, logout, updateProfile, userRegister } from "../controllers/user.controller.js";
+import { getAllUsers, login, logout, updateProfile, userRegister, getCurrentUser } from "../controllers/user.controller.js";
 import { isAuthenticated } from "../middleware/isAuthenticated.js";
 import { singleUploads } from "../middleware/multer.js";
 
@@ -14,6 +14,7 @@ const router = express.Router();
 router.post("/register", userRegister);
 router.post("/login", login);
 router.post("/logout", logout);
+router.get("/me", isAuthenticated, getCurrentUser);
 router.get("/all-users", getAllUsers);
 
 // PROFILE

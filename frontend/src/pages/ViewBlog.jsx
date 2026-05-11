@@ -11,9 +11,9 @@ import {
   FaBookmark,
   FaRegBookmark,
 } from "react-icons/fa";
-import { FiSend } from "react-icons/fi";
 import { IoShareOutline } from "react-icons/io5";
-import CommentItem from "./CommentItem";
+import Skeleton from "../components/Skeleton";
+import CommentsSection from "../components/CommentsSection";
 import userimg from "../assets/userprofile.png";
 
 const ViewBlog = ({ blog }) => {
@@ -30,11 +30,27 @@ const ViewBlog = ({ blog }) => {
   const [likeCount, setLikeCount] = useState(0);
   const [saved, setSaved] = useState(false);
 
-  const [comment, setComment] = useState("");
-  const [comments, setComments] = useState([]);
+  const [showComments, setShowComments] = useState(false);
+  const commentsSectionRef = useRef(null);
 
-  const [showCommentBox, setShowCommentBox] = useState(false);
-  const commentRef = useRef(null);
+  // 🔥 SET INITIAL LIKE STATE
+  useEffect(() => {
+    if (user && selectedBlog?.likes) {
+      setLiked(selectedBlog.likes.includes(user._id));
+      setLikeCount(selectedBlog.likes.length);
+    } else {
+      setLiked(false);
+      setLikeCount(selectedBlog?.likes?.length || 0);
+    }
+  }, [user, selectedBlog]);
+
+  useEffect(() => {
+  const foundBlog = blogState?.find((b) => b._id === blogId);
+
+  if (foundBlog) {
+    setSelectedBlog(foundBlog);
+  }
+}, [blogId, blogState]);
 
   // Fetch blog
   useEffect(() => {
@@ -58,31 +74,34 @@ const ViewBlog = ({ blog }) => {
     } else if (selectedBlog) {
       setLoading(false);
     }
-  }, [blogId]);
+  }, [blogId, selectedBlog]);
 
-  // Fetch comments
   useEffect(() => {
-    if (selectedBlog) {
-      const fetchComments = async () => {
-        try {
-          const { data } = await axios.get(
-            `${API_BASE_URL}/api/v1/comment/blog/${selectedBlog._id}`,
-            { withCredentials: true }
-          );
-          if (data.success) {
-            setComments(data.comments || []);
-          }
-        } catch (err) {
-          console.error(err);
-        }
-      };
-      fetchComments();
+    if (showComments && commentsSectionRef.current) {
+      commentsSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }, [selectedBlog]);
+  }, [showComments]);
 
-  const handleLike = () => {
-    setLiked(!liked);
-    setLikeCount(liked ? likeCount - 1 : likeCount + 1);
+  const handleLike = async () => {
+    if (!user) {
+      toast.error("Please login to like blogs");
+      return;
+    }
+
+    try {
+      const res = await axios.patch(
+        `${API_BASE_URL}/api/v1/blog/${selectedBlog._id}/like`,
+        {},
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        setLiked(res.data.liked);
+        setLikeCount(res.data.likes);
+      }
+    } catch (error) {
+      toast.error("Failed to like blog");
+    }
   };
 
   const handleShare = async () => {
@@ -101,36 +120,6 @@ const ViewBlog = ({ blog }) => {
     }
   };
 
-  const handleAddComment = async () => {
-    if (!comment.trim()) return;
-
-    try {
-      const { data } = await axios.post(
-        `${API_BASE_URL}/api/v1/comment/${selectedBlog._id}/add-comment`,
-        { text: comment },
-        { withCredentials: true }
-      );
-
-      if (data.success) {
-        setComments([data.comment, ...comments]);
-        setComment("");
-        toast.success("Comment added!");
-      }
-    } catch (err) {
-      toast.error("Failed to add comment");
-    }
-  };
-  // Update comment in state after edit
-const handleCommentUpdated = (updatedComment) => {
-  setComments((prev) =>
-    prev.map((c) => (c._id === updatedComment._id ? updatedComment : c))
-  );
-};
-
-// Remove comment from state after delete
-const handleCommentDeleted = (deletedCommentId) => {
-  setComments((prev) => prev.filter((c) => c._id !== deletedCommentId));
-};
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -138,8 +127,13 @@ const handleCommentDeleted = (deletedCommentId) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gray-50 dark:bg-gray-900">
-        <div className="w-16 h-16 border-4 border-gray-300 dark:border-gray-700 border-t-black dark:border-t-white rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-10">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <Skeleton type="blogCard" count={1} />
+          <div className="space-y-4">
+            <Skeleton type="comment" count={2} />
+          </div>
+        </div>
       </div>
     );
   }
@@ -207,12 +201,7 @@ const handleCommentDeleted = (deletedCommentId) => {
             </button>
             <FaRegComment
               className="cursor-pointer"
-              onClick={() => {
-                setShowCommentBox(true);
-                setTimeout(() => {
-                  commentRef.current?.focus();
-                }, 100);
-              }}
+              onClick={() => setShowComments((prev) => !prev)}
             />
           </div>
 
@@ -224,51 +213,14 @@ const handleCommentDeleted = (deletedCommentId) => {
           </div>
         </div>
 
-        {/* Comment Section */}
-        <div className="border-t pt-6 space-y-6">
-
-          {/* Comment Box */}
-          {showCommentBox && (
-            <div className="flex items-start gap-3">
-              <img
-                src={user?.profilePic || userimg}
-                alt={user?.firstName || "User"}
-                className="w-10 h-10 rounded-full object-cover"
-                onError={(e) => (e.target.src = userimg)}
-              />
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleAddComment();
-                }}
-                className="flex-1 flex items-center border rounded-full px-4 py-2"
-              >
-                <input
-                  ref={commentRef}
-                  type="text"
-                  placeholder="Leave a comment..."
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  className="flex-1 outline-none"
-                />
-                <button type="submit">
-                  <FiSend />
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* Existing Comments */}
-          {comments.map((c) => (
-            <CommentItem
-              key={c._id}
-              comment={c}
-              currentUserId={user?._id}   
-              onCommentUpdated={handleCommentUpdated} 
-              onCommentDeleted={handleCommentDeleted}
+        <div ref={commentsSectionRef} className="border-t pt-6">
+          {showComments && (
+            <CommentsSection
+              blogId={selectedBlog._id}
+              currentUser={user}
+              className="bg-white dark:bg-gray-900 p-4 rounded-3xl"
             />
-          ))}
-
+          )}
         </div>
       </div>
     </div>

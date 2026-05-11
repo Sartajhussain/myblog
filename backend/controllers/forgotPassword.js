@@ -28,12 +28,21 @@ export const forgotPassword = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     user.otp = otp;
-    user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 min expiry
+    user.otpExpires = Date.now() + 5 * 60 * 1000;
 
     await user.save();
 
-    // 🔥 SEND EMAIL
-    await sendMail(user.email, otp);
+    // 🔥 SEND EMAIL (FIXED)
+    try {
+      await sendMail(user.email, otp);
+    } catch (error) {
+      console.log("EMAIL ERROR:", error.message);
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send OTP",
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -49,7 +58,6 @@ export const forgotPassword = async (req, res) => {
     });
   }
 };
-
 
 // ==========================
 // VERIFY OTP
@@ -74,7 +82,6 @@ export const verifyOTP = async (req, res) => {
       });
     }
 
-    // check OTP
     if (user.otp !== otp) {
       return res.status(400).json({
         success: false,
@@ -82,7 +89,6 @@ export const verifyOTP = async (req, res) => {
       });
     }
 
-    // check expiry
     if (user.otpExpires < Date.now()) {
       return res.status(400).json({
         success: false,
@@ -90,9 +96,9 @@ export const verifyOTP = async (req, res) => {
       });
     }
 
-    // clear OTP
     user.otp = null;
     user.otpExpires = null;
+
     await user.save();
 
     return res.status(200).json({

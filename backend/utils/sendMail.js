@@ -21,5 +21,6 @@ export const sendMail = async (email, otp) => {
 
   } catch (error) {
     console.log("EMAIL ERROR:", error.message);
+    throw error; // 🔥 IMPORTANT
   }
 };

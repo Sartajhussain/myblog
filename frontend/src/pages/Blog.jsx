@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../utils/api";
 import { setBlog } from "../redux/blogSlice";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import Skeleton from "../components/Skeleton";
 import userimg from "../assets/userprofile.png";
 
 const Blog = () => {
@@ -81,14 +82,9 @@ const Blog = () => {
   /* ================= LOADING ================= */
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 px-4">
-        <div className="max-w-5xl md:ml-[310px] mx-auto space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-16 rounded-md bg-gray-200 dark:bg-slate-700 animate-pulse"
-            />
-          ))}
+      <div className="min-h-screen pt-24 px-4 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-5xl md:ml-[310px] mx-auto space-y-6 py-10">
+          <Skeleton type="blogCard" count={3} />
         </div>
       </div>
     );

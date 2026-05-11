@@ -163,6 +163,12 @@ border border-gray-200 dark:border-gray-700
             >
               <FiBookOpen /> Blog's
             </Link>
+            <Link
+              to="dashboard/blog"
+              className="flex items-center gap-1 hover:text-blue-600"
+            >
+              <FiBookOpen />Your Blog
+            </Link>
 
             <Link
               to="/blog-feed"

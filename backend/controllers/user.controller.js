@@ -113,15 +113,14 @@ export const login = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    // 🔥 FINAL COOKIE FIX (IMPORTANT)
     const cookieOptions = {
       httpOnly: true,
-      secure: true,        // MUST (Render HTTPS)
-      sameSite: "None",    // MUST (mobile ke liye)
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+      path: "/",
       maxAge: 24 * 60 * 60 * 1000,
     };
 
-    // ✅ Set cookie
     res.cookie("token", token, cookieOptions);
 
     // ✅ Remove password
@@ -162,7 +161,8 @@ export const logout = async (_, res) => {
       .cookie("token", "", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        sameSite: "None",
+        path: "/",
         expires: new Date(0),
       })
       .json({
@@ -178,6 +178,36 @@ export const logout = async (_, res) => {
   }
 };
 
+export const getCurrentUser = async (req, res) => {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).json({
+        success: false,
+        message: "Please login first",
+      });
+    }
+
+    const user = await User.findById(req.user.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error("GET CURRENT USER ERROR:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to restore user session",
+    });
+  }
+};
 
 export const updateProfile = async (req, res) => {
   try {

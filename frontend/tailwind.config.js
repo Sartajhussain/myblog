@@ -8,6 +8,22 @@ export default {
       fontFamily: {
         campton: ['Campton', 'sans-serif'],
       },
+      zIndex: {
+        9999: "9999",
+      },
+      animation: {
+        shimmer: "shimmer 2s infinite",
+      },
+      keyframes: {
+        shimmer: {
+          "0%": {
+            transform: "translateX(-100%)",
+          },
+          "100%": {
+            transform: "translateX(100%)",
+          },
+        },
+      },
     },
   },
   plugins: [],

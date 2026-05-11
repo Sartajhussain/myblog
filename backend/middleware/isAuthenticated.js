@@ -2,9 +2,13 @@ import jwt from "jsonwebtoken";
 
 export const isAuthenticated = async (req, res, next) => {
   try {
-    const token = req.cookies?.token;
+    const tokenFromCookie = req.cookies?.token;
+    const authHeader = req.headers.authorization;
+    const bearerToken = authHeader && authHeader.startsWith("Bearer ")
+      ? authHeader.split(" ")[1]
+      : null;
+    const token = tokenFromCookie || bearerToken;
 
-    // 🔒 Token check
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -12,19 +16,13 @@ export const isAuthenticated = async (req, res, next) => {
       });
     }
 
-    // 🔐 Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ✅ FIX: ensure consistent user id
     req.user = {
-      id: decoded.id || decoded._id
+      id: decoded.id || decoded._id,
     };
 
-    // 🧪 Debug (temporary)
-    console.log("Authenticated User:", req.user);
-
     next();
-
   } catch (error) {
     console.error("❌ Authentication Error:", error.message);
 

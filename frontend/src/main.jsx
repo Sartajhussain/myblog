@@ -9,6 +9,12 @@ import { Toaster } from "react-hot-toast";
 import ThemeProvider from "./components/ThemeProvider";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
+import axios from "axios";
+import { API_BASE_URL } from "./utils/api";
+
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = API_BASE_URL;
+
 const persistor = persistStore(store);
 
 createRoot(document.getElementById("root")).render(

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import PublishedBlogSideBar from "./PublishedBlogSideBar";
 import Pagination from "./Pagination";
+import Skeleton from "../components/Skeleton";
 
 import { API_BASE_URL } from "../utils/api";
 
@@ -57,12 +58,6 @@ const Blogs = () => {
 
   return (
     <>
-      {/* 🔥 Loading GIF Overlay */}
-     {loading && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
-    <div className="w-16 h-16 border-4 border-gray-300 dark:border-gray-700 border-t-black dark:border-t-white rounded-full animate-spin"></div>
-  </div>
-)}
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 mt-13 px-4 md:px-8 py-10 relative">
 
     
@@ -76,7 +71,9 @@ const Blogs = () => {
             Published Blogs
           </h1>
 
-          {currentBlogs.length === 0 ? (
+          {loading ? (
+            <Skeleton type="blogCard" count={6} className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6" />
+          ) : currentBlogs.length === 0 ? (
             <p className="text-gray-600 dark:text-gray-400">No blogs found.</p>
           ) : (
             <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
