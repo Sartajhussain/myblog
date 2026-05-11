@@ -73,7 +73,7 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // ✅ Validate input
+    /* ================= VALIDATION ================= */
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -81,7 +81,7 @@ export const login = async (req, res) => {
       });
     }
 
-    // ✅ Check user
+    /* ================= FIND USER ================= */
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
@@ -91,8 +91,11 @@ export const login = async (req, res) => {
       });
     }
 
-    // ✅ Compare password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    /* ================= CHECK PASSWORD ================= */
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!isPasswordValid) {
       return res.status(400).json({
@@ -101,35 +104,38 @@ export const login = async (req, res) => {
       });
     }
 
-    // ✅ JWT secret check
+    /* ================= JWT TOKEN ================= */
     if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET not defined");
+      throw new Error("JWT_SECRET is missing");
     }
 
-    // ✅ Generate token
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      {
+        expiresIn: "7d",
+      }
     );
 
-    const cookieOptions = {
+    /* ================= COOKIE OPTIONS ================= */
+    const isProduction = process.env.NODE_ENV === "production";
+
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
+      secure: isProduction, // render/live ke liye
+      sameSite: isProduction ? "None" : "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
-      maxAge: 24 * 60 * 60 * 1000,
-    };
+    });
 
-    res.cookie("token", token, cookieOptions);
-
-    // ✅ Remove password
+    /* ================= REMOVE PASSWORD ================= */
     user.password = undefined;
 
-    // ✅ Response
+    /* ================= RESPONSE ================= */
     return res.status(200).json({
       success: true,
       message: `Welcome back ${user.firstName}`,
+      token,
       user: {
         _id: user._id,
         firstName: user.firstName,
@@ -145,7 +151,8 @@ export const login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Login Error:", error);
+    console.log("LOGIN ERROR:", error);
+
     return res.status(500).json({
       success: false,
       message: "Login failed",
