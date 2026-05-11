@@ -4,7 +4,6 @@ import axios from "axios";
 import PublishedBlogSideBar from "./PublishedBlogSideBar";
 import Pagination from "./Pagination";
 import Skeleton from "../components/Skeleton";
-
 import { API_BASE_URL } from "../utils/api";
 
 const Blogs = () => {
@@ -16,13 +15,16 @@ const Blogs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const blogsPerPage = 6;
 
-  // ✅ Loading state
   const [loading, setLoading] = useState(false);
 
   const fetchBlogs = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/api/v1/blog/feed`, { withCredentials: true });
+      const { data } = await axios.get(
+        `${API_BASE_URL}/api/v1/blog/feed`,
+        { withCredentials: true }
+      );
+
       if (data.success) {
         setBlogs(data.blogs);
       }
@@ -37,30 +39,31 @@ const Blogs = () => {
     fetchBlogs();
   }, []);
 
-  // CATEGORY FILTER
+  // 🔥 IMAGE FIX FUNCTION
+  const getImage = (img) => {
+    if (!img || img === "null" || img === "undefined") return null;
+
+    if (img.startsWith("http")) return img;
+
+    return `${API_BASE_URL}/${img}`;
+  };
+
   const filteredBlogs =
     categoryFilter === "All"
       ? blogs
       : blogs.filter((b) => b.category === categoryFilter);
 
-  // PAGINATION
   const indexOfLastBlog = currentPage * blogsPerPage;
   const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
   const currentBlogs = filteredBlogs.slice(indexOfFirstBlog, indexOfLastBlog);
   const totalPages = Math.ceil(filteredBlogs.length / blogsPerPage);
 
-  // ✅ Handle blog click with loading
   const handleReadMore = (id) => {
-    setLoading(true);
     navigate(`/view-blog/${id}`);
-    setLoading(false);
   };
 
   return (
-    <>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 mt-13 px-4 md:px-8 py-10 relative">
-
-    
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-10">
 
@@ -74,26 +77,33 @@ const Blogs = () => {
           {loading ? (
             <Skeleton type="blogCard" count={6} className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6" />
           ) : currentBlogs.length === 0 ? (
-            <p className="text-gray-600 dark:text-gray-400">No blogs found.</p>
+            <p>No blogs found.</p>
           ) : (
             <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+
               {currentBlogs.map((item) => (
                 <div
                   key={item._id}
                   className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition duration-300 overflow-hidden group"
                 >
-                  {item.thumbnail && (
+
+                  {/* 🔥 FIXED IMAGE */}
+                  {getImage(item.thumbnail) && (
                     <img
-                      src={item.thumbnail}
+                      src={getImage(item.thumbnail)}
                       alt={item.title}
                       className="w-full h-48 object-cover group-hover:scale-105 transition duration-300"
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                      }}
                     />
                   )}
 
                   <div className="p-5 space-y-3">
 
-                    <div className="text-xs text-gray-500 dark:text-gray-400 flex capitalize items-center justify-between">
+                    <div className="text-xs text-gray-500 flex justify-between">
                       Posted By {item.author?.firstName} {item.author?.lastName}
+
                       <span>
                         {new Date(item.createdAt).toLocaleDateString("en-IN", {
                           day: "numeric",
@@ -103,17 +113,17 @@ const Blogs = () => {
                       </span>
                     </div>
 
-                    <h2 className="text-lg capitalize font-semibold text-gray-900 dark:text-white line-clamp-2">
+                    <h2 className="text-lg font-semibold line-clamp-2">
                       {item.title}
                     </h2>
 
-                    <p className="text-sm capitalize text-gray-600 dark:text-gray-400 line-clamp-2">
+                    <p className="text-sm text-gray-600 line-clamp-2">
                       {item.subtitle}
                     </p>
 
                     <button
                       onClick={() => handleReadMore(item._id)}
-                      className="mt-2 px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-900 transition"
+                      className="mt-2 px-4 py-2 bg-black text-white rounded-lg text-sm"
                     >
                       Read More
                     </button>
@@ -121,6 +131,7 @@ const Blogs = () => {
                   </div>
                 </div>
               ))}
+
             </div>
           )}
 
@@ -135,14 +146,13 @@ const Blogs = () => {
         {/* SIDEBAR */}
         <div className="order-1 lg:order-2">
           <PublishedBlogSideBar
-            blogs={blogs} 
+            blogs={blogs}
             setCategoryFilter={setCategoryFilter}
           />
         </div>
 
       </div>
     </div>
-    </>
   );
 };
 

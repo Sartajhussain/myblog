@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { FaEllipsisV, FaHeart, FaRegHeart } from "react-icons/fa";
 import { FiSend } from "react-icons/fi";
 import { API_BASE_URL } from "../utils/api";
+import { getProfileImage } from "../utils/profileImage";
 import Skeleton from "./Skeleton";
 import userimg from "../assets/userprofile.png";
 
@@ -63,12 +64,6 @@ const CommentsSection = ({
   useEffect(() => {
     fetchComments();
   }, [fetchComments]);
-
-  const getImageUrl = (value) => {
-    if (!value) return userimg;
-    if (value.startsWith("http")) return value;
-    return `${API_BASE_URL}/${value}`;
-  };
 
   const formatDate = (createdAt) => {
     if (!createdAt) return "";
@@ -201,12 +196,10 @@ const CommentsSection = ({
   <div className="flex items-start gap-2 sm:gap-3 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-gray-900 p-2 sm:p-4 overflow-hidden">
 
     <img
-      src={
-        currentUser?.profilePic
-          ? getImageUrl(currentUser.profilePic)
-          : userimg
-      }
+      src={getProfileImage(currentUser?.profilePic)}
       alt={currentUser?.firstName || "User"}
+      loading="eager"
+      fetchPriority="high"
       className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0"
       onError={(event) => {
         event.target.src = userimg;
@@ -265,8 +258,10 @@ const CommentsSection = ({
           >
 
             <img
-              src={getImageUrl(comment.user?.profilePic)}
+              src={getProfileImage(comment.user?.profilePic)}
               alt={comment.user?.firstName || "Avatar"}
+              loading="eager"
+              fetchPriority="high"
               className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0"
               onError={(event) => {
                 event.target.src = userimg;

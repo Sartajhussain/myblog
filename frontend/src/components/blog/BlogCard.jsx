@@ -14,6 +14,21 @@ import { API_BASE_URL } from "../../utils/api";
 import userimg from "../../assets/userprofile.png";
 import CommentsSection from "../CommentsSection";
 
+/* =========================
+   🔥 IMAGE FIX HELPER
+========================= */
+const getBlogImage = (thumbnail) => {
+  if (!thumbnail || thumbnail === "null" || thumbnail === "undefined") {
+    return userimg;
+  }
+
+  if (thumbnail.startsWith("http")) {
+    return thumbnail;
+  }
+
+  return `${API_BASE_URL}/${thumbnail}`;
+};
+
 const BlogCard = ({ blog }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(blog.likes?.length || 0);
@@ -25,7 +40,9 @@ const BlogCard = ({ blog }) => {
 
   const { user: currentUser } = useSelector((state) => state.auth);
 
-  // 🔥 SET INITIAL LIKE STATE
+  /* =========================
+     LIKE STATE INIT
+  ========================= */
   useEffect(() => {
     if (currentUser && blog.likes) {
       setLiked(blog.likes.includes(currentUser._id));
@@ -35,7 +52,9 @@ const BlogCard = ({ blog }) => {
     setLikeCount(blog.likes?.length || 0);
   }, [currentUser, blog.likes]);
 
-  // 🔥 FETCH COMMENT COUNT (IMPORTANT FIX)
+  /* =========================
+     COMMENT COUNT
+  ========================= */
   useEffect(() => {
     const fetchCommentCount = async () => {
       try {
@@ -55,6 +74,9 @@ const BlogCard = ({ blog }) => {
     fetchCommentCount();
   }, [blog._id]);
 
+  /* =========================
+     LIKE
+  ========================= */
   const handleLike = async () => {
     if (!currentUser) {
       toast.error("Please login to like blogs");
@@ -77,6 +99,9 @@ const BlogCard = ({ blog }) => {
     }
   };
 
+  /* =========================
+     SHARE
+  ========================= */
   const handleShare = async () => {
     try {
       if (navigator.share) {
@@ -96,14 +121,12 @@ const BlogCard = ({ blog }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
 
-      {/* IMAGE */}
-      {blog.thumbnail && (
-        <img
-          src={blog.thumbnail}
-          alt={blog.title}
-          className="w-full h-52 sm:h-64 object-cover"
-        />
-      )}
+      {/* IMAGE (🔥 FIXED) */}
+      <img
+        src={getBlogImage(blog.thumbnail)}
+        alt={blog.title}
+        className="w-full h-52 sm:h-64 object-cover"
+      />
 
       <div className="p-5 space-y-4">
 
@@ -130,10 +153,9 @@ const BlogCard = ({ blog }) => {
         {/* ACTIONS */}
         <div className="flex justify-between pt-2 border-t">
 
-          {/* LEFT SIDE */}
+          {/* LEFT */}
           <div className="flex gap-5 items-center text-sm">
 
-            {/* LIKE */}
             <button onClick={handleLike} className="flex items-center gap-1">
               {liked ? (
                 <FaHeart className="text-red-500" />
@@ -143,7 +165,6 @@ const BlogCard = ({ blog }) => {
               <span>{likeCount}</span>
             </button>
 
-            {/* COMMENT */}
             <button
               onClick={() => setShowComments((prev) => !prev)}
               className="flex items-center gap-1"
@@ -154,7 +175,7 @@ const BlogCard = ({ blog }) => {
 
           </div>
 
-          {/* RIGHT SIDE */}
+          {/* RIGHT */}
           <div className="flex gap-5 items-center">
 
             <button onClick={handleShare}>
@@ -180,7 +201,7 @@ const BlogCard = ({ blog }) => {
               blogId={blog._id}
               currentUser={currentUser}
               className="bg-white dark:bg-gray-900 p-4 rounded-3xl"
-              onCommentChange={(count) => setCommentCount(count)} // 🔥 LIVE UPDATE
+              onCommentChange={(count) => setCommentCount(count)}
             />
           </div>
         )}

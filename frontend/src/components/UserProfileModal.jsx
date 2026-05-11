@@ -7,6 +7,7 @@ import {
     FiGithub
 } from "react-icons/fi";
 import userimg from "../assets/userprofile.png";
+import { getProfileImage } from "../utils/profileImage";
 import { API_BASE_URL } from "../utils/api";
 
 const UserProfileModal = ({ isOpen, user, onClose }) => {
@@ -164,8 +165,10 @@ const UserProfileModal = ({ isOpen, user, onClose }) => {
                     {/* LEFT SECTION */}
                     <div className="w-full md:w-1/3 flex flex-col items-center text-center">
                         <img
-                            src={user.profilePic || userimg}
+                            src={getProfileImage(user.profilePic)}
                             alt="profile"
+                            loading="eager"
+                            fetchPriority="high"
                             className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-gray-300 dark:border-gray-600"
                             onError={(e) => (e.target.src = userimg)}
                         />

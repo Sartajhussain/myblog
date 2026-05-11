@@ -5,6 +5,23 @@ import BlogCard from "../components/blog/BlogCard";
 import Skeleton from "../components/Skeleton";
 import { API_BASE_URL } from "../utils/api";
 
+import userimg from "../assets/userprofile.png";
+
+/* =======================
+   🔥 IMAGE FIX HELPER
+======================= */
+const getBlogImage = (thumbnail) => {
+  if (!thumbnail || thumbnail === "null" || thumbnail === "undefined") {
+    return userimg;
+  }
+
+  if (thumbnail.startsWith("http")) {
+    return thumbnail;
+  }
+
+  return `${API_BASE_URL}/${thumbnail}`;
+};
+
 const PublicFeed = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +33,9 @@ const PublicFeed = () => {
         { withCredentials: true }
       );
 
-      if (data.success) setBlogs(data.blogs);
+      if (data.success) {
+        setBlogs(data.blogs || []);
+      }
     } catch (err) {
       toast.error("Error fetching feed");
     } finally {
@@ -32,6 +51,7 @@ const PublicFeed = () => {
     <div className="min-h-screen mt-[30px] bg-gray-50 dark:bg-gray-900 px-4 py-10 relative">
 
       <div className="max-w-3xl mx-auto space-y-10">
+
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Public Feed
         </h1>
@@ -40,11 +60,20 @@ const PublicFeed = () => {
           <div className="space-y-6">
             <Skeleton type="blogCard" count={4} />
           </div>
+        ) : blogs.length === 0 ? (
+          <p className="text-center text-gray-500">No blogs found</p>
         ) : (
           blogs.map((blog) => (
-            <BlogCard key={blog._id} blog={blog}  />
+            <BlogCard
+              key={blog._id}
+              blog={{
+                ...blog,
+                thumbnail: getBlogImage(blog.thumbnail),
+              }}
+            />
           ))
         )}
+
       </div>
     </div>
   );

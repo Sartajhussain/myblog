@@ -19,6 +19,7 @@ import { useSelector, useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { API_BASE_URL } from "../utils/api";
+import { getProfileImage } from "../utils/profileImage";
 import { setUser } from "../redux/authSlice.js";
 import { toggleTheme } from "../redux/themeSlice.js";
 import { Button } from "../components/ui/button";
@@ -46,6 +47,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const profileImage = getProfileImage(user?.profilePic);
   const searchResults =
     search.trim() === ""
       ? []
@@ -133,10 +135,18 @@ border border-gray-200 dark:border-gray-700
         transition"
                     >
                       <img
-                        src={item.thumbnail}
-                        alt={item.title}
-                        className="w-10 h-10 rounded object-cover"
-                      />
+  src={profileImage}
+  alt="user"
+  loading="eager"
+  fetchPriority="high"
+  onError={(e) => {
+    e.target.src = userimg;
+  }}
+  className="w-9 h-9 rounded-full object-cover cursor-pointer
+  ring-2 ring-gray-300 dark:ring-slate-600
+  hover:ring-black dark:hover:ring-white
+  transition"
+/>
 
                       <p className="text-sm font-medium line-clamp-1 
         text-gray-800 dark:text-gray-200">
@@ -221,22 +231,18 @@ border border-gray-200 dark:border-gray-700
                   <DropdownMenuTrigger asChild>
                     <Button variant="" className="p-0 bg-transparent hover:bg-transparent">
                       <img
-                        src={
-                          user?.profilePic
-                            ? user.profilePic.startsWith("http")
-                              ? user.profilePic
-                              : `${API_BASE_URL}/${user.profilePic}`
-                            : userimg
-                        }
-                        alt="user"
-                        onError={(e) => {
-                          e.target.src = userimg;
-                        }}
-                        className="w-9 h-9 rounded-full object-cover cursor-pointer
+  src={profileImage}
+  alt="user"
+  loading="eager"
+  fetchPriority="high"
+  onError={(e) => {
+    e.target.src = userimg;
+  }}
+  className="w-9 h-9 rounded-full object-cover cursor-pointer
   ring-2 ring-gray-300 dark:ring-slate-600
   hover:ring-black dark:hover:ring-white
   transition"
-                      />
+/>
                     </Button>
                   </DropdownMenuTrigger>
 
@@ -409,14 +415,10 @@ border border-gray-200 dark:border-gray-700
                 <div className={`p-2 rounded-full transition
           ${isActive("/dashboard/profile") ? "bg-gray-200 dark:bg-gray-700" : ""}`}>
                  <img
-  src={
-    user?.profilePic
-      ? user.profilePic.startsWith("http")
-        ? user.profilePic
-        : `${API_BASE_URL}/${user.profilePic}`
-      : userimg
-  }
+  src={profileImage}
   alt="user"
+  loading="eager"
+  fetchPriority="high"
   onError={(e) => {
     e.target.src = userimg;
   }}
@@ -471,15 +473,11 @@ border border-gray-200 dark:border-gray-700
             }}
 
           >
-            <img
-  src={
-    user?.profilePic
-      ? user.profilePic.startsWith("http")
-        ? user.profilePic
-        : `${API_BASE_URL}/${user.profilePic}`
-      : userimg
-  }
+           <img
+  src={profileImage}
   alt="user"
+  loading="eager"
+  fetchPriority="high"
   onError={(e) => {
     e.target.src = userimg;
   }}

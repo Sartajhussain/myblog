@@ -7,9 +7,10 @@ import {
   FiGithub,
   FiSearch,
 } from "react-icons/fi";
+
 import { API_BASE_URL } from "../utils/api";
 import userimg from "../assets/userprofile.png";
-import UserProfileModal from "../components/UserProfileModal"; // ✅ Import modal
+import UserProfileModal from "../components/UserProfileModal";
 
 const AllUserProfile = () => {
   const [users, setUsers] = useState([]);
@@ -17,14 +18,17 @@ const AllUserProfile = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  // Fetch users
+  // FETCH USERS
   const getUsers = async () => {
     try {
       const { data } = await axios.get(
         `${API_BASE_URL}/api/v1/user/all-users`,
         { withCredentials: true }
       );
-      if (data.success) setUsers(data.users);
+
+      if (data.success) {
+        setUsers(data.users || []);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -34,6 +38,7 @@ const AllUserProfile = () => {
     getUsers();
   }, []);
 
+  // OPEN MODAL
   const handleUserClick = (user) => {
     setSelectedUser(user);
     setIsModalOpen(true);
@@ -43,7 +48,7 @@ const AllUserProfile = () => {
     window.scrollTo(0, 0);
   }, [selectedUser]);
 
-  // 🔥 FILTER USERS (SEARCH)
+  // SEARCH FILTER
   const filteredUsers = users.filter((u) =>
     `${u.firstName} ${u.lastName}`
       .toLowerCase()
@@ -59,10 +64,12 @@ const AllUserProfile = () => {
         <hr className="w-1/3 border-t-4 border-gray-600 mx-auto mt-4" />
       </h2>
 
-      {/* 🔥 SEARCH BAR */}
+      {/* SEARCH BAR */}
       <div className="flex justify-center mb-8">
         <div className="relative w-full max-w-md">
+
           <FiSearch className="absolute left-3 top-3 text-gray-500" />
+
           <input
             type="text"
             placeholder="Search user by name..."
@@ -77,34 +84,54 @@ const AllUserProfile = () => {
       </div>
 
       {/* USERS GRID */}
-      <div className="
+      <div
+        className="
         grid 
         grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 
         gap-4 md:gap-6 pb-10
-      ">
-        {filteredUsers.map((user) => (
-          <div
-            key={user._id}
-            onClick={() => handleUserClick(user)}
-            className="flex flex-col items-center gap-2 p-3 
-            bg-white dark:bg-gray-800 rounded-xl shadow 
-            hover:shadow-lg transition cursor-pointer"
-          >
-            <img
-              src={user.profilePic || userimg}
-              alt={user.firstName}
-              className="w-24 h-24 md:w-36 md:h-36 rounded-full object-cover border"
-              onError={(e) => (e.target.src = userimg)}
-            />
-            <p className="text-sm font-semibold text-center capitalize text-gray-900 dark:text-white">
-              {user.firstName} {user.lastName}
-            </p>
-          </div>
-        ))}
+      "
+      >
+        {filteredUsers.map((user) => {
+
+          // ✅ PROFILE IMAGE FIX
+          const profileImage =
+            user?.profilePic &&
+            user.profilePic !== "null" &&
+            user.profilePic !== "undefined" &&
+            user.profilePic.trim() !== ""
+              ? user.profilePic.startsWith("http")
+                ? user.profilePic
+                : `${API_BASE_URL}/${user.profilePic}`
+              : userimg;
+
+          return (
+            <div
+              key={user._id}
+              onClick={() => handleUserClick(user)}
+              className="flex flex-col items-center gap-2 p-3 
+              bg-white dark:bg-gray-800 rounded-xl shadow 
+              hover:shadow-lg transition cursor-pointer"
+            >
+              <img
+                src={profileImage}
+                alt={user.firstName}
+                loading="lazy"
+                className="w-24 h-24 md:w-36 md:h-36 rounded-full object-cover border"
+                onError={(e) => {
+                  e.target.src = userimg;
+                }}
+              />
+
+              <p className="text-sm font-semibold text-center capitalize text-gray-900 dark:text-white">
+                {user.firstName} {user.lastName}
+              </p>
+            </div>
+          );
+        })}
       </div>
 
-      {/* ✅ MODAL - Using separate component */}
-      <UserProfileModal 
+      {/* MODAL */}
+      <UserProfileModal
         isOpen={isModalOpen}
         user={selectedUser}
         onClose={() => setIsModalOpen(false)}

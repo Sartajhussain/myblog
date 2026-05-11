@@ -9,6 +9,7 @@ import {
 import axios from "axios";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../utils/api";
+import { getProfileImage } from "../utils/profileImage";
 
 const CommentItem = ({
   comment,
@@ -106,11 +107,14 @@ const CommentItem = ({
     <div className="flex gap-3 relative">
       {/* Avatar */}
       <img
-        src={
-          comment.user?.profilePic ||
-          "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
-        }
+        src={getProfileImage(comment.user?.profilePic)}
+        alt={comment.user?.firstName || "Avatar"}
+        loading="eager"
+        fetchPriority="high"
         className="w-10 h-10 rounded-full object-cover"
+        onError={(e) => {
+          e.target.src = "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg";
+        }}
       />
 
       <div className="flex-1 space-y-2">

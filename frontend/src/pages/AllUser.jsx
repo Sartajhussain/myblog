@@ -16,6 +16,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../utils/api";
+import { getProfileImage } from "../utils/profileImage";
 import UserProfileModal from "../components/UserProfileModal"; // ✅ Import modal
 
 const AllUser = () => {
@@ -94,8 +95,10 @@ const AllUser = () => {
                                     hover:shadow-lg transition cursor-pointer"
                                 >
                                     <img
-                                        src={u?.profilePic || userimg}
+                                        src={getProfileImage(u?.profilePic)}
                                         alt={u?.firstName}
+                                        loading="eager"
+                                        fetchPriority="high"
                                         className="w-[180px] h-[180px] md:w-[220px] md:h-[220px] rounded-full object-cover border"
                                         onError={(e) => (e.target.src = userimg)}
                                     />

@@ -5,13 +5,11 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { setBlog } from "../redux/blogSlice";
-
-// ✅ FIXED (IMPORTANT)
 import { useNavigate, useParams } from "react-router-dom";
 
 const UpdateBlog = () => {
-  const navigate = useNavigate(); // ✅ must call
-  const { blogId } = useParams(); // ✅ get id from URL
+  const navigate = useNavigate();
+  const { blogId } = useParams();
   const dispatch = useDispatch();
   const editor = useRef(null);
 
@@ -27,57 +25,82 @@ const UpdateBlog = () => {
   const [isPublished, setIsPublished] = useState(false);
   const [contents, setContents] = useState("");
   const [thumbnail, setThumbnail] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState("");
 
   const [blogData, setBlogData] = useState({
     title: "",
     subtitle: "",
-    category: ""
+    category: "",
   });
 
-  /* ================= SYNC DATA ================= */
+  /* ================= LOAD BLOG ================= */
   useEffect(() => {
     if (selectedBlog) {
       setBlogData({
         title: selectedBlog.title || "",
         subtitle: selectedBlog.subtitle || "",
-        category: selectedBlog.category || ""
+        category: selectedBlog.category || "",
       });
 
       setContents(selectedBlog.description || "");
+
       setIsPublished(selectedBlog.isPublished || false);
-      setPreview(selectedBlog.thumbnail || null);
+
+      // ✅ FIX IMAGE PREVIEW
+      if (selectedBlog.thumbnail) {
+        if (selectedBlog.thumbnail.startsWith("http")) {
+          setPreview(selectedBlog.thumbnail);
+        } else {
+          setPreview(`${API_BASE_URL}/${selectedBlog.thumbnail}`);
+        }
+      }
     }
   }, [selectedBlog]);
 
-  /* ================= HANDLERS ================= */
+  /* ================= INPUT CHANGE ================= */
   const handleChange = (e) => {
-    setBlogData({ ...blogData, [e.target.name]: e.target.value });
+    setBlogData({
+      ...blogData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const selectCategory = (e) => {
-    setBlogData({ ...blogData, category: e.target.value });
+    setBlogData({
+      ...blogData,
+      category: e.target.value,
+    });
   };
 
+  /* ================= THUMBNAIL ================= */
   const thumbnailHandler = (e) => {
     const file = e.target.files[0];
+
     if (file) {
       setThumbnail(file);
+
+      // ✅ INSTANT PREVIEW
       setPreview(URL.createObjectURL(file));
     }
   };
 
-  /* ================= UPDATE ================= */
+  /* ================= UPDATE BLOG ================= */
   const blogUpdateHandler = async () => {
+
+    // ✅ STOP DOUBLE CLICK
+    if (loading) return;
+
     try {
       setLoading(true);
 
       const formData = new FormData();
+
       formData.append("title", blogData.title);
       formData.append("subtitle", blogData.subtitle);
       formData.append("category", blogData.category);
       formData.append("description", contents);
 
+      // ✅ ONLY SEND FILE IF NEW IMAGE SELECTED
       if (thumbnail) {
         formData.append("file", thumbnail);
       }
@@ -87,24 +110,34 @@ const UpdateBlog = () => {
         formData,
         {
           withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" }
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         }
       );
 
       if (data.success) {
+
         toast.success("Blog Updated Successfully");
 
-        // ✅ update redux state
+        // ✅ UPDATE REDUX
         const updatedBlogs = blog.map((b) =>
           b._id === blogId ? data.blog : b
         );
+
         dispatch(setBlog(updatedBlogs));
 
         navigate("/dashboard/blog");
       }
 
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error updating blog");
+
+      console.log(error);
+
+      toast.error(
+        error.response?.data?.message || "Error updating blog"
+      );
+
     } finally {
       setLoading(false);
     }
@@ -112,28 +145,39 @@ const UpdateBlog = () => {
 
   /* ================= PUBLISH ================= */
   const publishHandler = async () => {
+
+    if (publishLoading) return;
+
     try {
       setPublishLoading(true);
 
       const { data } = await axios.patch(
         `${API_BASE_URL}/api/v1/blog/${blogId}/publish`,
         {},
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        }
       );
 
       if (data.success) {
+
         setIsPublished(data.blog.isPublished);
 
         const updatedBlogs = blog.map((b) =>
           b._id === blogId ? data.blog : b
         );
+
         dispatch(setBlog(updatedBlogs));
 
         toast.success(data.message);
       }
 
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error");
+
+      toast.error(
+        error.response?.data?.message || "Error"
+      );
+
     } finally {
       setPublishLoading(false);
     }
@@ -141,35 +185,51 @@ const UpdateBlog = () => {
 
   /* ================= DELETE ================= */
   const deleteHandler = async () => {
-    if (!window.confirm("Are you sure you want to delete this blog?")) return;
+
+    if (!window.confirm("Are you sure you want to delete this blog?")) {
+      return;
+    }
+
+    if (deleteLoading) return;
 
     try {
       setDeleteLoading(true);
 
       const { data } = await axios.delete(
         `${API_BASE_URL}/api/v1/blog/${blogId}`,
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        }
       );
 
       if (data.success) {
+
         toast.success("Blog Deleted Successfully");
 
-        const updatedBlogs = blog.filter((b) => b._id !== blogId);
+        const updatedBlogs = blog.filter(
+          (b) => b._id !== blogId
+        );
+
         dispatch(setBlog(updatedBlogs));
 
         navigate("/dashboard/blog");
       }
 
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error deleting blog");
+
+      toast.error(
+        error.response?.data?.message ||
+        "Error deleting blog"
+      );
+
     } finally {
       setDeleteLoading(false);
     }
   };
 
-  /* ================= UI (UNCHANGED) ================= */
   return (
     <div className="min-h-screen pt-20 pb-24 md:ml-72 px-4 py-10 bg-gray-50 dark:bg-gray-900">
+
       <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-10">
 
         <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-900 dark:text-white">
@@ -178,19 +238,27 @@ const UpdateBlog = () => {
 
         {/* BUTTONS */}
         <div className="flex gap-3 mb-6">
+
           <button
             onClick={publishHandler}
+            disabled={publishLoading}
             className="px-4 py-2 bg-green-600 text-white rounded-lg"
           >
-            {publishLoading ? "Processing..." : isPublished ? "Unpublish" : "Publish"}
+            {publishLoading
+              ? "Processing..."
+              : isPublished
+              ? "Unpublish"
+              : "Publish"}
           </button>
 
           <button
             onClick={deleteHandler}
+            disabled={deleteLoading}
             className="px-4 py-2 bg-red-600 text-white rounded-lg"
           >
             {deleteLoading ? "Deleting..." : "Delete"}
           </button>
+
         </div>
 
         {/* TITLE */}
@@ -233,24 +301,26 @@ const UpdateBlog = () => {
           onChange={(newContent) => setContents(newContent)}
         />
 
-        {/* THUMBNAIL */}
+        {/* FILE INPUT */}
         <input
           type="file"
           className="mt-4"
           onChange={thumbnailHandler}
         />
 
+        {/* PREVIEW */}
         {preview && (
           <img
             src={preview}
             alt="preview"
-            className="w-40 h-40 mt-3 object-cover"
+            className="w-40 h-40 mt-3 object-cover rounded-lg"
           />
         )}
 
         {/* SAVE BUTTON */}
         <button
           onClick={blogUpdateHandler}
+          disabled={loading}
           className="mt-6 px-6 py-2 bg-black text-white rounded"
         >
           {loading ? "Saving..." : "Save Changes"}

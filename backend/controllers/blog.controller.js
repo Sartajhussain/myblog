@@ -1,13 +1,16 @@
 import { Blog } from "../models/blog.model.js";
-import cloudinary from "../utils/cloudinary.js";
-import { getDataUri } from "../utils/dataUri.js";
 import mongoose from "mongoose";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// ================= CREATE BLOG =================
+/* ================= CREATE / UPDATE BLOG ================= */
 export const createBlog = async (req, res) => {
   try {
-    const { title, category } = req.body;
+    const { title, category, subtitle, description } = req.body;
 
     if (!title || !category) {
       return res.status(400).json({
@@ -16,10 +19,74 @@ export const createBlog = async (req, res) => {
       });
     }
 
-    const blog = await Blog.create({
+    let thumbnail = null;
+
+    // ✅ IMAGE UPLOAD FIXED
+    if (req.file) {
+      const uploadDir = path.join(__dirname, "..", "uploads");
+
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const fileName = `${Date.now()}-${req.file.originalname}`;
+      const filePath = path.join(uploadDir, fileName);
+
+      fs.writeFileSync(filePath, req.file.buffer);
+
+      // ✅ SAVE ONLY RELATIVE PATH
+      thumbnail = `uploads/${fileName}`;
+    }
+
+    const blogData = {
       title,
       category,
+      subtitle,
+      description,
       author: req.user.id,
+    };
+
+    // ✅ ONLY IF IMAGE EXISTS
+    if (thumbnail) {
+      blogData.thumbnail = thumbnail;
+    }
+
+    let blog;
+
+    // ================= UPDATE =================
+    if (req.params.blogId) {
+      const existingBlog = await Blog.findById(req.params.blogId);
+
+      if (!existingBlog) {
+        return res.status(404).json({
+          success: false,
+          message: "Blog not found",
+        });
+      }
+
+      if (existingBlog.author.toString() !== req.user.id) {
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized",
+        });
+      }
+
+      blog = await Blog.findByIdAndUpdate(
+        req.params.blogId,
+        blogData,
+        { new: true }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Blog Updated Successfully",
+        blog,
+      });
+    }
+
+    // ================= CREATE =================
+    blog = await Blog.create({
+      ...blogData,
       likes: [],
       isPublished: false,
     });
@@ -31,63 +98,78 @@ export const createBlog = async (req, res) => {
     });
 
   } catch (error) {
+    console.log("BLOG ERROR:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Failed to create blog",
+      message: "Failed to create/update blog",
     });
   }
 };
 
-
-// ================= GET MY BLOGS =================
+/* ================= GET MY BLOGS ================= */
 export const getMyBlogs = async (req, res) => {
   try {
     const blogs = await Blog.find({ author: req.user.id })
       .populate("author", "firstName lastName profilePic")
       .sort({ createdAt: -1 });
 
-    res.json({ success: true, blogs });
+    res.json({
+      success: true,
+      blogs,
+    });
 
   } catch (err) {
-    res.status(500).json({ success: false });
+    res.status(500).json({
+      success: false,
+    });
   }
 };
 
-
-// ================= PUBLIC FEED =================
+/* ================= PUBLIC FEED ================= */
 export const getPublicFeed = async (req, res) => {
   try {
     const blogs = await Blog.find({ isPublished: true })
       .populate("author", "firstName lastName profilePic")
       .sort({ createdAt: -1 });
 
-    res.json({ success: true, blogs });
+    res.json({
+      success: true,
+      blogs,
+    });
 
   } catch (err) {
-    res.status(500).json({ success: false });
+    res.status(500).json({
+      success: false,
+    });
   }
 };
 
-
-// ================= SINGLE BLOG =================
+/* ================= SINGLE BLOG ================= */
 export const getSingleBlog = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.blogId)
       .populate("author", "firstName lastName profilePic");
 
     if (!blog) {
-      return res.status(404).json({ success: false });
+      return res.status(404).json({
+        success: false,
+      });
     }
 
-    res.json({ success: true, blog });
+    res.json({
+      success: true,
+      blog,
+    });
 
   } catch (err) {
-    res.status(500).json({ success: false });
+    res.status(500).json({
+      success: false,
+    });
   }
 };
 
-
-// ================= DELETE BLOG =================
+/* ================= DELETE BLOG ================= */
 export const deleteBlog = async (req, res) => {
   try {
     const blog = await Blog.findOneAndDelete({
@@ -96,44 +178,58 @@ export const deleteBlog = async (req, res) => {
     });
 
     if (!blog) {
-      return res.status(404).json({ success: false });
+      return res.status(404).json({
+        success: false,
+      });
     }
 
-    res.json({ success: true });
+    res.json({
+      success: true,
+    });
 
   } catch (err) {
-    res.status(500).json({ success: false });
+    res.status(500).json({
+      success: false,
+    });
   }
 };
 
-
-// ================= PUBLISH BLOG =================
+/* ================= PUBLISH BLOG ================= */
 export const publishBlog = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.blogId);
 
     if (!blog) {
-      return res.status(404).json({ success: false });
+      return res.status(404).json({
+        success: false,
+      });
     }
 
     blog.isPublished = !blog.isPublished;
+
     await blog.save();
 
-    res.json({ success: true, blog });
+    res.json({
+      success: true,
+      blog,
+    });
 
   } catch (err) {
-    res.status(500).json({ success: false });
+    res.status(500).json({
+      success: false,
+    });
   }
 };
 
-
-// ================= LIKE BLOG (🔥 FIXED) =================
+/* ================= LIKE BLOG ================= */
 export const likeBlog = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.blogId);
 
     if (!blog) {
-      return res.status(404).json({ success: false });
+      return res.status(404).json({
+        success: false,
+      });
     }
 
     const userId = req.user.id;
@@ -155,12 +251,13 @@ export const likeBlog = async (req, res) => {
     });
 
   } catch (err) {
-    res.status(500).json({ success: false });
+    res.status(500).json({
+      success: false,
+    });
   }
 };
 
-
-// ================= TOTAL LIKES =================
+/* ================= TOTAL LIKES ================= */
 export const fetMyTotallogslikes = async (req, res) => {
   try {
     const blogs = await Blog.find({ author: req.user.id });
@@ -170,9 +267,14 @@ export const fetMyTotallogslikes = async (req, res) => {
       0
     );
 
-    res.json({ success: true, totalLikes });
+    res.json({
+      success: true,
+      totalLikes,
+    });
 
   } catch (err) {
-    res.status(500).json({ success: false });
+    res.status(500).json({
+      success: false,
+    });
   }
 };
