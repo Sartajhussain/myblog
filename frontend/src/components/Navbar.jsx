@@ -25,6 +25,7 @@ import { Button } from "../components/ui/button";
 import { useLocation } from "react-router-dom";
 
 
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -220,12 +221,21 @@ border border-gray-200 dark:border-gray-700
                   <DropdownMenuTrigger asChild>
                     <Button variant="" className="p-0 bg-transparent hover:bg-transparent">
                       <img
-                        src={user?.profilePic || userimg}
+                        src={
+                          user?.profilePic
+                            ? user.profilePic.startsWith("http")
+                              ? user.profilePic
+                              : `${API_BASE_URL}/${user.profilePic}`
+                            : userimg
+                        }
                         alt="user"
-                        className="w-8 h-8 rounded-full cursor-pointer object-cover 
-          ring-2 ring-gray-300 dark:ring-slate-600 
-          hover:ring-black dark:hover:ring-white 
-          transition"
+                        onError={(e) => {
+                          e.target.src = userimg;
+                        }}
+                        className="w-9 h-9 rounded-full object-cover cursor-pointer
+  ring-2 ring-gray-300 dark:ring-slate-600
+  hover:ring-black dark:hover:ring-white
+  transition"
                       />
                     </Button>
                   </DropdownMenuTrigger>
@@ -398,10 +408,23 @@ border border-gray-200 dark:border-gray-700
 
                 <div className={`p-2 rounded-full transition
           ${isActive("/dashboard/profile") ? "bg-gray-200 dark:bg-gray-700" : ""}`}>
-                  <img
-                    src={user?.profilePic || userimg}
-                    className="w-7 h-7 rounded-full object-cover"
-                  />
+                 <img
+  src={
+    user?.profilePic
+      ? user.profilePic.startsWith("http")
+        ? user.profilePic
+        : `${API_BASE_URL}/${user.profilePic}`
+      : userimg
+  }
+  alt="user"
+  onError={(e) => {
+    e.target.src = userimg;
+  }}
+  className="w-9 h-9 rounded-full object-cover cursor-pointer
+  ring-2 ring-gray-300 dark:ring-slate-600
+  hover:ring-black dark:hover:ring-white
+  transition"
+/>
                 </div>
 
                 <span className="text-gray-600 dark:text-gray-300">Profile</span>
@@ -449,9 +472,22 @@ border border-gray-200 dark:border-gray-700
 
           >
             <img
-              src={user?.profilePic || userimg}
-              className="w-10 h-10 rounded-full object-cover"
-            />
+  src={
+    user?.profilePic
+      ? user.profilePic.startsWith("http")
+        ? user.profilePic
+        : `${API_BASE_URL}/${user.profilePic}`
+      : userimg
+  }
+  alt="user"
+  onError={(e) => {
+    e.target.src = userimg;
+  }}
+  className="w-9 h-9 rounded-full object-cover cursor-pointer
+  ring-2 ring-gray-300 dark:ring-slate-600
+  hover:ring-black dark:hover:ring-white
+  transition"
+/>
 
             <div>
               <p className="font-semibold text-sm">

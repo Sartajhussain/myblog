@@ -2,6 +2,7 @@ import { API_BASE_URL } from "../utils/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { setUser, setLoading } from "../redux/authSlice.js";
+import userimg from "../assets/userprofile.png";
 import {
   FiFacebook,
   FiGithub,
@@ -80,21 +81,21 @@ const Profile = () => {
   useEffect(() => {
     const fetchStats = async () => {
       if (!user?._id) return;
-      
+
       try {
         setStatsLoading(true);
-        
+
         // Fetch current user's blogs using my-blogs endpoint
         const blogsRes = await axios.get(
           `${API_BASE_URL}/api/v1/blog/my-blogs`,
           { withCredentials: true }
         );
-        
+
         if (blogsRes.data.success) {
           setTotalBlogs(blogsRes.data.blogs?.length || 0);
           console.log("Total blogs fetched:", blogsRes.data.blogs?.length);
         }
-        
+
         // Fetch current user's comments - Assuming similar endpoint exists
         // Agar comments ka endpoint "/api/v1/comment/my-comments" hai toh ye use karo
         try {
@@ -102,7 +103,7 @@ const Profile = () => {
             `${API_BASE_URL}/api/v1/comment/my-comments`,
             { withCredentials: true }
           );
-          
+
           if (commentsRes.data.success) {
             setTotalComments(commentsRes.data.comments?.length || 0);
             console.log("Total comments fetched:", commentsRes.data.comments?.length);
@@ -130,7 +131,7 @@ const Profile = () => {
             console.log("Total comments from all blogs:", totalCommentCount);
           }
         }
-        
+
       } catch (error) {
         console.error("Error fetching stats:", error);
       } finally {
@@ -223,7 +224,11 @@ px-4 md:px-8 py-12">
           <div className="w-full md:w-1/3 flex flex-col items-center text-center">
             <div className="relative">
               <img
-                src={user?.profilePic || userimg}
+                src={
+                  user?.profilePic
+                    ? `${API_BASE_URL}/${user?.profilePic}`
+                    : userimg
+                }
                 alt="profile"
                 className="w-28 h-28 md:w-32 md:h-32 rounded-full 
           border-4 border-gray-200 dark:border-slate-600 
