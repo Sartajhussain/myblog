@@ -14,10 +14,24 @@ const PublishedBlogSideBar = ({ blogs, setCategoryFilter }) => {
   const popularPosts = [...publishedBlogs]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 4);
-   
-    useEffect(()=>{
-        window.scrollTo(0,0);
-    },[])
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // 🔥 IMAGE FIX FUNCTION (IMPORTANT)
+  const getImage = (img) => {
+    if (!img || img === "null" || img === "undefined") {
+      return "/fallback.png";
+    }
+
+    if (img.startsWith("http")) return img;
+
+    const base = "http://localhost:8000"; // ya API_BASE_URL use kar sakte ho
+
+    return `${base}/${img.replace(/^\/+/, "")}`;
+  };
+
   return (
     <aside className="space-y-8 lg:sticky lg:top-24 h-fit">
 
@@ -55,10 +69,15 @@ const PublishedBlogSideBar = ({ blogs, setCategoryFilter }) => {
               className="flex gap-3 items-center cursor-pointer"
               onClick={() => navigate(`/view-blog/${post._id}`)}
             >
+
+              {/* ✅ FIXED IMAGE */}
               <img
-                src={post.thumbnail}
+                src={getImage(post.thumbnail)}
                 alt={post.title}
                 className="w-14 h-14 object-cover rounded-lg"
+                onError={(e) => {
+                  e.target.src = "/fallback.png";
+                }}
               />
 
               <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">

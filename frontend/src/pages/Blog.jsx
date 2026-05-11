@@ -164,7 +164,7 @@ const Blog = () => {
           >
             <option value="all">All Blogs</option>
             <option value="published">Published</option>
-            <option value="draft">Draft</option>
+            <option value="draft">Pending</option>
           </select>
         </div>
       </div>
@@ -203,17 +203,15 @@ const Blog = () => {
                     {/* BLOG */}
                     <td className="py-2 px-3">
                       <div className="flex items-center gap-2">
-                        <img
+                        <img 
+                        className="w-10 h-10 object-cover rounded-md"
                           src={
-                            b?.thumbnail &&
-                              b.thumbnail !== "null" &&
-                              b.thumbnail !== "undefined"
-                              ? `${API_BASE_URL}/${b.thumbnail}`
+                            b?.thumbnail
+                              ? b.thumbnail.startsWith("http")
+                                ? b.thumbnail
+                                : `${API_BASE_URL}/${b.thumbnail.replace(/^\/+/, "")}`
                               : userimg
                           }
-                          alt={b.title}
-                          className="w-10 h-10 object-cover rounded-md"
-                          onError={handleImageError}
                         />
                         <div>
                           <p
@@ -231,8 +229,8 @@ const Blog = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${b.isPublished
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
                           }`}
                       >
                         {b.isPublished ? "Published" : "pending"}
@@ -264,8 +262,8 @@ const Blog = () => {
                         <button
                           onClick={() => publishBlog(b._id)}
                           className={`transition-colors duration-200 ${b.isPublished
-                              ? "text-yellow-600 hover:text-yellow-900 dark:text-yellow-500 dark:hover:text-yellow-400"
-                              : "text-green-600 hover:text-green-900 dark:text-green-500 dark:hover:text-green-400"
+                            ? "text-yellow-600 hover:text-yellow-900 dark:text-yellow-500 dark:hover:text-yellow-400"
+                            : "text-green-600 hover:text-green-900 dark:text-green-500 dark:hover:text-green-400"
                             }`}
                         >
                           {b.isPublished ? "Unpublish" : "Publish"}
@@ -335,8 +333,8 @@ const Blog = () => {
                   <button
                     onClick={() => publishBlog(b._id)}
                     className={`text-sm transition-colors duration-200 ${b.isPublished
-                        ? "text-yellow-600 hover:text-yellow-900 dark:text-yellow-500 dark:hover:text-yellow-400"
-                        : "text-green-600 hover:text-green-900 dark:text-green-500 dark:hover:text-green-400"
+                      ? "text-yellow-600 hover:text-yellow-900 dark:text-yellow-500 dark:hover:text-yellow-400"
+                      : "text-green-600 hover:text-green-900 dark:text-green-500 dark:hover:text-green-400"
                       }`}
                   >
                     {b.isPublished ? "Unpub" : "Pub"}

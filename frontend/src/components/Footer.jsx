@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
+import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaGithub } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -32,16 +32,16 @@ transition-colors duration-300">
           </p>
 
           <div className="flex gap-3 mt-4">
-            <a href="#" className="p-2 rounded-full bg-white dark:bg-slate-800 shadow hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition">
+            <a href="https://www.facebook.com/sartaj.hussain.144" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-white dark:bg-slate-800 shadow hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition">
               <FaFacebookF />
             </a>
-            <a href="#" className="p-2 rounded-full bg-white dark:bg-slate-800 shadow hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition">
-              <FaTwitter />
+            <a href="https://github.com/Sartajhussain" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-white dark:bg-slate-800 shadow hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition">
+              <FaGithub />
             </a>
-            <a href="#" className="p-2 rounded-full bg-white dark:bg-slate-800 shadow hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition">
+            <a href="https://www.instagram.com/sartaj_mansuri2002" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-white dark:bg-slate-800 shadow hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition">
               <FaInstagram />
             </a>
-            <a href="#" className="p-2 rounded-full bg-white dark:bg-slate-800 shadow hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition">
+            <a href="https://www.linkedin.com/in/sartaj-hussain/" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-white dark:bg-slate-800 shadow hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition">
               <FaLinkedinIn />
             </a>
           </div>
