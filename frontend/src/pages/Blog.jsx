@@ -132,7 +132,7 @@ const Blog = () => {
 
         <button
           onClick={() => navigate("/dashboard/create-blogs")}
-          className="flex items-center gap-2 bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-lg transition"
+          className="flex items-center gap-2 bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg transition"
         >
           <FiPlus />
           Create Blog
@@ -203,8 +203,8 @@ const Blog = () => {
                     {/* BLOG */}
                     <td className="py-2 px-3">
                       <div className="flex items-center gap-2">
-                        <img 
-                        className="w-10 h-10 object-cover rounded-md"
+                        <img
+                          className="w-10 h-10 object-cover rounded-md"
                           src={
                             b?.thumbnail
                               ? b.thumbnail.startsWith("http")
@@ -296,7 +296,9 @@ const Blog = () => {
                       b?.thumbnail &&
                         b.thumbnail !== "null" &&
                         b.thumbnail !== "undefined"
-                        ? `${API_BASE_URL}/${b.thumbnail}`
+                        ? b.thumbnail.startsWith("http")
+                          ? b.thumbnail
+                          : `${API_BASE_URL}/${b.thumbnail.replace(/^\/+/, "")}`
                         : userimg
                     }
                     alt={b.title}
