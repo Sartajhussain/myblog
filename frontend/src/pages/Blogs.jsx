@@ -5,6 +5,7 @@ import PublishedBlogSideBar from "./PublishedBlogSideBar";
 import Pagination from "./Pagination";
 import Skeleton from "../components/Skeleton";
 import { API_BASE_URL } from "../utils/api";
+import { getBlogImage } from "../utils/getBlogImage";
 
 const Blogs = () => {
   const navigate = useNavigate();
@@ -39,13 +40,12 @@ const Blogs = () => {
     fetchBlogs();
   }, []);
 
-  // 🔥 IMAGE FIX FUNCTION
+  // 🔥 FIXED IMAGE FUNCTION - Using getBlogImage utility
   const getImage = (img) => {
-    if (!img || img === "null" || img === "undefined") return null;
-
-    if (img.startsWith("http")) return img;
-
-    return `${API_BASE_URL}/${img}`;
+    if (!img || img === "null" || img === "undefined" || img === "") {
+      return null;
+    }
+    return getBlogImage(img);
   };
 
   const filteredBlogs =
@@ -87,14 +87,16 @@ const Blogs = () => {
                   className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition duration-300 overflow-hidden group"
                 >
 
-                  {/* 🔥 FIXED IMAGE */}
-                  {getImage(item.thumbnail) && (
+                  {/* 🔥 FIXED IMAGE - Now using proper blog image with fallback */}
+                  {getImage(item.thumbnail || item.image || item.coverImage) && (
                     <img
-                      src={getImage(item.thumbnail)}
+                      src={getImage(item.thumbnail || item.image || item.coverImage)}
                       alt={item.title}
                       className="w-full h-48 object-cover group-hover:scale-105 transition duration-300"
                       onError={(e) => {
-                        e.target.style.display = "none";
+                        e.target.onerror = null;
+                        e.target.src = "https://placehold.co/600x400?text=No+Image";
+                        e.target.style.display = "block";
                       }}
                     />
                   )}

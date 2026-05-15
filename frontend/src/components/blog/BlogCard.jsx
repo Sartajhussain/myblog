@@ -10,28 +10,14 @@ import {
 import { IoShareOutline } from "react-icons/io5";
 import toast from "react-hot-toast";
 import axios from "axios";
+
 import { API_BASE_URL } from "../../utils/api";
-import userimg from "../../assets/userprofile.png";
+
 import CommentsSection from "../CommentsSection";
-
-/* =========================
-   🔥 IMAGE FIX HELPER
-========================= */
-const getBlogImage = (thumbnail) => {
-  if (!thumbnail || thumbnail === "null" || thumbnail === "undefined") {
-    return userimg;
-  }
-
-  if (thumbnail.startsWith("http")) {
-    return thumbnail;
-  }
-
-  return `${API_BASE_URL}/${thumbnail}`;
-};
 
 const BlogCard = ({ blog }) => {
   const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(blog.likes?.length || 0);
+  const [likeCount, setLikeCount] = useState(blog?.likes?.length || 0);
 
   const [saved, setSaved] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -44,13 +30,14 @@ const BlogCard = ({ blog }) => {
      LIKE STATE INIT
   ========================= */
   useEffect(() => {
-    if (currentUser && blog.likes) {
+    if (currentUser && blog?.likes) {
       setLiked(blog.likes.includes(currentUser._id));
     } else {
       setLiked(false);
     }
-    setLikeCount(blog.likes?.length || 0);
-  }, [currentUser, blog.likes]);
+
+    setLikeCount(blog?.likes?.length || 0);
+  }, [currentUser, blog]);
 
   /* =========================
      COMMENT COUNT
@@ -59,7 +46,7 @@ const BlogCard = ({ blog }) => {
     const fetchCommentCount = async () => {
       try {
         const res = await axios.get(
-          `${API_BASE_URL}/api/v1/comment/blog/${blog._id}`,
+          `${API_BASE_URL}/api/v1/comment/blog/${blog?._id}`,
           { withCredentials: true }
         );
 
@@ -71,8 +58,10 @@ const BlogCard = ({ blog }) => {
       }
     };
 
-    fetchCommentCount();
-  }, [blog._id]);
+    if (blog?._id) {
+      fetchCommentCount();
+    }
+  }, [blog?._id]);
 
   /* =========================
      LIKE
@@ -104,72 +93,138 @@ const BlogCard = ({ blog }) => {
   ========================= */
   const handleShare = async () => {
     try {
+      const blogUrl = `${window.location.origin}/view-blog/${blog._id}`;
+
       if (navigator.share) {
         await navigator.share({
           title: blog.title,
-          url: window.location.href,
+          url: blogUrl,
         });
       } else {
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(blogUrl);
         toast.success("Link copied!");
       }
     } catch (err) {
-      console.error(err);
+      console.log(err);
     }
   };
 
+  // Function to get blog image URL
+  const getBlogImageUrl = () => {
+    const image = blog?.thumbnail || blog?.image || blog?.coverImage;
+    
+    if (!image || image === "null" || image === "undefined" || image === "") {
+      return null;
+    }
+    
+    if (image.startsWith("http://") || image.startsWith("https://")) {
+      return image;
+    }
+    
+    if (image.startsWith("/uploads")) {
+      return `${API_BASE_URL}${image}`;
+    }
+    
+    if (image.startsWith("uploads")) {
+      return `${API_BASE_URL}/${image}`;
+    }
+    
+    return `${API_BASE_URL}/${image}`;
+  };
+
+  const blogImageUrl = getBlogImageUrl();
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden flex flex-col">
 
-      {/* IMAGE (🔥 FIXED) */}
-      <img
-        src={getBlogImage(blog.thumbnail)}
-        alt={blog.title}
-        className="w-full h-52 sm:h-64 object-cover"
-      />
+      {/* BLOG IMAGE - TOP */}
+      <div className="w-full">
+        {blogImageUrl ? (
+          <img
+            src={blogImageUrl}
+            alt={blog?.title || "blog"}
+            loading="lazy"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://placehold.co/800x400?text=Blog+Image+Not+Found";
+            }}
+            className="w-full h-52 sm:h-64 object-cover"
+          />
+        ) : (
+          <div className="w-full h-52 sm:h-64 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+            <span className="text-gray-500 dark:text-gray-400">No Blog Image</span>
+          </div>
+        )}
+      </div>
 
+      {/* CONTENT - BOTTOM */}
       <div className="p-5 space-y-4">
 
         {/* TITLE */}
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          {blog.title}
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white line-clamp-2">
+          {blog?.title}
         </h2>
 
-        {/* DESCRIPTION */}
-        <p className="text-gray-600 dark:text-gray-300 text-sm">
-          {blog.subtitle}
+        {/* SUBTITLE */}
+        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3">
+          {blog?.subtitle}
         </p>
 
-        <div
-          className="text-gray-700 dark:text-gray-300 text-sm"
-          dangerouslySetInnerHTML={{ __html: blog.description }}
-        />
+        {/* DESCRIPTION */}
+        {blog?.description && (
+          <div
+            className="text-gray-700 dark:text-gray-300 text-sm line-clamp-4 prose dark:prose-invert max-w-none"
+            dangerouslySetInnerHTML={{
+              __html: blog.description,
+            }}
+          />
+        )}
 
         {/* AUTHOR */}
-        <p className="text-xs text-gray-500">
-          By {blog.author?.firstName} {blog.author?.lastName}
-        </p>
+        <div className="flex items-center justify-between text-xs text-gray-500">
+
+          <p>
+            By {blog?.author?.firstName || "Unknown"}{" "}
+            {blog?.author?.lastName || "Author"}
+          </p>
+
+          <p>
+            {blog?.createdAt
+              ? new Date(blog.createdAt).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })
+              : ""}
+          </p>
+
+        </div>
 
         {/* ACTIONS */}
-        <div className="flex justify-between pt-2 border-t">
+        <div className="flex justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
 
           {/* LEFT */}
           <div className="flex gap-5 items-center text-sm">
 
-            <button onClick={handleLike} className="flex items-center gap-1">
+            <button
+              onClick={handleLike}
+              className="flex items-center gap-1 hover:text-red-500 transition"
+            >
               {liked ? (
                 <FaHeart className="text-red-500" />
               ) : (
                 <FaRegHeart />
               )}
+
               <span>{likeCount}</span>
             </button>
 
             <button
               onClick={() => setShowComments((prev) => !prev)}
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 hover:text-blue-500 transition"
             >
               <FaRegComment />
+
               <span>{commentCount}</span>
             </button>
 
@@ -178,11 +233,17 @@ const BlogCard = ({ blog }) => {
           {/* RIGHT */}
           <div className="flex gap-5 items-center">
 
-            <button onClick={handleShare}>
+            <button
+              onClick={handleShare}
+              className="hover:text-green-500 transition"
+            >
               <IoShareOutline />
             </button>
 
-            <button onClick={() => setSaved(!saved)}>
+            <button
+              onClick={() => setSaved(!saved)}
+              className="hover:text-yellow-500 transition"
+            >
               {saved ? (
                 <FaBookmark className="text-yellow-500" />
               ) : (
@@ -198,7 +259,7 @@ const BlogCard = ({ blog }) => {
         {showComments && (
           <div className="mt-5">
             <CommentsSection
-              blogId={blog._id}
+              blogId={blog?._id}
               currentUser={currentUser}
               className="bg-white dark:bg-gray-900 p-4 rounded-3xl"
               onCommentChange={(count) => setCommentCount(count)}

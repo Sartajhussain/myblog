@@ -1,23 +1,32 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { getBlogImage } from "../utils/getBlogImage";
 
 const BlogList = ({ blog }) => {
   const { user } = useSelector((state) => state.auth);
-
-
-
   const navigate = useNavigate();
+
+  // 🔥 FIXED IMAGE FUNCTION
+  const getImage = (img) => {
+    if (!img || img === "null" || img === "undefined" || img === "") {
+      return "https://placehold.co/400x200?text=No+Image";
+    }
+    return getBlogImage(img);
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition flex flex-col md:flex-row gap-4 p-3 mb-4">
 
-      {/* BLOG IMAGE */}
-
+      {/* 🔥 FIXED BLOG IMAGE - Now using getImage function */}
       <img
-        src={blog.thumbnail}
+        src={getImage(blog.thumbnail || blog.image || blog.coverImage)}
         alt={blog.title}
         className="w-full md:w-48 h-40 md:h-32 object-cover rounded-lg"
+        onError={(e) => {
+          e.target.onerror = null;
+          e.target.src = "https://placehold.co/400x200?text=No+Image";
+        }}
       />
 
       {/* BLOG CONTENT */}

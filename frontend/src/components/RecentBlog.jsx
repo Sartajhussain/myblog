@@ -24,7 +24,7 @@ const RecentBlog = ({ blogs = [] }) => {
 
           {blogs && blogs.length > 0 ? (
             blogs.slice(0, 4).map((item, index) => (
-              <BlogList key={index} blog={item} />
+              <BlogList key={item._id || index} blog={item} />
             ))
           ) : (
             <p className="text-gray-600 dark:text-gray-400 text-center py-10">No blogs available</p>

@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setBlog } from "../redux/blogSlice";
 import { API_BASE_URL } from "../utils/api";
-import userimg from "../assets/userprofile.png";
 import {
   FiEdit,
   FiTrash,
@@ -107,9 +106,25 @@ const Blog = () => {
     }
   };
 
-  // ✅ HANDLE IMAGE ERROR
-  const handleImageError = (e) => {
-    e.target.src = userimg;
+  // ✅ FIXED: Function to get blog image URL (no user image)
+  const getBlogImageUrl = (thumbnail) => {
+    if (!thumbnail || thumbnail === "null" || thumbnail === "undefined" || thumbnail === "") {
+      return "https://placehold.co/100x100?text=No+Image";
+    }
+    
+    if (thumbnail.startsWith("http://") || thumbnail.startsWith("https://")) {
+      return thumbnail;
+    }
+    
+    if (thumbnail.startsWith("/uploads")) {
+      return `${API_BASE_URL}${thumbnail}`;
+    }
+    
+    if (thumbnail.startsWith("uploads")) {
+      return `${API_BASE_URL}/${thumbnail}`;
+    }
+    
+    return `${API_BASE_URL}/${thumbnail.replace(/^\/+/, "")}`;
   };
 
   if (loading) {
@@ -200,18 +215,17 @@ const Blog = () => {
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredBlogs.map((b) => (
                   <tr key={b._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                    {/* BLOG */}
+                    {/* BLOG WITH FIXED IMAGE */}
                     <td className="py-2 px-3">
                       <div className="flex items-center gap-2">
                         <img
                           className="w-10 h-10 object-cover rounded-md"
-                          src={
-                            b?.thumbnail
-                              ? b.thumbnail.startsWith("http")
-                                ? b.thumbnail
-                                : `${API_BASE_URL}/${b.thumbnail.replace(/^\/+/, "")}`
-                              : userimg
-                          }
+                          src={getBlogImageUrl(b?.thumbnail || b?.image || b?.coverImage)}
+                          alt={b.title}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "https://placehold.co/100x100?text=No+Image";
+                          }}
                         />
                         <div>
                           <p
@@ -220,7 +234,6 @@ const Blog = () => {
                           >
                             {b.title}
                           </p>
-                          {/* <span className="text-[11px] text-gray-400">#{b._id.slice(-6)}</span> */}
                         </div>
                       </div>
                     </td>
@@ -270,7 +283,7 @@ const Blog = () => {
                         </button>
                         <button
                           onClick={() => deleteBlog(b._id)}
-                          className="text-red-600  hover:text-red-900 dark:text-red-500 dark:hover:text-red-400 transition-colors duration-200"
+                          className="text-red-600 hover:text-red-900 dark:text-red-500 dark:hover:text-red-400 transition-colors duration-200"
                           aria-label="Delete blog"
                         >
                           <FiTrash />
@@ -283,7 +296,7 @@ const Blog = () => {
             </table>
           </div>
 
-          {/* CARD VIEW (MOBILE) */}
+          {/* CARD VIEW (MOBILE) WITH FIXED IMAGE */}
           <div className="md:hidden space-y-4">
             {filteredBlogs.map((b) => (
               <div
@@ -292,18 +305,13 @@ const Blog = () => {
               >
                 <div className="flex items-center gap-2 flex-1">
                   <img
-                    src={
-                      b?.thumbnail &&
-                        b.thumbnail !== "null" &&
-                        b.thumbnail !== "undefined"
-                        ? b.thumbnail.startsWith("http")
-                          ? b.thumbnail
-                          : `${API_BASE_URL}/${b.thumbnail.replace(/^\/+/, "")}`
-                        : userimg
-                    }
+                    src={getBlogImageUrl(b?.thumbnail || b?.image || b?.coverImage)}
                     alt={b.title}
                     className="w-10 h-10 rounded-md object-cover"
-                    onError={handleImageError}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://placehold.co/100x100?text=No+Image";
+                    }}
                   />
                   <div className="flex-1">
                     <p

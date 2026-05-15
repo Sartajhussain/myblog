@@ -4,6 +4,8 @@ import { useSelector } from "react-redux";
 import { Badge } from "../components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../utils/api";
+import { getBlogImage } from "../utils/getBlogImage";
 
 const BlogSideBar = () => {
   const [email, setEmail] = useState("");
@@ -32,7 +34,7 @@ const BlogSideBar = () => {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:8000/api/v1/subscribe",
+        `${API_BASE_URL}/api/v1/subscribe`,
         { email },
         { withCredentials: true }
       );
@@ -46,6 +48,14 @@ const BlogSideBar = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // 🔥 FIXED IMAGE FUNCTION
+  const getImage = (img) => {
+    if (!img || img === "null" || img === "undefined" || img === "") {
+      return "https://placehold.co/100x100?text=No+Image";
+    }
+    return getBlogImage(img);
   };
 
   return (
@@ -119,17 +129,22 @@ const BlogSideBar = () => {
           {suggestedBlogs.length > 0 ? (
             suggestedBlogs.map((item, index) => (
               <div
-                key={index}
+                key={item._id || index}
                 className="flex gap-3 items-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 p-2 rounded"
                 onClick={() => {
                   if (user) navigate(`/view-blog/${item._id}`);
                   else navigate("/login");
                 }}
               >
+                {/* 🔥 FIXED IMAGE - Now using getImage function */}
                 <img
-                  src={item?.thumbnail}
+                  src={getImage(item.thumbnail || item.image || item.coverImage)}
                   alt={item?.title}
                   className="w-14 h-14 object-cover rounded"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://placehold.co/100x100?text=No+Image";
+                  }}
                 />
 
                 <p className="text-sm font-medium text-gray-800 dark:text-gray-200 line-clamp-2">

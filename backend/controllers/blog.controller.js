@@ -148,8 +148,16 @@ export const getPublicFeed = async (req, res) => {
 /* ================= SINGLE BLOG ================= */
 export const getSingleBlog = async (req, res) => {
   try {
+
     const blog = await Blog.findById(req.params.blogId)
-      .populate("author", "firstName lastName profilePic");
+      .populate("author", "firstName lastName profilePic")
+      .populate({
+        path: "comments",
+        populate: {
+          path: "user",
+          select: "firstName lastName profilePic",
+        },
+      });
 
     if (!blog) {
       return res.status(404).json({
@@ -157,12 +165,15 @@ export const getSingleBlog = async (req, res) => {
       });
     }
 
-    res.json({
+    res.status(200).json({
       success: true,
       blog,
     });
 
-  } catch (err) {
+  } catch (error) {
+
+    console.log(error);
+
     res.status(500).json({
       success: false,
     });
@@ -224,35 +235,48 @@ export const publishBlog = async (req, res) => {
 /* ================= LIKE BLOG ================= */
 export const likeBlog = async (req, res) => {
   try {
+
     const blog = await Blog.findById(req.params.blogId);
 
     if (!blog) {
       return res.status(404).json({
         success: false,
+        message: "Blog not found",
       });
     }
 
     const userId = req.user.id;
 
-    const alreadyLiked = blog.likes.includes(userId);
+    const alreadyLiked = blog.likes.some(
+      (id) => id.toString() === userId
+    );
 
     if (alreadyLiked) {
-      blog.likes.pull(userId);
+
+      blog.likes = blog.likes.filter(
+        (id) => id.toString() !== userId
+      );
+
     } else {
+
       blog.likes.push(userId);
     }
 
     await blog.save();
 
-    res.json({
+    res.status(200).json({
       success: true,
-      likes: blog.likes.length,
+      totalLikes: blog.likes.length,
       liked: !alreadyLiked,
     });
 
-  } catch (err) {
+  } catch (error) {
+
+    console.log(error);
+
     res.status(500).json({
       success: false,
+      message: "Failed to like blog",
     });
   }
 };

@@ -25,6 +25,7 @@ const Profile = () => {
   // State for blogs and comments stats
   const [totalBlogs, setTotalBlogs] = useState(0);
   const [totalComments, setTotalComments] = useState(0);
+  const [totalLikes, setTotalLikes] = useState(0);
   const [statsLoading, setStatsLoading] = useState(true);
 
   const [input, setInput] = useState({
@@ -94,6 +95,15 @@ const Profile = () => {
 
         if (blogsRes.data.success) {
           setTotalBlogs(blogsRes.data.blogs?.length || 0);
+
+          // ✅ TOTAL LIKES COUNT
+          const likes = blogsRes.data.blogs?.reduce(
+            (acc, blog) => acc + (blog.likes?.length || 0),
+            0
+          );
+
+          setTotalLikes(likes);
+
           console.log("Total blogs fetched:", blogsRes.data.blogs?.length);
         }
 
@@ -317,7 +327,7 @@ px-4 md:px-8 py-12">
               </div>
 
               <div className="bg-gray-100 dark:bg-slate-700 rounded-xl p-5 text-center">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">250+</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white"> {statsLoading ? "..." : totalLikes}</h3>
                 <p className="text-gray-500 dark:text-gray-300 text-sm">Likes</p>
               </div>
             </div>

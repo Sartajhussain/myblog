@@ -1,5 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../utils/api";
+import { getBlogImage } from "../utils/getBlogImage";
 
 const PublishedBlogSideBar = ({ blogs, setCategoryFilter }) => {
   const navigate = useNavigate();
@@ -19,17 +21,12 @@ const PublishedBlogSideBar = ({ blogs, setCategoryFilter }) => {
     window.scrollTo(0, 0);
   }, []);
 
-  // 🔥 IMAGE FIX FUNCTION (IMPORTANT)
+  // 🔥 FIXED IMAGE FUNCTION - Using getBlogImage utility
   const getImage = (img) => {
-    if (!img || img === "null" || img === "undefined") {
-      return "/fallback.png";
+    if (!img || img === "null" || img === "undefined" || img === "") {
+      return "https://placehold.co/100x100?text=No+Image";
     }
-
-    if (img.startsWith("http")) return img;
-
-    const base = "http://localhost:8000"; // ya API_BASE_URL use kar sakte ho
-
-    return `${base}/${img.replace(/^\/+/, "")}`;
+    return getBlogImage(img);
   };
 
   return (
@@ -70,13 +67,14 @@ const PublishedBlogSideBar = ({ blogs, setCategoryFilter }) => {
               onClick={() => navigate(`/view-blog/${post._id}`)}
             >
 
-              {/* ✅ FIXED IMAGE */}
+              {/* ✅ FIXED IMAGE - Now using getBlogImage utility */}
               <img
-                src={getImage(post.thumbnail)}
+                src={getImage(post.thumbnail || post.image || post.coverImage)}
                 alt={post.title}
                 className="w-14 h-14 object-cover rounded-lg"
                 onError={(e) => {
-                  e.target.src = "/fallback.png";
+                  e.target.onerror = null;
+                  e.target.src = "https://placehold.co/100x100?text=No+Image";
                 }}
               />
 

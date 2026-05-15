@@ -1,4 +1,5 @@
 import express from "express";
+
 import {
   createBlog,
   deleteBlog,
@@ -15,22 +16,54 @@ import { singleUploads } from "../middleware/multer.js";
 
 const router = express.Router();
 
+/* ================= PUBLIC ROUTES ================= */
+
 router.get("/feed", getPublicFeed);
+
+/* ================= PROTECTED ROUTES ================= */
+
 router.get("/my-blogs", isAuthenticated, getMyBlogs);
-router.get("/my-total-likes", isAuthenticated, fetMyTotallogslikes);
 
-router.post("/", isAuthenticated, singleUploads, createBlog);
+router.get(
+  "/my-total-likes",
+  isAuthenticated,
+  fetMyTotallogslikes
+);
 
-router.put("/:blogId", isAuthenticated, singleUploads, createBlog);
+router.post(
+  "/",
+  isAuthenticated,
+  singleUploads,
+  createBlog
+);
 
-router.delete("/:blogId", isAuthenticated, deleteBlog);
+router.put(
+  "/:blogId",
+  isAuthenticated,
+  singleUploads,
+  createBlog
+);
 
-router.patch("/:blogId/publish", isAuthenticated, publishBlog);
+router.delete(
+  "/:blogId",
+  isAuthenticated,
+  deleteBlog
+);
 
-// 🔥 LIKE FIXED
-router.patch("/:blogId/like", isAuthenticated, likeBlog);
+router.patch(
+  "/:blogId/publish",
+  isAuthenticated,
+  publishBlog
+);
 
-// SINGLE BLOG
+router.patch(
+  "/:blogId/like",
+  isAuthenticated,
+  likeBlog
+);
+
+/* ================= SINGLE BLOG ROUTE LAST ================= */
+
 router.get("/:blogId", getSingleBlog);
 
 export default router;

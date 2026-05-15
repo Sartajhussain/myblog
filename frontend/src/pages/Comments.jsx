@@ -39,6 +39,27 @@ const Comments = () => {
     window.scrollTo(0, 0);
   }, [page]);
 
+  // ✅ FIXED: Function to get blog image URL
+  const getBlogImageUrl = (thumbnail) => {
+    if (!thumbnail || thumbnail === "null" || thumbnail === "undefined" || thumbnail === "") {
+      return "https://placehold.co/100x100?text=No+Image";
+    }
+    
+    if (thumbnail.startsWith("http://") || thumbnail.startsWith("https://")) {
+      return thumbnail;
+    }
+    
+    if (thumbnail.startsWith("/uploads")) {
+      return `${API_BASE_URL}${thumbnail}`;
+    }
+    
+    if (thumbnail.startsWith("uploads")) {
+      return `${API_BASE_URL}/${thumbnail}`;
+    }
+    
+    return `${API_BASE_URL}/${thumbnail.replace(/^\/+/, "")}`;
+  };
+
   return (
     <div className="min-h-screen mt-10 pt-20 md:ml-[300px] p-4 md:p-8 
 bg-gray-50 dark:bg-slate-950">
@@ -83,15 +104,15 @@ bg-gray-50 dark:bg-slate-950">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
 
+                          {/* ✅ FIXED: Blog image with proper URL */}
                           <img
-                            src={
-                              comment.blog?.thumbnail
-                                ? comment.blog.thumbnail.startsWith("http")
-                                  ? comment.blog.thumbnail
-                                  : `${API_BASE_URL}/${comment.blog.thumbnail}`
-                                : "https://via.placeholder.com/100"
-                            }
+                            src={getBlogImageUrl(comment.blog?.thumbnail || comment.blog?.image || comment.blog?.coverImage)}
+                            alt={comment.blog?.title}
                             className="w-10 h-10 rounded-md object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "https://placehold.co/100x100?text=No+Image";
+                            }}
                           />
 
                           <span className="truncate max-w-[160px]">
@@ -129,16 +150,15 @@ bg-gray-50 dark:bg-slate-950">
                 <div key={comment._id}
                   className="p-3 flex gap-3 items-start">
 
-                  {/* IMAGE */}
+                  {/* ✅ FIXED: Blog image with proper URL */}
                   <img
-                    src={
-                      comment.blog?.thumbnail
-                        ? comment.blog.thumbnail.startsWith("http")
-                          ? comment.blog.thumbnail
-                          : `${API_BASE_URL}/${comment.blog.thumbnail}`
-                        : "https://via.placeholder.com/100"
-                    }
+                    src={getBlogImageUrl(comment.blog?.thumbnail || comment.blog?.image || comment.blog?.coverImage)}
+                    alt={comment.blog?.title}
                     className="w-12 h-12 rounded-md object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://placehold.co/100x100?text=No+Image";
+                    }}
                   />
 
                   {/* CONTENT */}

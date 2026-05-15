@@ -1,6 +1,5 @@
-// controllers/comment.controller.js
-
 import Comment from "../models/comment.model.js";
+import { Blog } from "../models/blog.model.js";
 
 export { addReply } from "./addReply.controller.js";
 export { getComments } from "./getCommentReply.controller.js";
@@ -9,64 +8,63 @@ export { likeComment } from "./likeComment.controller.js";
 // ================= ADD COMMENT =================
 export const addComment = async (req, res) => {
   try {
-    const { text } = req.body;
-    const { id: blogId } = req.params;
 
-    if (!text) {
+    const { text } = req.body;
+    const { blogId } = req.params;
+
+    if (!text || text.trim() === "") {
       return res.status(400).json({
         success: false,
         message: "Comment text required",
       });
     }
 
-    if (!blogId) {
-      return res.status(400).json({
-        success: false,
-        message: "Blog ID required",
-      });
-    }
+    const blog = await Blog.findById(blogId);
 
-    if (!req.user?.id) {
-      return res.status(401).json({
+    if (!blog) {
+      return res.status(404).json({
         success: false,
-        message: "User not authenticated",
+        message: "Blog not found",
       });
     }
 
     const comment = await Comment.create({
-      blog: blogId,
-      user: req.user.id,
       text,
+      user: req.user.id,
+      blog: blog._id,
     });
 
-    const populatedComment = await Comment.findById(comment._id)
-      .populate("user", "firstName lastName profilePic")
-      .populate("blog", "title thumbnail");
+    blog.comments.push(comment._id);
 
-    res.status(201).json({
+    await blog.save();
+
+    const populatedComment = await Comment.findById(comment._id)
+      .populate("user", "firstName lastName profilePic");
+
+    return res.status(201).json({
       success: true,
       comment: populatedComment,
     });
 
-  } catch (err) {
-    console.log("COMMENT ERROR:", err.message);
+  } catch (error) {
 
-    res.status(500).json({
+    console.log("ADD COMMENT ERROR:", error);
+
+    return res.status(500).json({
       success: false,
-      message: "Comment failed",
+      message: "Failed to add comment",
     });
   }
 };
 
-// ================= GET ALL COMMENTS (🔥 NEW - IMPORTANT) =================
+// ================= GET ALL COMMENTS =================
 export const getAllComments = async (req, res) => {
   try {
-    // page & limit query se lo
+
     const page = parseInt(req.query.page) || 1;
-    const limit = 5; // 🔥 fixed 5 comments per page
+    const limit = 5;
     const skip = (page - 1) * limit;
 
-    // total count
     const totalComments = await Comment.countDocuments();
 
     const comments = await Comment.find()
@@ -81,11 +79,12 @@ export const getAllComments = async (req, res) => {
       comments,
       currentPage: page,
       totalPages: Math.ceil(totalComments / limit),
-      totalComments
+      totalComments,
     });
 
   } catch (err) {
-    console.log("GET ALL COMMENTS ERROR:", err.message);
+
+    console.log("GET ALL COMMENTS ERROR:", err);
 
     res.status(500).json({
       success: false,
@@ -94,13 +93,14 @@ export const getAllComments = async (req, res) => {
   }
 };
 
-// ================= UPDATE =================
+// ================= UPDATE COMMENT =================
 export const updateComment = async (req, res) => {
   try {
+
     const { commentId } = req.params;
     const { text } = req.body;
 
-    if (!text) {
+    if (!text || text.trim() === "") {
       return res.status(400).json({
         success: false,
         message: "Comment text required",
@@ -124,19 +124,20 @@ export const updateComment = async (req, res) => {
     }
 
     comment.text = text;
+
     await comment.save();
 
-    const updated = await Comment.findById(comment._id)
-      .populate("user", "firstName lastName profilePic")
-      .populate("blog", "title");
+    const updatedComment = await Comment.findById(comment._id)
+      .populate("user", "firstName lastName profilePic");
 
-    res.json({
+    res.status(200).json({
       success: true,
-      comment: updated,
+      comment: updatedComment,
     });
 
   } catch (err) {
-    console.log("UPDATE COMMENT ERROR:", err.message);
+
+    console.log("UPDATE COMMENT ERROR:", err);
 
     res.status(500).json({
       success: false,
@@ -145,9 +146,10 @@ export const updateComment = async (req, res) => {
   }
 };
 
-// ================= DELETE =================
+// ================= DELETE COMMENT =================
 export const deleteComment = async (req, res) => {
   try {
+
     const { commentId } = req.params;
 
     const comment = await Comment.findById(commentId);
@@ -165,16 +167,24 @@ export const deleteComment = async (req, res) => {
         message: "You can only delete your own comments",
       });
     }
+   
+    // REMOVE COMMENT ID FROM BLOG
+    await Blog.findByIdAndUpdate(comment.blog, {
+      $pull: {
+        comments: comment._id,
+      },
+    });
 
     await Comment.findByIdAndDelete(commentId);
 
-    res.json({
+    res.status(200).json({
       success: true,
       message: "Comment deleted",
     });
 
   } catch (err) {
-    console.log("DELETE COMMENT ERROR:", err.message);
+
+    console.log("DELETE COMMENT ERROR:", err);
 
     res.status(500).json({
       success: false,

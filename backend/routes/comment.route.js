@@ -1,6 +1,5 @@
-// routes/comment.route.js
-
 import express from "express";
+
 import {
   addComment,
   likeComment,
@@ -8,28 +7,32 @@ import {
   getComments,
   deleteComment,
   updateComment,
-  getAllComments
+  getAllComments,
 } from "../controllers/comment.controller.js";
 
 import { isAuthenticated } from "../middleware/isAuthenticated.js";
 
 const router = express.Router();
 
-// ================= COMMENTS =================
-router.post("/:id/add-comment", isAuthenticated, addComment);
+// ✅ ADD COMMENT
+router.post("/:blogId/add-comment", isAuthenticated, addComment);
 
-// 🔥 IMPORTANT (Dashboard use karega)
-router.get("/all", isAuthenticated, getAllComments);
-
-// Blog specific
+// ✅ GET BLOG COMMENTS
 router.get("/blog/:blogId", getComments);
 
-// Update / Delete
+// ✅ ALL COMMENTS
+router.get("/all", isAuthenticated, getAllComments);
+
+// ✅ UPDATE
 router.put("/:commentId", isAuthenticated, updateComment);
+
+// ✅ DELETE
 router.delete("/:commentId", isAuthenticated, deleteComment);
 
-// Extra
-router.post("/reply", addReply);
-router.post("/like/:commentId", likeComment);
+// ✅ LIKE
+router.post("/like/:commentId", isAuthenticated, likeComment);
+
+// ✅ REPLY
+router.post("/reply", isAuthenticated, addReply);
 
 export default router;

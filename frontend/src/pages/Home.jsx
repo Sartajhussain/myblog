@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import Autoplay from "embla-carousel-autoplay";
 import { Badge } from "../components/ui/badge";
 import Skeleton from "../components/Skeleton";
+import { getBlogImage } from "../utils/getBlogImage";
 
 import RecentBlog from "../components/RecentBlog";
 import { Card, CardContent } from "../components/ui/card";
@@ -78,16 +79,7 @@ const Home = () => {
     });
   }, [api]);
 
-  // 🔥 IMAGE FIX FUNCTION
-  const getImage = (img) => {
-    if (!img || img === "null" || img === "undefined") {
-      return "/fallback.png"; // optional fallback image
-    }
 
-    if (img.startsWith("http")) return img;
-
-    return `${API_BASE_URL}/${img}`;
-  };
 
   if (loading) {
     return (
@@ -154,11 +146,16 @@ const Home = () => {
                       {/* IMAGE FIX HERE */}
                       <div className="md:w-1/2 w-full">
                         <img
-                          src={getImage(item.thumbnail)}
+                          src={getBlogImage(
+                            item.thumbnail ||
+                            item.image ||
+                            item.coverImage
+                          )}
                           alt={item.title}
                           className="w-full h-[260px] md:h-[420px] object-cover rounded-xl"
                           onError={(e) => {
-                            e.target.src = "/fallback.png";
+                            e.target.src =
+                              "https://placehold.co/600x400?text=No+Image";
                           }}
                         />
                       </div>

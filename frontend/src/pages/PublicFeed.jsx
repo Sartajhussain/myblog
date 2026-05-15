@@ -5,23 +5,6 @@ import BlogCard from "../components/blog/BlogCard";
 import Skeleton from "../components/Skeleton";
 import { API_BASE_URL } from "../utils/api";
 
-import userimg from "../assets/userprofile.png";
-
-/* =======================
-   🔥 IMAGE FIX HELPER
-======================= */
-const getBlogImage = (thumbnail) => {
-  if (!thumbnail || thumbnail === "null" || thumbnail === "undefined") {
-    return userimg;
-  }
-
-  if (thumbnail.startsWith("http")) {
-    return thumbnail;
-  }
-
-  return `${API_BASE_URL}/${thumbnail}`;
-};
-
 const PublicFeed = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,10 +49,7 @@ const PublicFeed = () => {
           blogs.map((blog) => (
             <BlogCard
               key={blog._id}
-              blog={{
-                ...blog,
-                thumbnail: getBlogImage(blog.thumbnail),
-              }}
+              blog={blog}
             />
           ))
         )}

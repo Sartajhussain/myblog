@@ -42,20 +42,75 @@ const ViewBlog = ({ blog }) => {
   const { blog: blogState } = useSelector((store) => store.blog);
   const { user } = useSelector((store) => store.auth);
 
-  const [selectedBlog, setSelectedBlog] = useState(
-    blog || blogState?.find((b) => b._id === blogId) || null
-  );
+  const [selectedBlog, setSelectedBlog] = useState(null);
 
-  const [loading, setLoading] = useState(!selectedBlog);
+  const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [saved, setSaved] = useState(false);
 
   /* =======================
-     COMMENT COUNT FIX 🔥
+     COMMENT COUNT
   ======================= */
   const [commentCount, setCommentCount] = useState(0);
 
+  /* =======================
+     FETCH BLOG
+  ======================= */
+  const fetchBlog = async () => {
+    try {
+      setLoading(true);
+
+      /* 🔥 FIRST CHECK REDUX */
+      const existingBlog =
+        blog ||
+        blogState?.find((b) => b._id === blogId);
+
+      if (existingBlog) {
+        setSelectedBlog(existingBlog);
+        setLiked(existingBlog.likes?.includes(user?._id) || false);
+        setLikeCount(existingBlog.likes?.length || 0);
+        setLoading(false);
+      }
+
+      /* 🔥 ALWAYS FETCH NEW BLOG */
+      const { data } = await axios.get(
+        `${API_BASE_URL}/api/v1/blog/${blogId}`,
+        { withCredentials: true }
+      );
+
+      if (data.success) {
+        setSelectedBlog(data.blog);
+        setLiked(data.blog.likes?.includes(user?._id) || false);
+        setLikeCount(data.blog.likes?.length || 0);
+      }
+
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to load blog");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* =======================
+     BLOG CHANGE FIX 🔥
+  ======================= */
+  useEffect(() => {
+    if (blogId) {
+      fetchBlog();
+
+      /* 🔥 TOP SCROLL */
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }, [blogId]);
+
+  /* =======================
+     COMMENT COUNT FETCH
+  ======================= */
   useEffect(() => {
     const fetchComments = async () => {
       if (!selectedBlog?._id) return;
@@ -70,52 +125,13 @@ const ViewBlog = ({ blog }) => {
           setCommentCount(res.data.comments?.length || 0);
         }
       } catch (error) {
+        console.log(error);
         setCommentCount(0);
       }
     };
 
     fetchComments();
-  }, [selectedBlog]);
-
-  /* =======================
-     FETCH BLOG
-  ======================= */
-  useEffect(() => {
-    const fetchBlog = async () => {
-      if (selectedBlog) return;
-
-      try {
-        setLoading(true);
-
-        const { data } = await axios.get(
-          `${API_BASE_URL}/api/v1/blog/${blogId}`,
-          { withCredentials: true }
-        );
-
-        if (data.success) {
-          setSelectedBlog(data.blog);
-          setLiked(data.blog.likes?.includes(user?._id) || false);
-          setLikeCount(data.blog.likes?.length || 0);
-        }
-      } catch (error) {
-        toast.error("Failed to load blog");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBlog();
-  }, [blogId, selectedBlog, user?._id]);
-
-  /* =======================
-     LIKE STATE UPDATE
-  ======================= */
-  useEffect(() => {
-    if (selectedBlog) {
-      setLiked(selectedBlog.likes?.includes(user?._id) || false);
-      setLikeCount(selectedBlog.likes?.length || 0);
-    }
-  }, [selectedBlog, user?._id]);
+  }, [selectedBlog?._id]);
 
   /* =======================
      LIKE
@@ -138,6 +154,7 @@ const ViewBlog = ({ blog }) => {
         setLikeCount(res.data.likes);
       }
     } catch (error) {
+      console.log(error);
       toast.error("Failed to like blog");
     }
   };
@@ -161,22 +178,32 @@ const ViewBlog = ({ blog }) => {
     }
   };
 
-  if (loading) return <Skeleton type="blog" />;
+  /* =======================
+     LOADING
+  ======================= */
+  if (loading) {
+    return <Skeleton type="blog" />;
+  }
 
+  /* =======================
+     BLOG NOT FOUND
+  ======================= */
   if (!selectedBlog) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <p className="text-gray-500">Blog not found</p>
+        <p className="text-gray-500 dark:text-gray-400">
+          Blog not found
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="flex justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="flex justify-center bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="w-full max-w-6xl mt-14 py-10 px-4 md:px-10 space-y-10">
 
         {/* TITLE */}
-        <h1 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
           {selectedBlog.title}
         </h1>
 
@@ -187,7 +214,9 @@ const ViewBlog = ({ blog }) => {
             src={getProfileImage(selectedBlog?.author?.profilePic)}
             alt={selectedBlog?.author?.firstName || "Author"}
             className="w-10 h-10 rounded-full object-cover"
-            onError={(e) => (e.target.src = userimg)}
+            onError={(e) => {
+              e.target.src = userimg;
+            }}
           />
 
           <div>
@@ -197,44 +226,67 @@ const ViewBlog = ({ blog }) => {
             </p>
 
             <p>
-              {new Date(selectedBlog.createdAt).toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}{" "}
+              {new Date(selectedBlog.createdAt).toLocaleDateString(
+                "en-IN",
+                {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                }
+              )}{" "}
               •{" "}
-              {new Date(selectedBlog.createdAt).toLocaleTimeString("en-IN", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              {new Date(selectedBlog.createdAt).toLocaleTimeString(
+                "en-IN",
+                {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              )}
             </p>
           </div>
         </div>
 
         {/* IMAGE */}
         <img
-          src={getBlogImage(selectedBlog.thumbnail)}
+          src={getBlogImage(
+            selectedBlog.thumbnail ||
+              selectedBlog.image
+          )}
           alt={selectedBlog.title}
           className="w-full h-[300px] md:h-[500px] object-cover rounded-2xl"
+          onError={(e) => {
+            e.target.src = userimg;
+          }}
         />
 
         {/* DESCRIPTION */}
         <div
           className="prose dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: selectedBlog.description }}
+          dangerouslySetInnerHTML={{
+            __html: selectedBlog.description,
+          }}
         />
 
         {/* ACTIONS */}
-        <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
 
           <div className="flex gap-5 items-center text-sm">
 
-            <button onClick={handleLike} className="flex items-center gap-1">
-              {liked ? <FaHeart className="text-red-500" /> : <FaRegHeart />}
+            {/* LIKE */}
+            <button
+              onClick={handleLike}
+              className="flex items-center gap-1 hover:scale-105 transition"
+            >
+              {liked ? (
+                <FaHeart className="text-red-500" />
+              ) : (
+                <FaRegHeart />
+              )}
+
               <span>{likeCount}</span>
             </button>
 
-            {/* 🔥 FIXED COMMENT COUNT */}
+            {/* COMMENT */}
             <button className="flex items-center gap-1">
               <FaRegComment />
               <span>{commentCount}</span>
@@ -244,11 +296,19 @@ const ViewBlog = ({ blog }) => {
 
           <div className="flex gap-5 items-center">
 
-            <button onClick={handleShare}>
+            {/* SHARE */}
+            <button
+              onClick={handleShare}
+              className="hover:scale-105 transition"
+            >
               <IoShareOutline />
             </button>
 
-            <button onClick={() => setSaved(!saved)}>
+            {/* SAVE */}
+            <button
+              onClick={() => setSaved(!saved)}
+              className="hover:scale-105 transition"
+            >
               {saved ? (
                 <FaBookmark className="text-yellow-500" />
               ) : (

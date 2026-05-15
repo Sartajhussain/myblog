@@ -1,6 +1,8 @@
-﻿import React, { useState } from "react";
+﻿import { getBlogImage } from "../utils/getBlogImage";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { logoutUser } from "../redux/authSlice.js";
+
 import {
   FiSearch,
   FiHome,
@@ -48,16 +50,20 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const profileImage = getProfileImage(user?.profilePic);
+  
+  // Search results filter blogs
   const searchResults =
     search.trim() === ""
       ? []
       : blog?.filter((b) =>
-        b.title?.toLowerCase().includes(search.toLowerCase())
-      );
+          b.title?.toLowerCase().includes(search.toLowerCase())
+        );
+  
   const handleClick = (id) => {
-    setSearch("");          // 🔥 dropdown hide
+    setSearch("");
     navigate(`/view-blog/${id}`);
   };
+  
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
@@ -71,8 +77,8 @@ const Navbar = () => {
       );
 
       if (res.data.success) {
-        dispatch(logoutUser());   // ✅ update redux state
-        navigate("/");            // redirect
+        dispatch(logoutUser());
+        navigate("/");
         toast.success("Logged out successfully");
       }
 
@@ -113,7 +119,7 @@ const Navbar = () => {
 
               <FiSearch className="absolute left-3 top-2.5 w-5 h-4 text-gray-500" />
 
-              {/* SEARCH RESULTS */}
+              {/* SEARCH RESULTS - FIXED: Now showing blog images properly */}
               {search && searchResults?.length > 0 && (
                 <div
                   className="
@@ -125,7 +131,6 @@ shadow-lg rounded-lg overflow-hidden
 border border-gray-200 dark:border-gray-700
 "
                 >
-
                   {searchResults.slice(0, 5).map((item) => (
                     <div
                       key={item._id}
@@ -134,30 +139,28 @@ border border-gray-200 dark:border-gray-700
         hover:bg-gray-100 dark:hover:bg-gray-700
         transition"
                     >
+                      {/* FIX: Using getBlogImage utility for blog images */}
                       <img
-  src={profileImage}
-  alt="user"
-  loading="eager"
-  fetchPriority="high"
-  onError={(e) => {
-    e.target.src = userimg;
-  }}
-  className="w-9 h-9 rounded-full object-cover cursor-pointer
-  ring-2 ring-gray-300 dark:ring-slate-600
-  hover:ring-black dark:hover:ring-white
-  transition"
-/>
-
+                        src={getBlogImage(item.thumbnail || item.image || item.coverImage)}
+                        alt={item.title}
+                        loading="eager"
+                        fetchPriority="high"
+                        onError={(e) => {
+                          e.target.src = "https://placehold.co/100x100?text=Blog";
+                        }}
+                        className="w-9 h-9 rounded-md object-cover cursor-pointer
+                        ring-1 ring-gray-300 dark:ring-slate-600
+                        hover:ring-black dark:hover:ring-white
+                        transition"
+                      />
                       <p className="text-sm font-medium line-clamp-1 
         text-gray-800 dark:text-gray-200">
                         {item.title}
                       </p>
                     </div>
                   ))}
-
                 </div>
               )}
-
             </div>
           </div>
 
@@ -231,18 +234,18 @@ border border-gray-200 dark:border-gray-700
                   <DropdownMenuTrigger asChild>
                     <Button variant="" className="p-0 bg-transparent hover:bg-transparent">
                       <img
-  src={profileImage}
-  alt="user"
-  loading="eager"
-  fetchPriority="high"
-  onError={(e) => {
-    e.target.src = userimg;
-  }}
-  className="w-9 h-9 rounded-full object-cover cursor-pointer
-  ring-2 ring-gray-300 dark:ring-slate-600
-  hover:ring-black dark:hover:ring-white
-  transition"
-/>
+                        src={profileImage}
+                        alt="user"
+                        loading="eager"
+                        fetchPriority="high"
+                        onError={(e) => {
+                          e.target.src = userimg;
+                        }}
+                        className="w-9 h-9 rounded-full object-cover cursor-pointer
+                        ring-2 ring-gray-300 dark:ring-slate-600
+                        hover:ring-black dark:hover:ring-white
+                        transition"
+                      />
                     </Button>
                   </DropdownMenuTrigger>
 
@@ -415,18 +418,18 @@ border border-gray-200 dark:border-gray-700
                 <div className={`p-2 rounded-full transition
           ${isActive("/dashboard/profile") ? "bg-gray-200 dark:bg-gray-700" : ""}`}>
                  <img
-  src={profileImage}
-  alt="user"
-  loading="eager"
-  fetchPriority="high"
-  onError={(e) => {
-    e.target.src = userimg;
-  }}
-  className="w-9 h-9 rounded-full object-cover cursor-pointer
-  ring-2 ring-gray-300 dark:ring-slate-600
-  hover:ring-black dark:hover:ring-white
-  transition"
-/>
+                  src={profileImage}
+                  alt="user"
+                  loading="eager"
+                  fetchPriority="high"
+                  onError={(e) => {
+                    e.target.src = userimg;
+                  }}
+                  className="w-9 h-9 rounded-full object-cover cursor-pointer
+                  ring-2 ring-gray-300 dark:ring-slate-600
+                  hover:ring-black dark:hover:ring-white
+                  transition"
+                />
                 </div>
 
                 <span className="text-gray-600 dark:text-gray-300">Profile</span>
@@ -474,18 +477,18 @@ border border-gray-200 dark:border-gray-700
 
           >
            <img
-  src={profileImage}
-  alt="user"
-  loading="eager"
-  fetchPriority="high"
-  onError={(e) => {
-    e.target.src = userimg;
-  }}
-  className="w-9 h-9 rounded-full object-cover cursor-pointer
-  ring-2 ring-gray-300 dark:ring-slate-600
-  hover:ring-black dark:hover:ring-white
-  transition"
-/>
+            src={profileImage}
+            alt="user"
+            loading="eager"
+            fetchPriority="high"
+            onError={(e) => {
+              e.target.src = userimg;
+            }}
+            className="w-9 h-9 rounded-full object-cover cursor-pointer
+            ring-2 ring-gray-300 dark:ring-slate-600
+            hover:ring-black dark:hover:ring-white
+            transition"
+          />
 
             <div>
               <p className="font-semibold text-sm">
