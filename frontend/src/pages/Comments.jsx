@@ -44,19 +44,19 @@ const Comments = () => {
     if (!thumbnail || thumbnail === "null" || thumbnail === "undefined" || thumbnail === "") {
       return "https://placehold.co/100x100?text=No+Image";
     }
-    
+
     if (thumbnail.startsWith("http://") || thumbnail.startsWith("https://")) {
       return thumbnail;
     }
-    
+
     if (thumbnail.startsWith("/uploads")) {
       return `${API_BASE_URL}${thumbnail}`;
     }
-    
+
     if (thumbnail.startsWith("uploads")) {
       return `${API_BASE_URL}/${thumbnail}`;
     }
-    
+
     return `${API_BASE_URL}/${thumbnail.replace(/^\/+/, "")}`;
   };
 

@@ -7,7 +7,9 @@ import {
   FaBookmark,
   FaRegBookmark,
 } from "react-icons/fa";
+
 import { IoShareOutline } from "react-icons/io5";
+
 import toast from "react-hot-toast";
 import axios from "axios";
 
@@ -16,44 +18,71 @@ import { API_BASE_URL } from "../../utils/api";
 import CommentsSection from "../CommentsSection";
 
 const BlogCard = ({ blog }) => {
+
   const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(blog?.likes?.length || 0);
+
+  /* ✅ FIXED */
+  const [likeCount, setLikeCount] = useState(0);
 
   const [saved, setSaved] = useState(false);
+
   const [showComments, setShowComments] = useState(false);
 
+  /* ✅ FIXED */
   const [commentCount, setCommentCount] = useState(0);
 
-  const { user: currentUser } = useSelector((state) => state.auth);
+  const { user: currentUser } = useSelector(
+    (state) => state.auth
+  );
 
   /* =========================
      LIKE STATE INIT
   ========================= */
   useEffect(() => {
+
     if (currentUser && blog?.likes) {
-      setLiked(blog.likes.includes(currentUser._id));
+      setLiked(
+        blog.likes.includes(currentUser._id)
+      );
     } else {
       setLiked(false);
     }
 
-    setLikeCount(blog?.likes?.length || 0);
+    /* ✅ FIXED */
+    setLikeCount(
+      Number(blog?.likes?.length) || 0
+    );
+
   }, [currentUser, blog]);
 
   /* =========================
      COMMENT COUNT
   ========================= */
   useEffect(() => {
+
     const fetchCommentCount = async () => {
+
       try {
+
         const res = await axios.get(
           `${API_BASE_URL}/api/v1/comment/blog/${blog?._id}`,
-          { withCredentials: true }
+          {
+            withCredentials: true,
+          }
         );
 
         if (res.data.success) {
-          setCommentCount(res.data.comments?.length || 0);
+
+          /* ✅ FIXED */
+          setCommentCount(
+            Number(res.data.comments?.length) || 0
+          );
         }
+
       } catch (error) {
+
+        console.log(error);
+
         setCommentCount(0);
       }
     };
@@ -61,29 +90,44 @@ const BlogCard = ({ blog }) => {
     if (blog?._id) {
       fetchCommentCount();
     }
+
   }, [blog?._id]);
 
   /* =========================
-     LIKE
+     LIKE BLOG
   ========================= */
   const handleLike = async () => {
+
     if (!currentUser) {
       toast.error("Please login to like blogs");
       return;
     }
 
     try {
-      const res = await axios.patch(
+
+      const { data } = await axios.patch(
         `${API_BASE_URL}/api/v1/blog/${blog._id}/like`,
         {},
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        }
       );
 
-      if (res.data.success) {
-        setLiked(res.data.liked);
-        setLikeCount(res.data.likes);
+      if (data.success) {
+
+        /* ✅ HEART ICON */
+        setLiked(data.liked);
+
+        /* ✅ COUNT */
+        setLikeCount(
+          Number(data.likes) || 0
+        );
       }
+
     } catch (error) {
+
+      console.log(error);
+
       toast.error("Failed to like blog");
     }
   };
@@ -92,43 +136,68 @@ const BlogCard = ({ blog }) => {
      SHARE
   ========================= */
   const handleShare = async () => {
+
     try {
-      const blogUrl = `${window.location.origin}/view-blog/${blog._id}`;
+
+      const blogUrl =
+        `${window.location.origin}/view-blog/${blog._id}`;
 
       if (navigator.share) {
+
         await navigator.share({
           title: blog.title,
           url: blogUrl,
         });
+
       } else {
-        await navigator.clipboard.writeText(blogUrl);
+
+        await navigator.clipboard.writeText(
+          blogUrl
+        );
+
         toast.success("Link copied!");
       }
+
     } catch (err) {
+
       console.log(err);
     }
   };
 
-  // Function to get blog image URL
+  /* =========================
+     IMAGE URL
+  ========================= */
   const getBlogImageUrl = () => {
-    const image = blog?.thumbnail || blog?.image || blog?.coverImage;
-    
-    if (!image || image === "null" || image === "undefined" || image === "") {
+
+    const image =
+      blog?.thumbnail ||
+      blog?.image ||
+      blog?.coverImage;
+
+    if (
+      !image ||
+      image === "null" ||
+      image === "undefined" ||
+      image === ""
+    ) {
       return null;
     }
-    
-    if (image.startsWith("http://") || image.startsWith("https://")) {
+
+    if (
+      image.startsWith("http://") ||
+      image.startsWith("https://")
+    ) {
       return image;
     }
-    
+
     if (image.startsWith("/uploads")) {
       return `${API_BASE_URL}${image}`;
     }
-    
+
     if (image.startsWith("uploads")) {
       return `${API_BASE_URL}/${image}`;
     }
-    
+
     return `${API_BASE_URL}/${image}`;
   };
 
@@ -137,27 +206,37 @@ const BlogCard = ({ blog }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden flex flex-col">
 
-      {/* BLOG IMAGE - TOP */}
+      {/* BLOG IMAGE */}
       <div className="w-full">
+
         {blogImageUrl ? (
+
           <img
             src={blogImageUrl}
             alt={blog?.title || "blog"}
             loading="lazy"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = "https://placehold.co/800x400?text=Blog+Image+Not+Found";
+
+              e.target.src =
+                "https://placehold.co/800x400?text=Blog+Image+Not+Found";
             }}
             className="w-full h-52 sm:h-64 object-cover"
           />
+
         ) : (
+
           <div className="w-full h-52 sm:h-64 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-            <span className="text-gray-500 dark:text-gray-400">No Blog Image</span>
+
+            <span className="text-gray-500 dark:text-gray-400">
+              No Blog Image
+            </span>
+
           </div>
         )}
       </div>
 
-      {/* CONTENT - BOTTOM */}
+      {/* CONTENT */}
       <div className="p-5 space-y-4">
 
         {/* TITLE */}
@@ -190,7 +269,9 @@ const BlogCard = ({ blog }) => {
 
           <p>
             {blog?.createdAt
-              ? new Date(blog.createdAt).toLocaleDateString("en-IN", {
+              ? new Date(
+                  blog.createdAt
+                ).toLocaleDateString("en-IN", {
                   day: "numeric",
                   month: "short",
                   year: "numeric",
@@ -206,26 +287,36 @@ const BlogCard = ({ blog }) => {
           {/* LEFT */}
           <div className="flex gap-5 items-center text-sm">
 
+            {/* LIKE */}
             <button
               onClick={handleLike}
               className="flex items-center gap-1 hover:text-red-500 transition"
             >
+
               {liked ? (
                 <FaHeart className="text-red-500" />
               ) : (
                 <FaRegHeart />
               )}
 
+              {/* ✅ FIXED */}
               <span>{likeCount}</span>
+
             </button>
 
+            {/* COMMENT */}
             <button
-              onClick={() => setShowComments((prev) => !prev)}
+              onClick={() =>
+                setShowComments((prev) => !prev)
+              }
               className="flex items-center gap-1 hover:text-blue-500 transition"
             >
+
               <FaRegComment />
 
+              {/* ✅ FIXED */}
               <span>{commentCount}</span>
+
             </button>
 
           </div>
@@ -233,6 +324,7 @@ const BlogCard = ({ blog }) => {
           {/* RIGHT */}
           <div className="flex gap-5 items-center">
 
+            {/* SHARE */}
             <button
               onClick={handleShare}
               className="hover:text-green-500 transition"
@@ -240,15 +332,18 @@ const BlogCard = ({ blog }) => {
               <IoShareOutline />
             </button>
 
+            {/* SAVE */}
             <button
               onClick={() => setSaved(!saved)}
               className="hover:text-yellow-500 transition"
             >
+
               {saved ? (
                 <FaBookmark className="text-yellow-500" />
               ) : (
                 <FaRegBookmark />
               )}
+
             </button>
 
           </div>
@@ -257,13 +352,22 @@ const BlogCard = ({ blog }) => {
 
         {/* COMMENTS */}
         {showComments && (
+
           <div className="mt-5">
+
             <CommentsSection
               blogId={blog?._id}
               currentUser={currentUser}
               className="bg-white dark:bg-gray-900 p-4 rounded-3xl"
-              onCommentChange={(count) => setCommentCount(count)}
+
+              /* ✅ FIXED */
+              onCommentsChange={(comments) => {
+                setCommentCount(
+                  Number(comments?.length) || 0
+                );
+              }}
             />
+
           </div>
         )}
 

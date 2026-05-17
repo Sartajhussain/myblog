@@ -45,13 +45,15 @@ const ViewBlog = ({ blog }) => {
   const [selectedBlog, setSelectedBlog] = useState(null);
 
   const [loading, setLoading] = useState(true);
+
   const [liked, setLiked] = useState(false);
+
+  /* ✅ FIXED */
   const [likeCount, setLikeCount] = useState(0);
+
   const [saved, setSaved] = useState(false);
 
-  /* =======================
-     COMMENT COUNT
-  ======================= */
+  /* COMMENT COUNT */
   const [commentCount, setCommentCount] = useState(0);
 
   /* =======================
@@ -61,28 +63,45 @@ const ViewBlog = ({ blog }) => {
     try {
       setLoading(true);
 
-      /* 🔥 FIRST CHECK REDUX */
+      /* REDUX BLOG */
       const existingBlog =
         blog ||
         blogState?.find((b) => b._id === blogId);
 
       if (existingBlog) {
         setSelectedBlog(existingBlog);
-        setLiked(existingBlog.likes?.includes(user?._id) || false);
-        setLikeCount(existingBlog.likes?.length || 0);
+
+        setLiked(
+          existingBlog?.likes?.includes(user?._id) || false
+        );
+
+        /* ✅ FIXED */
+        setLikeCount(
+          Number(existingBlog?.likes?.length) || 0
+        );
+
         setLoading(false);
       }
 
-      /* 🔥 ALWAYS FETCH NEW BLOG */
+      /* FRESH BLOG */
       const { data } = await axios.get(
         `${API_BASE_URL}/api/v1/blog/${blogId}`,
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        }
       );
 
       if (data.success) {
         setSelectedBlog(data.blog);
-        setLiked(data.blog.likes?.includes(user?._id) || false);
-        setLikeCount(data.blog.likes?.length || 0);
+
+        setLiked(
+          data.blog?.likes?.includes(user?._id) || false
+        );
+
+        /* ✅ FIXED */
+        setLikeCount(
+          Number(data.blog?.likes?.length) || 0
+        );
       }
 
     } catch (error) {
@@ -94,13 +113,12 @@ const ViewBlog = ({ blog }) => {
   };
 
   /* =======================
-     BLOG CHANGE FIX 🔥
+     BLOG CHANGE
   ======================= */
   useEffect(() => {
     if (blogId) {
       fetchBlog();
 
-      /* 🔥 TOP SCROLL */
       window.scrollTo({
         top: 0,
         behavior: "smooth",
@@ -109,7 +127,7 @@ const ViewBlog = ({ blog }) => {
   }, [blogId]);
 
   /* =======================
-     COMMENT COUNT FETCH
+     FETCH COMMENTS
   ======================= */
   useEffect(() => {
     const fetchComments = async () => {
@@ -118,12 +136,17 @@ const ViewBlog = ({ blog }) => {
       try {
         const res = await axios.get(
           `${API_BASE_URL}/api/v1/comment/blog/${selectedBlog._id}`,
-          { withCredentials: true }
+          {
+            withCredentials: true,
+          }
         );
 
         if (res.data.success) {
-          setCommentCount(res.data.comments?.length || 0);
+          setCommentCount(
+            Number(res.data.comments?.length) || 0
+          );
         }
+
       } catch (error) {
         console.log(error);
         setCommentCount(0);
@@ -134,7 +157,7 @@ const ViewBlog = ({ blog }) => {
   }, [selectedBlog?._id]);
 
   /* =======================
-     LIKE
+     LIKE BLOG
   ======================= */
   const handleLike = async () => {
     if (!user) {
@@ -143,16 +166,33 @@ const ViewBlog = ({ blog }) => {
     }
 
     try {
-      const res = await axios.patch(
+      const { data } = await axios.patch(
         `${API_BASE_URL}/api/v1/blog/${selectedBlog._id}/like`,
         {},
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        }
       );
 
-      if (res.data.success) {
-        setLiked(res.data.liked);
-        setLikeCount(res.data.likes);
+      if (data.success) {
+
+        /* ✅ ICON */
+        setLiked(data.liked);
+
+        /* ✅ COUNT */
+        setLikeCount(Number(data.likes) || 0);
+
+        /* ✅ UPDATE BLOG STATE */
+        setSelectedBlog((prev) => {
+          if (!prev) return prev;
+
+          return {
+            ...prev,
+            likes: Array(Number(data.likes) || 0).fill("liked"),
+          };
+        });
       }
+
     } catch (error) {
       console.log(error);
       toast.error("Failed to like blog");
@@ -170,9 +210,13 @@ const ViewBlog = ({ blog }) => {
           url: window.location.href,
         });
       } else {
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(
+          window.location.href
+        );
+
         toast.success("Link copied!");
       }
+
     } catch (err) {
       console.error(err);
     }
@@ -200,6 +244,7 @@ const ViewBlog = ({ blog }) => {
 
   return (
     <div className="flex justify-center bg-gray-50 dark:bg-gray-900 min-h-screen">
+
       <div className="w-full max-w-6xl mt-14 py-10 px-4 md:px-10 space-y-10">
 
         {/* TITLE */}
@@ -211,8 +256,12 @@ const ViewBlog = ({ blog }) => {
         <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
 
           <img
-            src={getProfileImage(selectedBlog?.author?.profilePic)}
-            alt={selectedBlog?.author?.firstName || "Author"}
+            src={getProfileImage(
+              selectedBlog?.author?.profilePic
+            )}
+            alt={
+              selectedBlog?.author?.firstName || "Author"
+            }
             className="w-10 h-10 rounded-full object-cover"
             onError={(e) => {
               e.target.src = userimg;
@@ -226,22 +275,20 @@ const ViewBlog = ({ blog }) => {
             </p>
 
             <p>
-              {new Date(selectedBlog.createdAt).toLocaleDateString(
-                "en-IN",
-                {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                }
-              )}{" "}
+              {new Date(
+                selectedBlog.createdAt
+              ).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}{" "}
               •{" "}
-              {new Date(selectedBlog.createdAt).toLocaleTimeString(
-                "en-IN",
-                {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }
-              )}
+              {new Date(
+                selectedBlog.createdAt
+              ).toLocaleTimeString("en-IN", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </p>
           </div>
         </div>
@@ -283,15 +330,19 @@ const ViewBlog = ({ blog }) => {
                 <FaRegHeart />
               )}
 
+              {/* ✅ FIXED */}
               <span>{likeCount}</span>
             </button>
 
             {/* COMMENT */}
             <button className="flex items-center gap-1">
-              <FaRegComment />
-              <span>{commentCount}</span>
-            </button>
 
+              <FaRegComment />
+
+              {/* ✅ FIXED */}
+              <span>{commentCount}</span>
+
+            </button>
           </div>
 
           <div className="flex gap-5 items-center">
@@ -317,13 +368,17 @@ const ViewBlog = ({ blog }) => {
             </button>
 
           </div>
-
         </div>
 
         {/* COMMENTS */}
         <CommentsSection
           blogId={selectedBlog._id}
           currentUser={user}
+          onCommentsChange={(comments) => {
+            setCommentCount(
+              Number(comments?.length) || 0
+            );
+          }}
         />
 
       </div>

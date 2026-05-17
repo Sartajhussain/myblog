@@ -111,19 +111,19 @@ const Blog = () => {
     if (!thumbnail || thumbnail === "null" || thumbnail === "undefined" || thumbnail === "") {
       return "https://placehold.co/100x100?text=No+Image";
     }
-    
+
     if (thumbnail.startsWith("http://") || thumbnail.startsWith("https://")) {
       return thumbnail;
     }
-    
+
     if (thumbnail.startsWith("/uploads")) {
       return `${API_BASE_URL}${thumbnail}`;
     }
-    
+
     if (thumbnail.startsWith("uploads")) {
       return `${API_BASE_URL}/${thumbnail}`;
     }
-    
+
     return `${API_BASE_URL}/${thumbnail.replace(/^\/+/, "")}`;
   };
 
@@ -195,109 +195,111 @@ const Blog = () => {
         <div className="space-y-4">
           {/* TABLE VIEW (DESKTOP) */}
           <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-100 dark:bg-gray-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Blog
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredBlogs.map((b) => (
-                  <tr key={b._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                    {/* BLOG WITH FIXED IMAGE */}
-                    <td className="py-2 px-3">
-                      <div className="flex items-center gap-2">
-                        <img
-                          className="w-10 h-10 object-cover rounded-md"
-                          src={getBlogImageUrl(b?.thumbnail || b?.image || b?.coverImage)}
-                          alt={b.title}
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "https://placehold.co/100x100?text=No+Image";
-                          }}
-                        />
-                        <div>
-                          <p
-                            onClick={() => navigate(`/view-blog/${b._id}`)}
-                            className="text-sm font-medium text-gray-800 dark:text-gray-200 cursor-pointer hover:underline line-clamp-1"
-                          >
-                            {b.title}
-                          </p>
+            <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
+              <table className="w-full">
+                <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0 z-10">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Blog
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {filteredBlogs.map((b) => (
+                    <tr key={b._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                      {/* BLOG WITH FIXED IMAGE */}
+                      <td className="py-2 px-3">
+                        <div className="flex items-center gap-2">
+                          <img
+                            className="w-10 h-10 object-cover rounded-md"
+                            src={getBlogImageUrl(b?.thumbnail || b?.image || b?.coverImage)}
+                            alt={b.title}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "https://placehold.co/100x100?text=No+Image";
+                            }}
+                          />
+                          <div>
+                            <p
+                              onClick={() => navigate(`/view-blog/${b._id}`)}
+                              className="text-sm font-medium text-gray-800 dark:text-gray-200 cursor-pointer hover:underline line-clamp-1"
+                            >
+                              {b.title}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* STATUS */}
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${b.isPublished
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
-                          }`}
-                      >
-                        {b.isPublished ? "Published" : "pending"}
-                      </span>
-                    </td>
-
-                    {/* DATE */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(b.createdAt).toLocaleDateString()}
-                    </td>
-
-                    {/* ACTIONS */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center gap-4">
-                        <button
-                          onClick={() => navigate(`/dashboard/write-blog/${b._id}`)}
-                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
-                          aria-label="Edit blog"
-                        >
-                          <FiEdit />
-                        </button>
-                        <button
-                          onClick={() => navigate(`/view-blog/${b._id}`)}
-                          className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-200"
-                          aria-label="View blog"
-                        >
-                          <FiEye />
-                        </button>
-                        <button
-                          onClick={() => publishBlog(b._id)}
-                          className={`transition-colors duration-200 ${b.isPublished
-                            ? "text-yellow-600 hover:text-yellow-900 dark:text-yellow-500 dark:hover:text-yellow-400"
-                            : "text-green-600 hover:text-green-900 dark:text-green-500 dark:hover:text-green-400"
+                      {/* STATUS */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${b.isPublished
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
                             }`}
                         >
-                          {b.isPublished ? "Unpublish" : "Publish"}
-                        </button>
-                        <button
-                          onClick={() => deleteBlog(b._id)}
-                          className="text-red-600 hover:text-red-900 dark:text-red-500 dark:hover:text-red-400 transition-colors duration-200"
-                          aria-label="Delete blog"
-                        >
-                          <FiTrash />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                          {b.isPublished ? "Published" : "pending"}
+                        </span>
+                      </td>
+
+                      {/* DATE */}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {new Date(b.createdAt).toLocaleDateString()}
+                      </td>
+
+                      {/* ACTIONS */}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center gap-4">
+                          <button
+                            onClick={() => navigate(`/dashboard/write-blog/${b._id}`)}
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
+                            aria-label="Edit blog"
+                          >
+                            <FiEdit />
+                          </button>
+                          <button
+                            onClick={() => navigate(`/view-blog/${b._id}`)}
+                            className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-200"
+                            aria-label="View blog"
+                          >
+                            <FiEye />
+                          </button>
+                          <button
+                            onClick={() => publishBlog(b._id)}
+                            className={`transition-colors duration-200 ${b.isPublished
+                              ? "text-yellow-600 hover:text-yellow-900 dark:text-yellow-500 dark:hover:text-yellow-400"
+                              : "text-green-600 hover:text-green-900 dark:text-green-500 dark:hover:text-green-400"
+                              }`}
+                          >
+                            {b.isPublished ? "Unpublish" : "Publish"}
+                          </button>
+                          <button
+                            onClick={() => deleteBlog(b._id)}
+                            className="text-red-600 hover:text-red-900 dark:text-red-500 dark:hover:text-red-400 transition-colors duration-200"
+                            aria-label="Delete blog"
+                          >
+                            <FiTrash />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* CARD VIEW (MOBILE) WITH FIXED IMAGE */}
-          <div className="md:hidden space-y-4">
+          <div className="md:hidden space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar">
             {filteredBlogs.map((b) => (
               <div
                 key={b._id}
@@ -362,7 +364,49 @@ const Blog = () => {
           </div>
         </div>
       )}
+      {/* Modern Scrollbar Styles */}
+      <style jsx>{`
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+  
+  /* Dark mode scrollbar */
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #475569;
+  }
+  
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }
+  
+  /* Firefox support */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  
+  .dark .custom-scrollbar {
+    scrollbar-color: #475569 transparent;
+  }
+`}</style>
     </div>
+
   );
 };
 
