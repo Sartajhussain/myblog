@@ -172,7 +172,7 @@ const AuthButtons = () => (
       </button>
     </Link>
     <Link to="/login">
-      <button className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200">
+      <button className="group relative px-4 py-2 text-sm font-medium text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-full overflow-hidden transition-all duration-300 hover:shadow-lg">
         Login
       </button>
     </Link>

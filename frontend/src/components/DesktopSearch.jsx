@@ -35,20 +35,20 @@ const DesktopSearch = ({ search, setSearch, searchResults, handleClick }) => {
   return (
     <div className="relative w-full md:w-auto" ref={dropdownRef}>
       {/* Search Input - Smaller on mobile */}
-      <div className="relative">
+      <div className="relative ml-10 md:ml-0">
         <input
           type="text"
           placeholder="Search..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-[140px] md:w-64 lg:w-80 pl-8 md:pl-10 pr-3 md:pr-4 py-1.5 md:py-2 text-xs md:text-sm border rounded-full focus:ring-2 focus:ring-gray-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-all duration-200"
+          className="w-[180px] md:w-64 lg:w-80 pl-8 md:pl-10 pr-3 md:pr-4 py-1.5 md:py-2 text-xs md:text-sm border rounded-full focus:ring-2 focus:ring-gray-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-all duration-200"
         />
         <FiSearch className="absolute left-2.5 md:left-3 top-2 md:top-2.5 w-3.5 md:w-4 h-3.5 md:h-4 text-gray-500 dark:text-gray-400" />
       </div>
 
       {/* Search Results Dropdown - Full width on mobile */}
       {search && searchResults?.length > 0 && (
-        <div className="absolute mt-2 z-50 left-0 right-0 md:left-0 md:right-auto w-full md:w-[400px] lg:w-[450px] bg-white dark:bg-gray-800 shadow-2xl rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 animate-fade-in">
+        <div className="absolute mt-2 z-50 top-full left-0 md:left-auto md:right-0 w-[90vw] md:w-[400px] lg:w-[450px] max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 shadow-2xl rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 animate-fade-in">
           <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
             {searchResults.slice(0, 5).map((item) => (
               <div
