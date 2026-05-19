@@ -4,18 +4,20 @@ import { API_BASE_URL } from "../utils/api";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { setBlog } from "../redux/blogSlice";
 import { useNavigate, useParams } from "react-router-dom";
 
 const UpdateBlog = () => {
+  const { blog } = useSelector((store) => store.blog);
   const navigate = useNavigate();
   const { blogId } = useParams();
   const dispatch = useDispatch();
   const editor = useRef(null);
 
-  const { blog } = useSelector((store) => store.blog);
+  // ✅ REDUX DATA
+  const { myBlogs } = useSelector((store) => store.blog);
 
-  const selectedBlog = blog?.find((b) => b?._id === blogId);
+  // ✅ FIND BLOG
+  const selectedBlog = myBlogs?.find((b) => b?._id === blogId);
 
   /* ================= STATES ================= */
   const [loading, setLoading] = useState(false);
@@ -33,10 +35,10 @@ const UpdateBlog = () => {
     category: "",
   });
 
-  /* ================= HELPER: GET IMAGE URL ================= */
+  /* ================= IMAGE URL ================= */
   const getImageUrl = (img) => {
     if (!img || img === "null" || img === "undefined" || img === "") {
-      return null;
+      return "https://placehold.co/400x400?text=No+Image";
     }
 
     if (img.startsWith("http://") || img.startsWith("https://")) {
@@ -51,7 +53,7 @@ const UpdateBlog = () => {
       return `${API_BASE_URL}/${img}`;
     }
 
-    return `${API_BASE_URL}/${img}`;
+    return `${API_BASE_URL}/${img.replace(/^\/+/, "")}`;
   };
 
   /* ================= LOAD BLOG ================= */
@@ -63,16 +65,23 @@ const UpdateBlog = () => {
         category: selectedBlog.category || "",
       });
 
-      setContents(selectedBlog.description || "");
+      // ✅ DESCRIPTION
+      setContents(
+        selectedBlog.description ||
+          selectedBlog.content ||
+          ""
+      );
+
       setIsPublished(selectedBlog.isPublished || false);
 
-      // ✅ FIXED IMAGE PREVIEW - Proper URL construction
-      const thumbnailUrl = selectedBlog.thumbnail || selectedBlog.image || selectedBlog.coverImage;
-      if (thumbnailUrl) {
-        const imageUrl = getImageUrl(thumbnailUrl);
-        if (imageUrl) {
-          setPreview(imageUrl);
-        }
+      // ✅ IMAGE PREVIEW
+      const image =
+        selectedBlog.thumbnail ||
+        selectedBlog.image ||
+        selectedBlog.coverImage;
+
+      if (image) {
+        setPreview(getImageUrl(image));
       }
     }
   }, [selectedBlog]);
@@ -85,6 +94,7 @@ const UpdateBlog = () => {
     });
   };
 
+  /* ================= CATEGORY ================= */
   const selectCategory = (e) => {
     setBlogData({
       ...blogData,
@@ -100,7 +110,6 @@ const UpdateBlog = () => {
       setThumbnail(file);
 
       const imageUrl = URL.createObjectURL(file);
-
       setPreview(imageUrl);
     }
   };
@@ -109,19 +118,22 @@ const UpdateBlog = () => {
   const blogUpdateHandler = async () => {
     if (loading) return;
 
-    // Validation
+    // ✅ VALIDATION
     if (!blogData.title.trim()) {
       toast.error("Title is required");
       return;
     }
+
     if (!blogData.subtitle.trim()) {
       toast.error("Subtitle is required");
       return;
     }
+
     if (!blogData.category) {
       toast.error("Category is required");
       return;
     }
+
     if (!contents.trim()) {
       toast.error("Description is required");
       return;
@@ -153,18 +165,23 @@ const UpdateBlog = () => {
       );
 
       if (data.success) {
-        toast.success("Blog Updated Successfully");
-
-        const updatedBlogs = blog.map((b) =>
+        // ✅ UPDATE REDUX
+        const updatedBlogs = myBlogs.map((b) =>
           b._id === blogId ? data.blog : b
         );
 
-        dispatch(setBlog(updatedBlogs));
+        dispatch(setMyBlogs(updatedBlogs));
+
+        toast.success("Blog Updated Successfully");
+
         navigate("/dashboard/blog");
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.response?.data?.message || "Error updating blog");
+
+      toast.error(
+        error.response?.data?.message || "Error updating blog"
+      );
     } finally {
       setLoading(false);
     }
@@ -186,15 +203,21 @@ const UpdateBlog = () => {
       if (data.success) {
         setIsPublished(data.blog.isPublished);
 
-        const updatedBlogs = blog.map((b) =>
+        // ✅ UPDATE REDUX
+        const updatedBlogs = myBlogs.map((b) =>
           b._id === blogId ? data.blog : b
         );
 
-        dispatch(setBlog(updatedBlogs));
+        dispatch(setMyBlogs(updatedBlogs));
+
         toast.success(data.message);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error");
+      console.log(error);
+
+      toast.error(
+        error.response?.data?.message || "Error"
+      );
     } finally {
       setPublishLoading(false);
     }
@@ -217,14 +240,24 @@ const UpdateBlog = () => {
       );
 
       if (data.success) {
+        // ✅ REMOVE FROM REDUX
+        const updatedBlogs = myBlogs.filter(
+          (b) => b._id !== blogId
+        );
+
+        dispatch(setMyBlogs(updatedBlogs));
+
         toast.success("Blog Deleted Successfully");
 
-        const updatedBlogs = blog.filter((b) => b._id !== blogId);
-        dispatch(setBlog(updatedBlogs));
         navigate("/dashboard/blog");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error deleting blog");
+      console.log(error);
+
+      toast.error(
+        error.response?.data?.message ||
+          "Error deleting blog"
+      );
     } finally {
       setDeleteLoading(false);
     }
@@ -232,24 +265,29 @@ const UpdateBlog = () => {
 
   return (
     <div className="min-h-screen pt-20 pb-24 md:ml-72 px-4 py-10 bg-gray-50 dark:bg-gray-900">
-
       <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-10">
-
+        
         <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-900 dark:text-white">
           Update Blog
         </h1>
 
         {/* BUTTONS */}
         <div className="flex gap-3 mb-6 flex-wrap">
+          
           <button
             onClick={publishHandler}
             disabled={publishLoading}
-            className={`px-4 py-2 rounded-lg text-white transition ${isPublished
+            className={`px-4 py-2 rounded-lg text-white transition ${
+              isPublished
                 ? "bg-yellow-600 hover:bg-yellow-700"
                 : "bg-green-600 hover:bg-green-700"
-              } disabled:opacity-50`}
+            } disabled:opacity-50`}
           >
-            {publishLoading ? "Processing..." : isPublished ? "Unpublish" : "Publish"}
+            {publishLoading
+              ? "Processing..."
+              : isPublished
+              ? "Unpublish"
+              : "Publish"}
           </button>
 
           <button
@@ -267,8 +305,8 @@ const UpdateBlog = () => {
           name="title"
           value={blogData.title}
           onChange={handleChange}
-          className="w-full mb-4 px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Title"
+          className="w-full mb-4 px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
         />
 
         {/* SUBTITLE */}
@@ -277,15 +315,15 @@ const UpdateBlog = () => {
           name="subtitle"
           value={blogData.subtitle}
           onChange={handleChange}
-          className="w-full mb-4 px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Subtitle"
+          className="w-full mb-4 px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
         />
 
         {/* CATEGORY */}
         <select
           value={blogData.category}
           onChange={selectCategory}
-          className="w-full mb-4 px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full mb-4 px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
         >
           <option value="">Select Category</option>
           <option value="tech">Technology</option>
@@ -303,40 +341,40 @@ const UpdateBlog = () => {
           />
         </div>
 
-        {/* FILE INPUT */}
+        {/* IMAGE INPUT */}
         <div className="mt-4">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Blog Thumbnail Image
+            Blog Thumbnail
           </label>
+
           <input
             type="file"
             accept="image/*"
             onChange={thumbnailHandler}
             className="block w-full text-sm text-gray-500 dark:text-gray-400
-              file:mr-4 file:py-2 file:px-4
-              file:rounded-lg file:border-0
-              file:text-sm file:font-semibold
-              file:bg-black file:text-white
-              hover:file:bg-gray-800
-              dark:file:bg-white dark:file:text-black
-              dark:hover:file:bg-gray-200
-              cursor-pointer"
+            file:mr-4 file:py-2 file:px-4
+            file:rounded-lg file:border-0
+            file:text-sm file:font-semibold
+            file:bg-black file:text-white
+            hover:file:bg-gray-800
+            dark:file:bg-white dark:file:text-black"
           />
         </div>
 
-        {/* PREVIEW - FIXED */}
+        {/* IMAGE PREVIEW */}
         {preview && (
           <div className="mt-4">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Image Preview:
+            <p className="text-sm font-medium mb-2 dark:text-white">
+              Preview
             </p>
+
             <img
               src={preview}
               alt="preview"
-              className="w-40 h-40 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
+              className="w-40 h-40 object-cover rounded-lg border"
               onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = "https://placehold.co/400x400?text=No+Image";
+                e.target.src =
+                  "https://placehold.co/400x400?text=No+Image";
               }}
             />
           </div>
@@ -346,48 +384,10 @@ const UpdateBlog = () => {
         <button
           onClick={blogUpdateHandler}
           disabled={loading}
-          className="
-    mt-6 w-full md:w-auto
-    min-w-[170px]
-    px-5 py-2.5
-    rounded-xl
-    text-sm font-medium
-    flex items-center justify-center gap-2
-    transition-all duration-300
-    shadow-md hover:shadow-xl
-
-    bg-black text-white
-    hover:bg-gray-900
-
-    dark:bg-white dark:text-black
-    dark:hover:bg-gray-200
-
-    disabled:opacity-70
-    disabled:cursor-not-allowed
-    active:scale-[0.98]
-  "
+          className="mt-6 px-6 py-3 rounded-xl bg-black text-white hover:bg-gray-900 transition disabled:opacity-50"
         >
-          {loading ? (
-            <>
-              {/* Loader */}
-              <span
-                className="
-          w-4 h-4
-          border-2
-          border-white dark:border-black
-          border-t-transparent
-          rounded-full
-          animate-spin
-        "
-              ></span>
-
-              <span>Saving...</span>
-            </>
-          ) : (
-            "Save Changes"
-          )}
+          {loading ? "Saving..." : "Save Changes"}
         </button>
-
       </div>
     </div>
   );

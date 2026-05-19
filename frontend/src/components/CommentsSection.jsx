@@ -21,7 +21,10 @@ const CommentsSection = ({
   className = "",
   onCommentsChange,
 }) => {
-  const initialCommentsValue = Array.isArray(initialComments) ? initialComments : [];
+  const initialCommentsValue = Array.isArray(initialComments)
+    ? initialComments
+    : [];
+
   const [comments, setComments] = useState(initialCommentsValue);
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState("");
@@ -29,6 +32,7 @@ const CommentsSection = ({
   const [activeMenuId, setActiveMenuId] = useState(null);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingText, setEditingText] = useState("");
+
   const inputRef = useRef(null);
   const onCommentsChangeRef = useRef(onCommentsChange);
 
@@ -38,21 +42,31 @@ const CommentsSection = ({
 
   useEffect(() => {
     if (!Array.isArray(initialComments)) return;
-    if (initialComments.length === 0) return;
     setComments(initialComments);
   }, [initialComments]);
 
+  /* =========================
+     FETCH COMMENTS
+  ========================= */
   const fetchComments = useCallback(async () => {
     if (!blogId) return;
 
-    const url = fetchUrl || `${API_BASE_URL}/api/v1/comment/blog/${blogId}`;
+    const url =
+      fetchUrl ||
+      `${API_BASE_URL}/api/v1/comment/blog/${blogId}`;
+
     setLoading(true);
 
     try {
-      const { data } = await axios.get(url, { withCredentials: true });
+      const { data } = await axios.get(url, {
+        withCredentials: true,
+      });
+
       if (data.success) {
         setComments(data.comments || []);
-        onCommentsChangeRef.current?.(data.comments || []);
+        onCommentsChangeRef.current?.(
+          data.comments || []
+        );
       }
     } catch (err) {
       console.error("Failed to load comments", err);
@@ -65,56 +79,158 @@ const CommentsSection = ({
     fetchComments();
   }, [fetchComments]);
 
+  /* =========================
+     FORMAT DATE
+  ========================= */
   const formatDate = (createdAt) => {
     if (!createdAt) return "";
+
     const date = new Date(createdAt);
+
     const today = new Date();
+
     const yesterday = new Date(today);
+
     yesterday.setDate(yesterday.getDate() - 1);
 
     let label;
+
     if (date.toDateString() === today.toDateString()) {
       label = "Today";
-    } else if (date.toDateString() === yesterday.toDateString()) {
+    } else if (
+      date.toDateString() === yesterday.toDateString()
+    ) {
       label = "Yesterday";
     } else {
-      label = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      label = date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
     }
 
-    const time = date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+    const time = date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
     return `${label} • ${time}`;
   };
 
+  /* =========================
+     ADD COMMENT
+  ========================= */
   const handleAddComment = async () => {
     if (!commentText.trim()) return;
+
     if (!currentUser) {
       toast.error("Please log in to add a comment.");
       return;
     }
 
-    const url = addUrl || `${API_BASE_URL}/api/v1/comment/${blogId}/add-comment`;
+    const url =
+      addUrl ||
+      `${API_BASE_URL}/api/v1/comment/${blogId}/add-comment`;
+
     try {
       const { data } = await axios.post(
         url,
-        { text: commentText },
-        { withCredentials: true }
+        {
+          text: commentText,
+        },
+        {
+          withCredentials: true,
+        }
       );
+
       if (data.success) {
-        const updatedComments = [data.comment, ...comments];
+        const updatedComments = [
+          data.comment,
+          ...comments,
+        ];
+
         setComments(updatedComments);
+
         setCommentText("");
-        onCommentsChangeRef.current?.(updatedComments);
+
+        onCommentsChangeRef.current?.(
+          updatedComments
+        );
+
         toast.success("Comment posted.");
+
         inputRef.current?.blur();
       }
     } catch (err) {
       console.error("Add comment failed", err);
-      toast.error(err.response?.data?.message || "Unable to post comment.");
+
+      toast.error(
+        err.response?.data?.message ||
+        "Unable to post comment."
+      );
     }
   };
 
+  /* =========================
+     LIKE COMMENT
+  ========================= */
+  /* =========================
+    LIKE COMMENT
+ ========================= */
+  const handleLikeComment = async (commentId) => {
+
+    if (!currentUser) {
+      toast.error("Please login first");
+      return;
+    }
+
+    try {
+
+      const { data } = await axios.patch(
+        `${API_BASE_URL}/api/v1/comment/${commentId}/like`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (data.success) {
+
+        setComments((prevComments) =>
+          prevComments.map((comment) => {
+
+            if (comment._id !== commentId) {
+              return comment;
+            }
+
+            return {
+              ...comment,
+
+              // ✅ backend se updated likes array
+              likes: Array.isArray(data.likes)
+                ? data.likes
+                : [],
+            };
+          })
+        );
+      }
+
+    } catch (error) {
+
+      console.log(error);
+
+      toast.error("Failed to like comment");
+    }
+  };
+
+  /* =========================
+     EDIT COMMENT
+  ========================= */
   const handleEditComment = async () => {
-    if (!editingText.trim() || !editingCommentId) return;
+    if (
+      !editingText.trim() ||
+      !editingCommentId
+    )
+      return;
 
     const url =
       updateUrl?.(editingCommentId) ||
@@ -123,83 +239,140 @@ const CommentsSection = ({
     try {
       const { data } = await axios.put(
         url,
-        { text: editingText },
-        { withCredentials: true }
+        {
+          text: editingText,
+        },
+        {
+          withCredentials: true,
+        }
       );
 
       if (data.success) {
-        const updatedComments = comments.map((comment) =>
-          comment._id === editingCommentId ? data.comment : comment
+        const updatedComments = comments.map(
+          (comment) =>
+            comment._id === editingCommentId
+              ? data.comment
+              : comment
         );
+
         setComments(updatedComments);
+
         setEditingCommentId(null);
+
         setEditingText("");
+
         setActiveMenuId(null);
-        onCommentsChangeRef.current?.(updatedComments);
+
+        onCommentsChangeRef.current?.(
+          updatedComments
+        );
+
         toast.success("Comment updated.");
       }
     } catch (err) {
       console.error("Edit comment failed", err);
-      toast.error(err.response?.data?.message || "Unable to update comment.");
+
+      toast.error(
+        err.response?.data?.message ||
+        "Unable to update comment."
+      );
     }
   };
 
-  const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Delete this comment?")) return;
+  /* =========================
+     DELETE COMMENT
+  ========================= */
+  const handleDeleteComment = async (
+    commentId
+  ) => {
+    if (!window.confirm("Delete this comment?"))
+      return;
 
-    const url = deleteUrl?.(commentId) || `${API_BASE_URL}/api/v1/comment/${commentId}`;
+    const url =
+      deleteUrl?.(commentId) ||
+      `${API_BASE_URL}/api/v1/comment/${commentId}`;
+
     try {
-      const { data } = await axios.delete(url, { withCredentials: true });
+      const { data } = await axios.delete(url, {
+        withCredentials: true,
+      });
+
       if (data.success) {
-        const updatedComments = comments.filter((comment) => comment._id !== commentId);
+        const updatedComments =
+          comments.filter(
+            (comment) =>
+              comment._id !== commentId
+          );
+
         setComments(updatedComments);
+
         setActiveMenuId(null);
-        onCommentsChangeRef.current?.(updatedComments);
+
+        onCommentsChangeRef.current?.(
+          updatedComments
+        );
+
         toast.success("Comment removed.");
       }
     } catch (err) {
-      console.error("Delete comment failed", err);
-      toast.error(err.response?.data?.message || "Unable to delete comment.");
+      console.error(
+        "Delete comment failed",
+        err
+      );
+
+      toast.error(
+        err.response?.data?.message ||
+        "Unable to delete comment."
+      );
     }
   };
 
-  const visibleComments = showAll ? comments : comments.slice(0, showCount);
+  const visibleComments = showAll
+    ? comments
+    : comments.slice(0, showCount);
+
   const commentCount = comments.length;
 
   return (
-    <div className={`space-y-3 sm:space-y-4 ${className}`}>
-
+    <div
+      className={`space-y-3 sm:space-y-4 ${className}`}
+    >
       {/* HEADER */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-
         <div>
           <h2 className="text-base sm:text-xl font-semibold text-gray-900 dark:text-white">
             {title}
           </h2>
 
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            {commentCount} comment{commentCount === 1 ? "" : "s"}
+            {commentCount} comment
+            {commentCount === 1 ? "" : "s"}
           </p>
         </div>
 
         {commentCount > showCount && (
           <button
-            onClick={() => setShowAll(!showAll)}
+            onClick={() =>
+              setShowAll(!showAll)
+            }
             className="text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-500 self-start sm:self-auto"
           >
-            {showAll ? "Show less" : `View all ${commentCount}`}
+            {showAll
+              ? "Show less"
+              : `View all ${commentCount}`}
           </button>
         )}
       </div>
 
-      {/* COMMENT INPUT */}
+      {/* INPUT */}
       <div className="flex items-start gap-2 sm:gap-3 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-gray-900 p-2 sm:p-4 overflow-hidden">
-
         <img
-          src={getProfileImage(currentUser?.profilePic)}
-          alt={currentUser?.firstName || "User"}
-          loading="eager"
-          fetchPriority="high"
+          src={getProfileImage(
+            currentUser?.profilePic
+          )}
+          alt={
+            currentUser?.firstName || "User"
+          }
           className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0"
           onError={(event) => {
             event.target.src = userimg;
@@ -207,11 +380,12 @@ const CommentsSection = ({
         />
 
         <div className="flex-1 min-w-0 flex items-center gap-2 rounded-full border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-gray-800 px-3 sm:px-4 py-2 sm:py-3">
-
           <input
             ref={inputRef}
             value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
+            onChange={(e) =>
+              setCommentText(e.target.value)
+            }
             placeholder={
               currentUser
                 ? "Write a comment..."
@@ -229,67 +403,98 @@ const CommentsSection = ({
 
           <button
             onClick={handleAddComment}
-            disabled={!currentUser || !commentText.trim()}
+            disabled={
+              !currentUser ||
+              !commentText.trim()
+            }
             className="flex-shrink-0 rounded-full p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <FiSend size={16} className="sm:w-[18px] sm:h-[18px]" />
+            <FiSend
+              size={16}
+              className="sm:w-[18px] sm:h-[18px]"
+            />
           </button>
-
         </div>
       </div>
 
       {/* COMMENTS */}
       {loading ? (
-        <Skeleton type="comment" count={showCount} />
+        <Skeleton
+          type="comment"
+          count={showCount}
+        />
       ) : commentCount === 0 ? (
         <div className="rounded-2xl sm:rounded-3xl border border-dashed border-gray-200 dark:border-slate-700 bg-white dark:bg-gray-900 p-5 sm:p-8 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-          No comments yet. Be the first to add one.
+          No comments yet. Be the first to
+          add one.
         </div>
       ) : (
         <div className="space-y-3 sm:space-y-4">
-
           {visibleComments.map((comment) => {
-            const isOwner = currentUser?._id === comment.user?._id;
+            const isOwner =
+              currentUser?._id ===
+              comment.user?._id;
+
+            const isLiked = Array.isArray(comment?.likes)
+              ? comment.likes.some(
+                (id) =>
+                  String(id) ===
+                  String(currentUser?._id)
+              )
+              : false;
 
             return (
               <div
                 key={comment._id}
                 className="flex gap-2 sm:gap-3 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-gray-900 p-3 sm:p-4 overflow-hidden"
               >
-
                 <img
-                  src={getProfileImage(comment.user?.profilePic)}
-                  alt={comment.user?.firstName || "Avatar"}
-                  loading="eager"
-                  fetchPriority="high"
+                  src={getProfileImage(
+                    comment.user?.profilePic
+                  )}
+                  alt={
+                    comment.user?.firstName ||
+                    "Avatar"
+                  }
                   className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0"
                   onError={(event) => {
-                    event.target.src = userimg;
+                    event.target.src =
+                      userimg;
                   }}
                 />
 
                 <div className="flex-1 min-w-0 space-y-2 sm:space-y-3">
-
                   {/* TOP */}
                   <div className="flex items-start justify-between gap-2">
-
                     <div className="min-w-0">
                       <p className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white truncate">
-                        {comment.user?.firstName} {comment.user?.lastName}
+                        {
+                          comment.user
+                            ?.firstName
+                        }{" "}
+                        {
+                          comment.user
+                            ?.lastName
+                        }
                       </p>
 
                       <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
-                        {formatDate(comment.createdAt)}
+                        {formatDate(
+                          comment.createdAt
+                        )}
                       </p>
                     </div>
 
                     {isOwner && (
                       <div className="relative flex-shrink-0">
-
                         <button
                           onClick={() =>
-                            setActiveMenuId((prev) =>
-                              prev === comment._id ? null : comment._id
+                            setActiveMenuId(
+                              (prev) =>
+                                prev ===
+                                  comment._id
+                                  ? null
+                                  : comment._id
                             )
                           }
                           className="rounded-full p-1.5 sm:p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800"
@@ -297,48 +502,63 @@ const CommentsSection = ({
                           <FaEllipsisV className="text-xs sm:text-sm" />
                         </button>
 
-                        {activeMenuId === comment._id && (
-                        <div className="absolute right-0 top-8 sm:top-10 w-28 sm:w-32 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-md z-20 overflow-hidden">
-  
-  <button
-    onClick={() => {
-      setEditingCommentId(comment._id);
-      setEditingText(comment.text);
-      setActiveMenuId(null);
-    }}
-    className="w-full text-left px-3 py-1.5 sm:py-2 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-  >
-    Edit
-  </button>
+                        {activeMenuId ===
+                          comment._id && (
+                            <div className="absolute right-0 top-8 sm:top-10 w-28 sm:w-32 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-md z-20 overflow-hidden">
+                              <button
+                                onClick={() => {
+                                  setEditingCommentId(
+                                    comment._id
+                                  );
 
-  <button
-    onClick={() => handleDeleteComment(comment._id)}
-    className="w-full text-left px-3 py-1.5 sm:py-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-  >
-    Delete
-  </button>
-</div>
-                        )}
+                                  setEditingText(
+                                    comment.text
+                                  );
+
+                                  setActiveMenuId(
+                                    null
+                                  );
+                                }}
+                                className="w-full text-left px-3 py-1.5 sm:py-2 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                              >
+                                Edit
+                              </button>
+
+                              <button
+                                onClick={() =>
+                                  handleDeleteComment(
+                                    comment._id
+                                  )
+                                }
+                                className="w-full text-left px-3 py-1.5 sm:py-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
                       </div>
                     )}
                   </div>
 
                   {/* EDIT */}
-                  {editingCommentId === comment._id ? (
+                  {editingCommentId ===
+                    comment._id ? (
                     <div className="space-y-2">
-
                       <input
                         value={editingText}
                         onChange={(e) =>
-                          setEditingText(e.target.value)
+                          setEditingText(
+                            e.target.value
+                          )
                         }
                         className="w-full rounded-2xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-900 dark:text-gray-100"
                       />
 
                       <div className="flex gap-2 flex-wrap">
-
                         <button
-                          onClick={handleEditComment}
+                          onClick={
+                            handleEditComment
+                          }
                           className="rounded-full bg-blue-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-white hover:bg-blue-700"
                         >
                           Save
@@ -346,14 +566,16 @@ const CommentsSection = ({
 
                         <button
                           onClick={() => {
-                            setEditingCommentId(null);
+                            setEditingCommentId(
+                              null
+                            );
+
                             setEditingText("");
                           }}
                           className="rounded-full border border-gray-200 dark:border-slate-700 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-800"
                         >
                           Cancel
                         </button>
-
                       </div>
                     </div>
                   ) : (
@@ -364,19 +586,26 @@ const CommentsSection = ({
 
                   {/* LIKE */}
                   <div className="flex items-center gap-3 sm:gap-4 text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">
+                    <button
+                      onClick={() =>
+                        handleLikeComment(
+                          comment._id
+                        )
+                      }
+                      className="flex items-center gap-1"
+                    >
+                      {isLiked ? (
+                        <FaHeart className="text-xs text-red-500" />
+                      ) : (
+                        <FaRegHeart className="text-xs" />
+                      )}
 
-                    <button className="flex items-center gap-1">
-                      <FaRegHeart className="text-xs" />
-                      <span>{comment.likes || 0}</span>
+                      <span>
+                        {comment.likes
+                          ?.length || 0}
+                      </span>
                     </button>
-
-                    <button className="flex items-center gap-1 text-blue-600 hover:text-blue-500">
-                      <FaHeart className="text-xs" />
-                      <span>Like</span>
-                    </button>
-
                   </div>
-
                 </div>
               </div>
             );

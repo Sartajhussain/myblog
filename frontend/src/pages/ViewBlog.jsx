@@ -1,9 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  useParams,
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  useSelector,
+} from "react-redux";
+
 import axios from "axios";
+
 import toast from "react-hot-toast";
+
 import { API_BASE_URL } from "../utils/api";
+
 import { getProfileImage } from "../utils/profileImage";
 
 import {
@@ -14,9 +28,13 @@ import {
   FaRegBookmark,
 } from "react-icons/fa";
 
-import { IoShareOutline } from "react-icons/io5";
+import {
+  IoShareOutline,
+  IoArrowBack,
+} from "react-icons/io5";
 
 import Skeleton from "../components/Skeleton";
+
 import CommentsSection from "../components/CommentsSection";
 
 import userimg from "../assets/userprofile.png";
@@ -25,7 +43,11 @@ import userimg from "../assets/userprofile.png";
    IMAGE HELPER
 ======================= */
 const getBlogImage = (thumbnail) => {
-  if (!thumbnail || thumbnail === "null" || thumbnail === "undefined") {
+  if (
+    !thumbnail ||
+    thumbnail === "null" ||
+    thumbnail === "undefined"
+  ) {
     return userimg;
   }
 
@@ -37,97 +59,84 @@ const getBlogImage = (thumbnail) => {
 };
 
 const ViewBlog = ({ blog }) => {
+
+  const navigate = useNavigate();
+
   const { blogId } = useParams();
 
-  const { blog: blogState } = useSelector((store) => store.blog);
-  const { user } = useSelector((store) => store.auth);
+  // ✅ REDUX
+  const {
+    blog: allBlogs = [],
+    publicBlogs = [],
+    myBlogs = [],
+  } = useSelector((store) => store.blog);
 
-  const [selectedBlog, setSelectedBlog] = useState(null);
+  const { user } = useSelector(
+    (store) => store.auth
+  );
 
-  const [loading, setLoading] = useState(true);
+  const [selectedBlog, setSelectedBlog] =
+    useState(null);
 
-  const [liked, setLiked] = useState(false);
+  const [loading, setLoading] =
+    useState(true);
 
-  /* ✅ FIXED */
-  const [likeCount, setLikeCount] = useState(0);
+  const [liked, setLiked] =
+    useState(false);
 
-  const [saved, setSaved] = useState(false);
+  const [likeCount, setLikeCount] =
+    useState(0);
 
-  /* COMMENT COUNT */
-  const [commentCount, setCommentCount] = useState(0);
+  const [saved, setSaved] =
+    useState(false);
 
-  /* =======================
-     FETCH BLOG
-  ======================= */
-  const fetchBlog = async () => {
-    try {
-      setLoading(true);
-
-      /* REDUX BLOG */
-      const existingBlog =
-        blog ||
-        blogState?.find((b) => b._id === blogId);
-
-      if (existingBlog) {
-        setSelectedBlog(existingBlog);
-
-        setLiked(
-          existingBlog?.likes?.includes(user?._id) || false
-        );
-
-        /* ✅ FIXED */
-        setLikeCount(
-          Number(existingBlog?.likes?.length) || 0
-        );
-
-        setLoading(false);
-      }
-
-      /* FRESH BLOG */
-      const { data } = await axios.get(
-        `${API_BASE_URL}/api/v1/blog/${blogId}`,
-        {
-          withCredentials: true,
-        }
-      );
-
-      if (data.success) {
-        setSelectedBlog(data.blog);
-
-        setLiked(
-          data.blog?.likes?.includes(user?._id) || false
-        );
-
-        /* ✅ FIXED */
-        setLikeCount(
-          Number(data.blog?.likes?.length) || 0
-        );
-      }
-
-    } catch (error) {
-      console.log(error);
-      toast.error("Failed to load blog");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [commentCount, setCommentCount] =
+    useState(0);
 
   /* =======================
-     BLOG CHANGE
+     GET BLOG FROM REDUX
   ======================= */
   useEffect(() => {
-    if (blogId) {
-      fetchBlog();
+    setLoading(true);
 
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
+    const allReduxBlogs = [
+      ...allBlogs,
+      ...publicBlogs,
+      ...myBlogs,
+    ];
+
+    const existingBlog =
+      blog ||
+      allReduxBlogs.find(
+        (b) => b._id === blogId
+      );
+
+    if (existingBlog) {
+      setSelectedBlog(existingBlog);
+
+      setLiked(
+        existingBlog?.likes?.includes(
+          user?._id
+        ) || false
+      );
+
+      setLikeCount(
+        Number(
+          existingBlog?.likes?.length
+        ) || 0
+      );
     }
-  }, [blogId]);
+
+    setLoading(false);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [blogId, blog]);
 
   /* =======================
-     FETCH COMMENTS
+     FETCH COMMENTS COUNT
   ======================= */
   useEffect(() => {
     const fetchComments = async () => {
@@ -143,12 +152,14 @@ const ViewBlog = ({ blog }) => {
 
         if (res.data.success) {
           setCommentCount(
-            Number(res.data.comments?.length) || 0
+            Number(
+              res.data.comments?.length
+            ) || 0
           );
         }
-
       } catch (error) {
         console.log(error);
+
         setCommentCount(0);
       }
     };
@@ -160,6 +171,7 @@ const ViewBlog = ({ blog }) => {
      LIKE BLOG
   ======================= */
   const handleLike = async () => {
+
     if (!user) {
       toast.error("Please login to like blogs");
       return;
@@ -176,25 +188,27 @@ const ViewBlog = ({ blog }) => {
 
       if (data.success) {
 
-        /* ✅ ICON */
         setLiked(data.liked);
 
-        /* ✅ COUNT */
-        setLikeCount(Number(data.likes) || 0);
+        setLikeCount(
+          Array.isArray(data.likes)
+            ? data.likes.length
+            : 0
+        );
 
-        /* ✅ UPDATE BLOG STATE */
         setSelectedBlog((prev) => {
           if (!prev) return prev;
 
           return {
             ...prev,
-            likes: Array(Number(data.likes) || 0).fill("liked"),
+            likes: data.likes || [],
           };
         });
       }
 
     } catch (error) {
       console.log(error);
+
       toast.error("Failed to like blog");
     }
   };
@@ -204,12 +218,16 @@ const ViewBlog = ({ blog }) => {
   ======================= */
   const handleShare = async () => {
     try {
+
       if (navigator.share) {
+
         await navigator.share({
           title: selectedBlog.title,
           url: window.location.href,
         });
+
       } else {
+
         await navigator.clipboard.writeText(
           window.location.href
         );
@@ -247,6 +265,16 @@ const ViewBlog = ({ blog }) => {
 
       <div className="w-full max-w-6xl mt-14 py-10 px-4 md:px-10 space-y-10">
 
+        {/* BACK BUTTON */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-sm md:text-base font-medium text-gray-700 dark:text-gray-200 hover:text-black dark:hover:text-white transition mb-2 md:mb-4"
+        >
+          <IoArrowBack className="text-xl" />
+
+          
+        </button>
+
         {/* TITLE */}
         <h1 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
           {selectedBlog.title}
@@ -277,18 +305,24 @@ const ViewBlog = ({ blog }) => {
             <p>
               {new Date(
                 selectedBlog.createdAt
-              ).toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}{" "}
+              ).toLocaleDateString(
+                "en-IN",
+                {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                }
+              )}{" "}
               •{" "}
               {new Date(
                 selectedBlog.createdAt
-              ).toLocaleTimeString("en-IN", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              ).toLocaleTimeString(
+                "en-IN",
+                {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              )}
             </p>
           </div>
         </div>
@@ -297,7 +331,7 @@ const ViewBlog = ({ blog }) => {
         <img
           src={getBlogImage(
             selectedBlog.thumbnail ||
-              selectedBlog.image
+            selectedBlog.image
           )}
           alt={selectedBlog.title}
           className="w-full h-[300px] md:h-[500px] object-cover rounded-2xl"
@@ -330,18 +364,16 @@ const ViewBlog = ({ blog }) => {
                 <FaRegHeart />
               )}
 
-              {/* ✅ FIXED */}
               <span>{likeCount}</span>
             </button>
 
             {/* COMMENT */}
             <button className="flex items-center gap-1">
-
               <FaRegComment />
 
-              {/* ✅ FIXED */}
-              <span>{commentCount}</span>
-
+              <span>
+                {commentCount}
+              </span>
             </button>
           </div>
 
@@ -366,7 +398,6 @@ const ViewBlog = ({ blog }) => {
                 <FaRegBookmark />
               )}
             </button>
-
           </div>
         </div>
 

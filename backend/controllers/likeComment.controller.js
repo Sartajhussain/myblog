@@ -1,8 +1,7 @@
-import Comment from "../models/comment.model.js";
-
 export const likeComment = async (req, res) => {
   try {
     const { commentId } = req.params;
+
     const userId = req.user._id;
 
     const comment = await Comment.findById(commentId);
@@ -14,7 +13,9 @@ export const likeComment = async (req, res) => {
       });
     }
 
-    const alreadyLiked = comment.likes.includes(userId);
+    const alreadyLiked = comment.likes.some(
+      (id) => String(id) === String(userId)
+    );
 
     if (alreadyLiked) {
       comment.likes.pull(userId);
@@ -24,13 +25,16 @@ export const likeComment = async (req, res) => {
 
     await comment.save();
 
-    res.json({
+    res.status(200).json({
       success: true,
-      likes: comment.likes.length,
-      liked: comment.likes.includes(userId), // 🔥 IMPORTANT FIX
+
+      liked: !alreadyLiked,
+
+      likes: comment.likes, // ✅ FULL ARRAY
     });
 
   } catch (err) {
+
     res.status(500).json({
       success: false,
       message: err.message,

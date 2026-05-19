@@ -1,28 +1,37 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  loading: false,
   blog: [],
-  allBlogs: [],
+  publicBlogs: [],
+  myBlogs: [],
 };
 
 const blogSlice = createSlice({
   name: "blog",
   initialState,
+
   reducers: {
-    setLoading: (state, action) => {
-      state.loading = action.payload ?? false;
-    },
-
+    // ALL BLOGS
     setBlog: (state, action) => {
-      state.blog = Array.isArray(action.payload) ? action.payload : [];
+      state.blog = action.payload;
     },
 
-    setAllBlogs: (state, action) => {
-      state.allBlogs = Array.isArray(action.payload) ? action.payload : [];
+    // PUBLIC BLOGS
+    setPublicBlogs: (state, action) => {
+      state.publicBlogs = action.payload;
+    },
+
+    // MY BLOGS
+    setMyBlogs: (state, action) => {
+      state.myBlogs = action.payload;
     },
   },
 });
 
-export const { setLoading, setBlog, setAllBlogs } = blogSlice.actions;
+export const {
+  setBlog,
+  setPublicBlogs,
+  setMyBlogs,
+} = blogSlice.actions;
+
 export default blogSlice.reducer;

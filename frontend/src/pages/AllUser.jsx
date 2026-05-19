@@ -123,7 +123,7 @@ const AllUser = () => {
             </div>
 
             {/* ✅ MODAL - Now a separate component */}
-            <UserProfileModal 
+            <UserProfileModal
                 isOpen={isModalOpen}
                 user={selectedUser}
                 onClose={() => setIsModalOpen(false)}

@@ -16,7 +16,6 @@ import {
 } from "redux-persist";
 
 import storage from "redux-persist/lib/storage";
-import { comment } from "postcss";
 
 // ===============================
 // Root Reducer
@@ -25,7 +24,7 @@ const rootReducer = combineReducers({
   auth: authSlice,
   theme: themeSlice,
   blog: blogSlice,
-  comment: commentReducer, // ✅ ADD COMMENT REDUCER
+  comment: commentReducer,
 });
 
 // ===============================
@@ -35,12 +34,15 @@ const persistConfig = {
   key: "root",
   version: 1,
   storage,
-
-  // 🔥 IMPORTANT: temporarily disable blog persist if issues
-  blacklist: ["blog"], // remove later if you want persistence for blog
 };
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+// ===============================
+// Persisted Reducer
+// ===============================
+const persistedReducer = persistReducer(
+  persistConfig,
+  rootReducer
+);
 
 // ===============================
 // Store

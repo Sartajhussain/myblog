@@ -2,24 +2,6 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@font-face {
-  font-family: 'Campton';
-  src: url('/fonts/Campton-Light.otf') format('opentype');
-  font-weight: 300;
-}
-
-@font-face {
-  font-family: 'Campton';
-  src: url('/fonts/Campton-Medium.otf') format('opentype');
-  font-weight: 500;
-}
-
-@font-face {
-  font-family: 'Campton';
-  src: url('/fonts/Campton-Bold.otf') format('opentype');
-  font-weight: 700;
-}
-
 body {
   font-family: 'Campton', sans-serif;
 }
