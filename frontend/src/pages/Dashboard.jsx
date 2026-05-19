@@ -12,7 +12,7 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 px-4 md:px-10 py-8 md:py-12">
+      <div className="flex-1 px-4 md:px-10 py-0 md:py-12">
         <Outlet />
       </div>
 

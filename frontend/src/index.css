@@ -5,18 +5,35 @@
 body {
   font-family: 'Campton', sans-serif;
 }
-h1,h2,h3,h4,h5,h6,p,li,a,span,button,input,textarea,label,div,section.article {
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+li,
+a,
+span,
+button,
+input,
+textarea,
+label,
+div,
+section.article {
   font-family: 'Campton', sans-serif;
 }
 
-button{
+button {
   cursor: pointer;
 }
-body{
+
+body {
   margin: 0;
   padding: 0;
-  
 }
+
 /* DARK MODE */
 .dark .jodit-container {
   background: #020817 !important;
@@ -41,6 +58,22 @@ body{
   background: #ffffff;
   color: #000000;
 }
+
+/* JODIT HEIGHT FIX */
+.jodit-container,
+.jodit-workplace,
+.jodit-wysiwyg {
+  min-height: 200px !important;
+}
+
+@media (max-width: 768px) {
+  .jodit-container,
+  .jodit-workplace,
+  .jodit-wysiwyg {
+    min-height: 200px !important;
+  }
+}
+
 @media (max-width: 600px) {
   .sign_up {
     margin-top: 50px;
