@@ -110,7 +110,7 @@ const Home = () => {
   return (
     <>
       {/* HERO SECTION */}
-      <section className="relative mt-5 w-full max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
+      <section className="relative mt-5 w-full max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 z-10">
 
         {/* BG */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-pink-50/20 to-blue-50/30 dark:from-purple-950/20 dark:via-pink-950/10 dark:to-blue-950/20 rounded-3xl -z-10" />
