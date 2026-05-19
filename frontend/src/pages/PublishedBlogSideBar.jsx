@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect,useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../utils/api";
 import { getBlogImage } from "../utils/getBlogImage";
 
 const PublishedBlogSideBar = ({ blogs, setCategoryFilter }) => {
   const navigate = useNavigate();
+  const [activeTag, setActiveTag] = useState("");
 
   const publishedBlogs = blogs?.filter((b) => b.isPublished) || [];
 
@@ -98,8 +99,16 @@ const PublishedBlogSideBar = ({ blogs, setCategoryFilter }) => {
           {categories.slice(1).map((tag, index) => (
             <span
               key={index}
-              onClick={() => setCategoryFilter(tag)}
-              className="text-xs bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full cursor-pointer hover:bg-black hover:text-white transition"
+              onClick={() => {
+                setCategoryFilter(tag);
+                setActiveTag(tag);
+              }}
+              className={`text-xs px-3 py-1 rounded-full cursor-pointer transition
+        ${activeTag === tag
+                  ? "bg-black text-white dark:bg-white dark:text-black"
+                  : "bg-gray-100 dark:bg-gray-700 hover:bg-black hover:text-white"
+                }
+      `}
             >
               {tag}
             </span>

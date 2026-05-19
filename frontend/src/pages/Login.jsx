@@ -30,24 +30,44 @@ const Login = () => {
   // 🔥 LOGIN
   const handleLogin = async (e) => {
     e.preventDefault();
+
     try {
+
       dispatch(setLoading(true));
 
-      const response = await axios.post(
+      const { data } = await axios.post(
         `${API_BASE_URL}/api/v1/user/login`,
-        { email, password },
-        { withCredentials: true }
+        {
+          email,
+          password,
+        },
+        {
+          withCredentials: true,
+        }
       );
 
-      if (response.data.success) {
-        toast.success(`Welcome back, ${response.data.user.firstName}!`);
-        dispatch(setUser(response.data.user));
+      if (data.success) {
+
+        dispatch(setUser(data.user));
+
+        toast.success(
+          `Welcome back, ${data.user.firstName}!`
+        );
+
         navigate("/");
       }
 
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed");
+
+      console.log(error);
+
+      toast.error(
+        error.response?.data?.message ||
+        "Login failed"
+      );
+
     } finally {
+
       dispatch(setLoading(false));
     }
   };
@@ -64,7 +84,7 @@ const Login = () => {
     try {
       dispatch(setLoading(true));
 
-     
+
 
       const res = await axios.post(
         `${API_BASE_URL}/api/v1/user/forgot-password`,
@@ -75,7 +95,7 @@ const Login = () => {
         }
       );
 
-   
+
 
       if (res.data.success) {
         toast.success("Verification code sent!");
@@ -144,9 +164,11 @@ const Login = () => {
       dispatch(setLoading(false));
     }
   };
-
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
   return (
-    <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200 flex flex-col md:flex-row min-h-[100dvh]">
+    <div className="bg-gray-100 pt-12 md:pt-0 dark:bg-gray-900 text-gray-900 dark:text-gray-200 flex flex-col md:flex-row min-h-[100dvh]">
 
       {/* LEFT IMAGE */}
       <div className="hidden md:flex md:w-1/2 items-center justify-center bg-gray-200 dark:bg-gray-800">

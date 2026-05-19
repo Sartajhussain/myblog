@@ -164,21 +164,27 @@ export const login = async (req, res) => {
 
 export const logout = async (_, res) => {
   try {
-    res.status(200)
-      .cookie("token", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "None",
-        path: "/",
-        expires: new Date(0),
-      })
-      .json({
-        success: true,
-        message: "Logged out successfully",
-      });
+
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite:
+        process.env.NODE_ENV === "production"
+          ? "None"
+          : "Lax",
+      path: "/",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+
   } catch (error) {
+
     console.log("Logout Error:", error);
-    res.status(500).json({
+
+    return res.status(500).json({
       success: false,
       message: "Logout failed",
     });

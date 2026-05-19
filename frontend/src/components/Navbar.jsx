@@ -35,24 +35,40 @@ const Navbar = () => {
     navigate(`/view-blog/${id}`);
   };
 
-  const Logout = async () => {
-    try {
-      const res = await axios.post(
-        `${API_BASE_URL}/api/v1/user/logout`,
-        {},
-        { withCredentials: true }
-      );
-      if (res.data.success) {
-        dispatch(logoutUser());
-        navigate("/");
-        toast.success("Logged out successfully");
-      }
-    } catch (error) {
-      console.log("Logout Error:", error);
-      toast.error(error?.response?.data?.message || "Error logging out");
-    }
-  };
+ const Logout = async () => {
+  try {
 
+    const { data } = await axios.post(
+      `${API_BASE_URL}/api/v1/user/logout`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+
+    if (data.success) {
+
+      dispatch(logoutUser());
+
+      localStorage.clear();
+
+      sessionStorage.clear();
+
+      toast.success(data.message);
+
+      navigate("/login");
+    }
+
+  } catch (error) {
+
+    console.log(error);
+
+    toast.error(
+      error.response?.data?.message ||
+      "Logout failed"
+    );
+  }
+};
   return (
     <>
       {/* Navbar */}

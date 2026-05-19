@@ -263,12 +263,12 @@ const ViewBlog = ({ blog }) => {
   return (
     <div className="flex justify-center bg-gray-50 dark:bg-gray-900 min-h-screen">
 
-      <div className="w-full max-w-6xl mt-14 py-10 px-4 md:px-10 space-y-10">
+      <div className="w-full max-w-6xl mt-8 py-10 px-4 md:px-10 space-y-10">
 
         {/* BACK BUTTON */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-sm md:text-base font-medium text-gray-700 dark:text-gray-200 hover:text-black dark:hover:text-white transition mb-2 md:mb-4"
+          className="flex items-center gap-2 mb-6 text-sm md:text-base font-medium text-gray-700 dark:text-gray-200 hover:text-black dark:hover:text-white transition mb-2 md:mb-4"
         >
           <IoArrowBack className="text-xl" />
 
