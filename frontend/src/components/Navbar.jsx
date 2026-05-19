@@ -39,9 +39,7 @@ const Navbar = () => {
 
   const dispatch = useDispatch();
 
-  const { blog } = useSelector(
-    (store) => store.blog
-  );
+  const { publicBlogs } = useSelector((store) => store.blog);
 
   const { user } = useSelector(
     (store) => store.auth
@@ -62,16 +60,14 @@ const Navbar = () => {
     location.pathname === path;
 
   /* SEARCH FILTER */
-  const searchResults =
-    search.trim() === ""
-      ? []
-      : blog?.filter((b) =>
-          b.title
-            ?.toLowerCase()
-            .includes(
-              search.toLowerCase()
-            )
-        );
+ const searchResults =
+  search.trim() === ""
+    ? []
+    : publicBlogs?.filter((b) =>
+        b.title
+          ?.toLowerCase()
+          .includes(search.toLowerCase())
+      );
 
   /* OPEN BLOG */
   const handleClick = (id) => {
