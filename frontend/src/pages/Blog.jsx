@@ -26,29 +26,42 @@ const Blog = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+  const refreshMyBlogs = async () => {
+    try {
+      const { data } = await axios.get(
+        `${API_BASE_URL}/api/v1/blog/my-blogs`,
+        { withCredentials: true }
+      );
+
+      if (data?.success) {
+        dispatch(setMyBlogs(data.blogs || []));
+      }
+
+    } catch (err) {
+      console.log("refresh error", err);
+    }
+  };
 
   // ✅ FETCH BLOGS WITH CACHE
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        // ✅ CACHE CHECK
-        if (myBlogs.length > 0) {
-          setLoading(false);
-          return;
-        }
-
         setLoading(true);
 
         const { data } = await axios.get(
           `${API_BASE_URL}/api/v1/blog/my-blogs`,
           {
             withCredentials: true,
+            headers: {
+              "Cache-Control": "no-cache",
+            },
           }
         );
 
         if (data?.success) {
           dispatch(setMyBlogs(data.blogs || []));
         }
+
       } catch (error) {
         console.log(error);
         toast.error("Failed to load blogs");
@@ -78,12 +91,7 @@ const Blog = () => {
 
   // ✅ DELETE BLOG
   const deleteBlog = async (blogId) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this blog?"
-      )
-    )
-      return;
+    if (!window.confirm("Are you sure you want to delete this blog?")) return;
 
     try {
       const { data } = await axios.delete(
@@ -92,18 +100,22 @@ const Blog = () => {
       );
 
       if (data.success) {
+
+        // ✅ instant UI update (optimistic update)
         dispatch(
           setMyBlogs(
-            myBlogs.filter(
-              (b) => b._id !== blogId
-            )
+            myBlogs.filter((b) => b._id !== blogId)
           )
         );
 
-        toast.success(
-          "Blog deleted successfully"
-        );
+        toast.success("Blog deleted successfully");
+
+        // 🔥 FORCE SYNC WITH SERVER (important fix)
+        setTimeout(() => {
+          refreshMyBlogs();
+        }, 300);
       }
+
     } catch (error) {
       console.log(error);
       toast.error("Failed to delete blog");
@@ -125,10 +137,10 @@ const Blog = () => {
             myBlogs.map((b) =>
               b._id === blogId
                 ? {
-                    ...b,
-                    isPublished:
-                      data.blog.isPublished,
-                  }
+                  ...b,
+                  isPublished:
+                    data.blog.isPublished,
+                }
                 : b
             )
           )
@@ -304,8 +316,8 @@ const Blog = () => {
                             className="w-10 h-10 object-cover rounded-md"
                             src={getBlogImageUrl(
                               b?.thumbnail ||
-                                b?.image ||
-                                b?.coverImage
+                              b?.image ||
+                              b?.coverImage
                             )}
                             alt={b.title}
                             onError={(e) => {
@@ -335,11 +347,10 @@ const Blog = () => {
                       {/* STATUS */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            b.isPublished
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${b.isPublished
                               ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
                               : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
-                          }`}
+                            }`}
                         >
                           {b.isPublished
                             ? "Published"
@@ -385,11 +396,10 @@ const Blog = () => {
                                 b._id
                               )
                             }
-                            className={`transition-colors duration-200 ${
-                              b.isPublished
+                            className={`transition-colors duration-200 ${b.isPublished
                                 ? "text-yellow-600 hover:text-yellow-900 dark:text-yellow-500 dark:hover:text-yellow-400"
                                 : "text-green-600 hover:text-green-900 dark:text-green-500 dark:hover:text-green-400"
-                            }`}
+                              }`}
                           >
                             {b.isPublished
                               ? "Unpublish"
@@ -426,8 +436,8 @@ const Blog = () => {
                   <img
                     src={getBlogImageUrl(
                       b?.thumbnail ||
-                        b?.image ||
-                        b?.coverImage
+                      b?.image ||
+                      b?.coverImage
                     )}
                     alt={b.title}
                     className="w-10 h-10 rounded-md object-cover"
@@ -487,11 +497,10 @@ const Blog = () => {
                     onClick={() =>
                       publishBlog(b._id)
                     }
-                    className={`text-sm transition-colors duration-200 ${
-                      b.isPublished
+                    className={`text-sm transition-colors duration-200 ${b.isPublished
                         ? "text-yellow-600 hover:text-yellow-900 dark:text-yellow-500 dark:hover:text-yellow-400"
                         : "text-green-600 hover:text-green-900 dark:text-green-500 dark:hover:text-green-400"
-                    }`}
+                      }`}
                   >
                     {b.isPublished
                       ? "Unpub"

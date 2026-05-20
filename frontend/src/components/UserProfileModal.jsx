@@ -4,151 +4,157 @@ import {
     FiInstagram,
     FiFacebook,
     FiLinkedin,
-    FiGithub
+    FiGithub,
+    FiBookOpen,
+    FiMessageCircle,
+    FiEye,
+    FiHeart
 } from "react-icons/fi";
 import userimg from "../assets/userprofile.png";
 import { getProfileImage } from "../utils/profileImage";
 import { API_BASE_URL } from "../utils/api";
+import { useNavigate } from "react-router-dom";
 
 const UserProfileModal = ({ isOpen, user, onClose }) => {
-    const [userStats, setUserStats] = useState(null);
+    const navigate = useNavigate();
+    const [userBlogs, setUserBlogs] = useState([]);
+    const [userComments, setUserComments] = useState([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (isOpen && user) {
-            fetchUserStats();
+        if (isOpen && user?._id) {
+            fetchUserData();
         }
-    }, [isOpen, user]);
+    }, [isOpen, user?._id]);
 
-    const fetchUserStats = async () => {
+    const fetchUserData = async () => {
         if (!user?._id) return;
         
         setLoading(true);
         try {
-            console.log("Fetching stats for user:", user._id);
+            console.log("🔍 Fetching data for user:", user._id, user.firstName);
             
-            let totalBlogs = 0;
-            let totalComments = 0;
+            let blogs = [];
+            let comments = [];
             
-            // Try different blog endpoints
-            let blogsRes = null;
-            
-            // Try 1: /api/v1/blog/user/:userId
+            // ✅ FETCH BLOGS
             try {
-                blogsRes = await axios.get(
+                // Try to get user's blogs
+                const blogsRes = await axios.get(
                     `${API_BASE_URL}/api/v1/blog/user/${user._id}`,
                     { withCredentials: true }
                 );
-                console.log("Blogs from /user/:userId:", blogsRes.data);
+                
+                if (blogsRes.data.success) {
+                    blogs = blogsRes.data.blogs || [];
+                    console.log(`✅ Found ${blogs.length} blogs for user`);
+                }
             } catch (err) {
-                console.log("Endpoint /user/:userId failed");
-            }
-            
-            // Try 2: /api/v1/blog/my-blogs (current user only)
-            if (!blogsRes?.data?.success) {
+                console.log("Blog fetch error:", err.response?.status);
+                
+                // If endpoint fails, try alternative
                 try {
-                    blogsRes = await axios.get(
-                        `${API_BASE_URL}/api/v1/blog/my-blogs`,
+                    const allBlogsRes = await axios.get(
+                        `${API_BASE_URL}/api/v1/blog/feed`,
                         { withCredentials: true }
                     );
-                    console.log("Blogs from /my-blogs:", blogsRes.data);
                     
-                    // Filter blogs by author if needed
-                    if (blogsRes.data.success && blogsRes.data.blogs) {
-                        const filteredBlogs = blogsRes.data.blogs.filter(
+                    if (allBlogsRes.data.success) {
+                        blogs = (allBlogsRes.data.blogs || []).filter(
                             blog => blog.author?._id === user._id || blog.author === user._id
                         );
-                        totalBlogs = filteredBlogs.length;
-                        blogsRes.data.blogs = filteredBlogs;
+                        console.log(`✅ Found ${blogs.length} blogs from feed for user`);
                     }
-                } catch (err) {
-                    console.log("Endpoint /my-blogs failed");
+                } catch (err2) {
+                    console.log("Alternative blog fetch also failed");
                 }
             }
             
-            // Try 3: /api/v1/blog/author/:userId
-            if (!blogsRes?.data?.success) {
-                try {
-                    blogsRes = await axios.get(
-                        `${API_BASE_URL}/api/v1/blog/author/${user._id}`,
-                        { withCredentials: true }
-                    );
-                    console.log("Blogs from /author/:userId:", blogsRes.data);
-                } catch (err) {
-                    console.log("Endpoint /author/:userId failed");
-                }
-            }
+            setUserBlogs(blogs);
             
-            if (blogsRes?.data?.success) {
-                totalBlogs = blogsRes.data.blogs?.length || 0;
+            // ✅ FETCH COMMENTS
+            try {
+                // Try to get user's comments
+                const commentsRes = await axios.get(
+                    `${API_BASE_URL}/api/v1/comment/user/${user._id}`,
+                    { withCredentials: true }
+                );
                 
-                // Fetch comments for each blog
-                const blogs = blogsRes.data.blogs || [];
-                for (const blog of blogs) {
-                    try {
-                        // Try different comment endpoints
-                        let commentsRes = null;
-                        
-                        // Try 1: /api/v1/comment/blog/:blogId
+                if (commentsRes.data.success) {
+                    comments = commentsRes.data.comments || [];
+                    console.log(`✅ Found ${comments.length} comments for user`);
+                }
+            } catch (err) {
+                console.log("Comment fetch error:", err.response?.status);
+                
+                // If endpoint fails, fetch comments from blogs
+                try {
+                    const allComments = [];
+                    for (const blog of blogs) {
                         try {
-                            commentsRes = await axios.get(
+                            const blogCommentsRes = await axios.get(
                                 `${API_BASE_URL}/api/v1/comment/blog/${blog._id}`,
                                 { withCredentials: true }
                             );
-                        } catch (err) {
-                            console.log(`Comment endpoint /blog/${blog._id} failed`);
-                        }
-                        
-                        // Try 2: /api/v1/comment/my-comments (current user)
-                        if (!commentsRes?.data?.success) {
-                            try {
-                                commentsRes = await axios.get(
-                                    `${API_BASE_URL}/api/v1/comment/my-comments`,
-                                    { withCredentials: true }
+                            
+                            if (blogCommentsRes.data.success) {
+                                const blogComments = (blogCommentsRes.data.comments || []).filter(
+                                    comment => comment.user?._id === user._id || comment.user === user._id
                                 );
-                                if (commentsRes.data.success) {
-                                    const userComments = commentsRes.data.comments.filter(
-                                        comment => comment.blog === blog._id
-                                    );
-                                    totalComments += userComments.length;
-                                }
-                            } catch (err) {
-                                console.log("Endpoint /my-comments failed");
+                                allComments.push(...blogComments);
                             }
+                        } catch (err2) {
+                            console.log(`Error fetching comments for blog ${blog._id}`);
                         }
-                        
-                        if (commentsRes?.data?.success && commentsRes.data.comments) {
-                            totalComments += commentsRes.data.comments?.length || 0;
-                        }
-                    } catch (err) {
-                        console.log(`Error fetching comments for blog ${blog._id}`);
                     }
+                    comments = allComments;
+                    console.log(`✅ Found ${comments.length} comments from blogs for user`);
+                } catch (err2) {
+                    console.log("Alternative comment fetch failed");
                 }
             }
             
-            console.log("Final totals - Blogs:", totalBlogs, "Comments:", totalComments);
-            
-            setUserStats({
-                totalBlogs: totalBlogs,
-                totalComments: totalComments,
-                totalViews: user.totalViews || 0,
-                likes: user.likes || 0
-            });
+            setUserComments(comments);
             
         } catch (error) {
-            console.error("Error fetching user stats:", error);
-            setUserStats({
-                totalBlogs: 0,
-                totalComments: 0,
-                totalViews: user.totalViews || 0,
-                likes: user.likes || 0
-            });
+            console.error("❌ Error fetching user data:", error);
         } finally {
             setLoading(false);
         }
     };
 
+    const getBlogImage = (blog) => {
+        const imagePath = blog?.thumbnail || blog?.image || blog?.coverImage;
+        if (!imagePath || imagePath === "null" || imagePath === "undefined") {
+            return "https://placehold.co/400x200/6366f1/white?text=No+Image";
+        }
+        if (imagePath.startsWith("http")) {
+            return imagePath;
+        }
+        if (imagePath.startsWith("/uploads")) {
+            return `${API_BASE_URL}${imagePath}`;
+        }
+        return `${API_BASE_URL}/${imagePath}`;
+    };
+
+    const formatDate = (date) => {
+        if (!date) return "";
+        return new Date(date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+        });
+    };
+
+    const handleViewBlog = (blogId) => {
+        onClose();
+        navigate(`/view-blog/${blogId}`);
+    };
+
     if (!isOpen || !user) return null;
+
+    const totalViews = userBlogs.reduce((sum, blog) => sum + (blog.views?.length || 0), 0);
+    const totalLikes = userBlogs.reduce((sum, blog) => sum + (blog.likes?.length || 0), 0);
 
     return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-3 overflow-y-auto">
@@ -221,35 +227,106 @@ const UserProfileModal = ({ isOpen, user, onClose }) => {
                             {user.bio || "No bio available"}
                         </p>
 
+                        {/* STATS CARDS */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-6 md:mt-8">
                             <div className="p-3 md:p-4 bg-gray-100 dark:bg-gray-700 rounded-xl text-center transition hover:scale-105">
                                 <h3 className="font-bold text-sm md:text-base text-gray-900 dark:text-white">
-                                    {loading ? "..." : (userStats?.totalViews || 0)}
+                                    {loading ? "..." : totalViews}
                                 </h3>
-                                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300">Views</p>
+                                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 flex items-center justify-center gap-1">
+                                    <FiEye className="w-3 h-3" /> Views
+                                </p>
                             </div>
 
                             <div className="p-3 md:p-4 bg-gray-100 dark:bg-gray-700 rounded-xl text-center transition hover:scale-105">
                                 <h3 className="font-bold text-sm md:text-base text-gray-900 dark:text-white">
-                                    {loading ? "..." : (userStats?.totalBlogs || 0)}
+                                    {loading ? "..." : userBlogs.length}
                                 </h3>
-                                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300">Blogs</p>
+                                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 flex items-center justify-center gap-1">
+                                    <FiBookOpen className="w-3 h-3" /> Blogs
+                                </p>
                             </div>
 
                             <div className="p-3 md:p-4 bg-gray-100 dark:bg-gray-700 rounded-xl text-center transition hover:scale-105">
                                 <h3 className="font-bold text-sm md:text-base text-gray-900 dark:text-white">
-                                    {loading ? "..." : (userStats?.totalComments || 0)}
+                                    {loading ? "..." : userComments.length}
                                 </h3>
-                                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300">Comments</p>
+                                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 flex items-center justify-center gap-1">
+                                    <FiMessageCircle className="w-3 h-3" /> Comments
+                                </p>
                             </div>
 
                             <div className="p-3 md:p-4 bg-gray-100 dark:bg-gray-700 rounded-xl text-center transition hover:scale-105">
                                 <h3 className="font-bold text-sm md:text-base text-gray-900 dark:text-white">
-                                    {userStats?.likes || 0}
+                                    {totalLikes}
                                 </h3>
-                                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300">Likes</p>
+                                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 flex items-center justify-center gap-1">
+                                    <FiHeart className="w-3 h-3" /> Likes
+                                </p>
                             </div>
                         </div>
+
+                        {/* BLOGS SECTION */}
+                        {!loading && userBlogs.length > 0 && (
+                            <div className="mt-6">
+                                <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                    <FiBookOpen className="w-4 h-4" />
+                                    Recent Blogs
+                                </h3>
+                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                    {userBlogs.slice(0, 5).map((blog) => (
+                                        <div
+                                            key={blog._id}
+                                            onClick={() => handleViewBlog(blog._id)}
+                                            className="flex gap-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                                        >
+                                            <img
+                                                src={getBlogImage(blog)}
+                                                alt={blog.title}
+                                                className="w-12 h-12 rounded object-cover"
+                                                onError={(e) => {
+                                                    e.target.src = "https://placehold.co/400x200/6366f1/white?text=No+Image";
+                                                }}
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                    {blog.title}
+                                                </p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                    {formatDate(blog.createdAt)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* COMMENTS SECTION */}
+                        {!loading && userComments.length > 0 && (
+                            <div className="mt-6">
+                                <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                    <FiMessageCircle className="w-4 h-4" />
+                                    Recent Comments
+                                </h3>
+                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                    {userComments.slice(0, 5).map((comment) => (
+                                        <div
+                                            key={comment._id}
+                                            onClick={() => comment.blog?._id && handleViewBlog(comment.blog._id)}
+                                            className="p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                                        >
+                                            <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-2">
+                                                "{comment.text}"
+                                            </p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                on: {comment.blog?.title || "Deleted Blog"} • {formatDate(comment.createdAt)}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

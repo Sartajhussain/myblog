@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FiHome, FiBookOpen, FiInfo, FiUser, FiLogOut, FiEdit, FiMessageSquare, FiFileText } from "react-icons/fi";
+import { FiHome, FiBookOpen, FiInfo, FiUser, FiLogOut, FiEdit, FiMessageSquare, FiFileText, FiTrash2 } from "react-icons/fi";
 import { Moon, Sun, ChevronDown } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -15,6 +15,9 @@ import { getProfileImage } from "../utils/profileImage";
 import userimg from "../assets/userprofile.png";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleTheme } from "../redux/themeSlice";
+import axios from "axios";
+import { API_BASE_URL } from "../utils/api";
+import toast from "react-hot-toast";
 
 const DesktopMenu = ({ user, Logout, navigate }) => {
   const dispatch = useDispatch();
@@ -23,6 +26,54 @@ const DesktopMenu = ({ user, Logout, navigate }) => {
 
   const handleThemeToggle = () => {
     dispatch(toggleTheme());
+  };
+
+  // ✅ DELETE ACCOUNT FUNCTION
+  const deleteAccountPermanently = async () => {
+    const confirmDelete = window.confirm(
+      "⚠️ WARNING: This action is PERMANENT and IRREVERSIBLE!\n\n" +
+      "Your account along with all your blogs, comments, and likes will be deleted forever.\n\n" +
+      "Are you absolutely sure you want to delete your account?"
+    );
+
+    if (!confirmDelete) return;
+
+    // Second confirmation for safety
+    const secondConfirm = window.confirm(
+      "Please confirm again: Type 'DELETE' in the prompt below to permanently delete your account."
+    );
+    
+    if (!secondConfirm) return;
+    
+    const userInput = prompt('Type "DELETE" to confirm account deletion:');
+    
+    if (userInput !== "DELETE") {
+      toast.error("Account deletion cancelled. 'DELETE' was not typed correctly.");
+      return;
+    }
+
+    try {
+      const { data } = await axios.delete(
+        `${API_BASE_URL}/api/v1/user/delete-account`,
+        { withCredentials: true }
+      );
+
+      if (data.success) {
+        toast.success("Account deleted permanently");
+        // Clear local storage and redirect to home
+        localStorage.clear();
+        sessionStorage.clear();
+        // Call logout to clear Redux state
+        await Logout();
+        // Redirect to home page
+        navigate("/");
+        // Reload to clear all state
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Delete account error:", error);
+      toast.error(error.response?.data?.message || "Failed to delete account");
+    }
   };
 
   return (
@@ -48,12 +99,12 @@ const DesktopMenu = ({ user, Logout, navigate }) => {
       <NavLink to="/blog-feed" icon={<FiBookOpen />} label="Feed" />
       <NavLink to="/about" icon={<FiInfo />} label="About" />
 
-      {/* Theme Toggle - Fixed */}
+      {/* Theme Toggle */}
       <ThemeToggle theme={theme} toggleTheme={handleThemeToggle} />
 
       {/* Auth Section */}
       {user ? (
-        <UserDropdown user={user} profileImage={profileImage} navigate={navigate} Logout={Logout} />
+        <UserDropdown user={user} profileImage={profileImage} navigate={navigate} Logout={Logout} deleteAccountPermanently={deleteAccountPermanently} />
       ) : (
         <AuthButtons />
       )}
@@ -73,7 +124,7 @@ const NavLink = ({ to, icon, label }) => (
   </Link>
 );
 
-// Theme Toggle Component - Fixed
+// Theme Toggle Component
 const ThemeToggle = ({ theme, toggleTheme }) => (
   <div className="relative group">
     <button
@@ -94,8 +145,8 @@ const ThemeToggle = ({ theme, toggleTheme }) => (
   </div>
 );
 
-// User Dropdown Component
-const UserDropdown = ({ user, profileImage, navigate, Logout }) => (
+// User Dropdown Component with Delete Account
+const UserDropdown = ({ user, profileImage, navigate, Logout, deleteAccountPermanently }) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button variant="ghost" className="group flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
@@ -165,12 +216,22 @@ const UserDropdown = ({ user, profileImage, navigate, Logout }) => (
 
       <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
 
+      {/* LOGOUT BUTTON */}
       <DropdownMenuItem
         className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-all duration-200"
         onClick={Logout}
       >
         <FiLogOut className="w-4 h-4" />
         <span>Log out</span>
+      </DropdownMenuItem>
+
+      {/* DELETE ACCOUNT PERMANENTLY - New Option */}
+      <DropdownMenuItem
+        className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-all duration-200 border-t border-red-200 dark:border-red-800 mt-1"
+        onClick={deleteAccountPermanently}
+      >
+        <FiTrash2 className="w-4 h-4" />
+        <span>Delete Account Permanently</span>
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
