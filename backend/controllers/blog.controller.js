@@ -1,4 +1,7 @@
 import { Blog } from "../models/blog.model.js";
+
+import cloudinary from "../utils/cloudinary.js";
+import streamifier from "streamifier";
 import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
@@ -8,6 +11,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* ================= CREATE / UPDATE BLOG ================= */
+
+
 export const createBlog = async (req, res) => {
   try {
     const { title, category, subtitle, description } = req.body;
@@ -21,21 +26,29 @@ export const createBlog = async (req, res) => {
 
     let thumbnail = null;
 
-    // ✅ IMAGE UPLOAD FIXED
+    // ✅ CLOUDINARY IMAGE UPLOAD
     if (req.file) {
-      const uploadDir = path.join(__dirname, "..", "uploads");
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "blogs",
+          },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        );
 
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
+        streamifier
+          .createReadStream(req.file.buffer)
+          .pipe(stream);
+      });
 
-      const fileName = `${Date.now()}-${req.file.originalname}`;
-      const filePath = path.join(uploadDir, fileName);
-
-      fs.writeFileSync(filePath, req.file.buffer);
-
-      // ✅ SAVE ONLY RELATIVE PATH
-      thumbnail = `uploads/${fileName}`;
+      // ✅ SAVE CLOUDINARY URL
+      thumbnail = result.secure_url;
     }
 
     const blogData = {
@@ -51,9 +64,9 @@ export const createBlog = async (req, res) => {
       blogData.thumbnail = thumbnail;
     }
 
-    let blog;
 
-    // ================= UPDATE =================
+
+    // ================= UPDATE BLOG =================
     if (req.params.blogId) {
       const existingBlog = await Blog.findById(req.params.blogId);
 
@@ -71,6 +84,28 @@ export const createBlog = async (req, res) => {
         });
       }
 
+      // ✅ DELETE OLD CLOUDINARY IMAGE
+      if (
+        thumbnail &&
+        existingBlog.thumbnail &&
+        existingBlog.thumbnail.includes("cloudinary")
+      ) {
+        try {
+          const parts = existingBlog.thumbnail.split("/");
+          const fileName =
+            parts[parts.length - 1].split(".")[0];
+
+          const folderName =
+            parts[parts.length - 2];
+
+          const publicId = `${folderName}/${fileName}`;
+
+          await cloudinary.uploader.destroy(publicId);
+        } catch (err) {
+          console.log("Old image delete failed:", err);
+        }
+      }
+
       blog = await Blog.findByIdAndUpdate(
         req.params.blogId,
         blogData,
@@ -84,7 +119,7 @@ export const createBlog = async (req, res) => {
       });
     }
 
-    // ================= CREATE =================
+    // ================= CREATE BLOG =================
     blog = await Blog.create({
       ...blogData,
       likes: [],
@@ -103,6 +138,7 @@ export const createBlog = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to create/update blog",
+      error: error.message,
     });
   }
 };
