@@ -176,7 +176,7 @@ const Home = () => {
   // ✅ ERROR UI
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-10">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-10 mt-10">
         <div className="max-w-7xl mx-auto text-center">
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-6">
             <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">

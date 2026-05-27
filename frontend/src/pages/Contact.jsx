@@ -28,7 +28,7 @@ const Contact = () => {
       setLoading(true);
 
       const res = await axios.post(
-        "https://blog-application-774e.onrender.com/api/v1/contact",
+        "https://myblog.onrender.com/api/v1/contact",
         form,
         { timeout: 10000 } // optional but good
       );

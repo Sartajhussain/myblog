@@ -74,7 +74,7 @@ const Blogs = () => {
 
     return getBlogImage(img);
   };
-
+      
   // ✅ FILTER BLOGS
   const filteredBlogs =
     categoryFilter === "All"
