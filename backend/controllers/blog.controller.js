@@ -1,5 +1,4 @@
 import { Blog } from "../models/blog.model.js";
-
 import cloudinary from "../utils/cloudinary.js";
 import streamifier from "streamifier";
 import mongoose from "mongoose";
@@ -12,10 +11,10 @@ const __dirname = path.dirname(__filename);
 
 /* ================= CREATE / UPDATE BLOG ================= */
 
-
 export const createBlog = async (req, res) => {
   try {
     const { title, category, subtitle, description } = req.body;
+    const { blogId } = req.params; // FIXED: Properly extract blogId
 
     if (!title || !category) {
       return res.status(400).json({
@@ -64,11 +63,11 @@ export const createBlog = async (req, res) => {
       blogData.thumbnail = thumbnail;
     }
 
-
+    let blog; // FIXED: Declare blog variable at top level
 
     // ================= UPDATE BLOG =================
-    if (req.params.blogId) {
-      const existingBlog = await Blog.findById(req.params.blogId);
+    if (blogId) { // FIXED: Use blogId variable instead of req.params.blogId
+      const existingBlog = await Blog.findById(blogId);
 
       if (!existingBlog) {
         return res.status(404).json({
@@ -107,7 +106,7 @@ export const createBlog = async (req, res) => {
       }
 
       blog = await Blog.findByIdAndUpdate(
-        req.params.blogId,
+        blogId, // FIXED: Use blogId variable
         blogData,
         { new: true }
       );
@@ -158,6 +157,7 @@ export const getMyBlogs = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
+      message: err.message // FIXED: Added error message
     });
   }
 };
@@ -177,6 +177,7 @@ export const getPublicFeed = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
+      message: err.message // FIXED: Added error message
     });
   }
 };
@@ -198,6 +199,7 @@ export const getSingleBlog = async (req, res) => {
     if (!blog) {
       return res.status(404).json({
         success: false,
+        message: "Blog not found" // FIXED: Added message
       });
     }
 
@@ -212,6 +214,7 @@ export const getSingleBlog = async (req, res) => {
 
     res.status(500).json({
       success: false,
+      message: error.message // FIXED: Added error message
     });
   }
 };
@@ -227,16 +230,19 @@ export const deleteBlog = async (req, res) => {
     if (!blog) {
       return res.status(404).json({
         success: false,
+        message: "Blog not found" // FIXED: Added message
       });
     }
 
     res.json({
       success: true,
+      message: "Blog deleted successfully" // FIXED: Added message
     });
 
   } catch (err) {
     res.status(500).json({
       success: false,
+      message: err.message // FIXED: Added error message
     });
   }
 };
@@ -249,6 +255,7 @@ export const publishBlog = async (req, res) => {
     if (!blog) {
       return res.status(404).json({
         success: false,
+        message: "Blog not found" // FIXED: Added message
       });
     }
 
@@ -258,12 +265,14 @@ export const publishBlog = async (req, res) => {
 
     res.json({
       success: true,
+      message: blog.isPublished ? "Blog published" : "Blog unpublished", // FIXED: Added message
       blog,
     });
 
   } catch (err) {
     res.status(500).json({
       success: false,
+      message: err.message // FIXED: Added error message
     });
   }
 };
@@ -335,6 +344,7 @@ export const fetMyTotallogslikes = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
+      message: err.message // FIXED: Added error message
     });
   }
 };

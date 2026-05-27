@@ -92,10 +92,10 @@ const CreateBlogs = () => {
               className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-black outline-none transition"
             >
               <option value="">Select Category</option>
-              <option value="tech">Technology</option>
-              <option value="business">Business</option>
-              <option value="lifestyle">Lifestyle</option>
-              <option value="education">Education</option>
+              <option value="Technology">Technology</option>
+              <option value="Business">Business</option>
+              <option value="Lifestyle">Lifestyle</option>
+              <option value="Education">Education</option>
             </select>
           </div>
 

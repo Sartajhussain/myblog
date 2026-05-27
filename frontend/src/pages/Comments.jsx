@@ -15,23 +15,23 @@ const Comments = () => {
   // ✅ FUNCTION TO GET CORRECT IMAGE URL
   const getCorrectImageUrl = (blog) => {
     const imagePath = blog?.thumbnail || blog?.image || blog?.coverImage;
-    
+
     if (!imagePath || imagePath === "null" || imagePath === "undefined" || imagePath === "") {
       return "https://placehold.co/100x100/6366f1/white?text=No+Image";
     }
-    
+
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    
+
     if (imagePath.startsWith('/uploads')) {
       return `${API_BASE_URL}${imagePath}`;
     }
-    
+
     if (imagePath.startsWith('uploads')) {
       return `${API_BASE_URL}/${imagePath}`;
     }
-    
+
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(blog?.title || 'Blog')}&background=6366f1&color=fff&size=100`;
   };
 
@@ -39,7 +39,7 @@ const Comments = () => {
   const fetchComments = async () => {
     try {
       setLoading(true);
-      
+
       const res = await axios.get(
         `${API_BASE_URL}/api/v1/comment/all?page=${page}`,
         { withCredentials: true }
@@ -50,10 +50,10 @@ const Comments = () => {
         const validComments = (res.data.comments || []).filter(
           (comment) => comment.blog?._id && comment.blog?._id !== "undefined"
         );
-        
+
         console.log("Total comments:", res.data.comments?.length);
         console.log("Valid comments:", validComments.length);
-        
+
         setAllComments(validComments);
         setTotalPages(res.data.totalPages || 1);
       }
@@ -83,9 +83,9 @@ const Comments = () => {
   }
 
   return (
-    <div className="min-h-screen mt-10 pt-20 md:ml-[300px] p-4 md:p-8 bg-gray-50 dark:bg-slate-950">
+    <div className="min-h-screen mt-10 pt-20 md:ml-[300px] p-3 sm:p-4 md:p-8 bg-gray-50 dark:bg-slate-950">
 
-      <h2 className="text-base md:text-lg font-semibold mb-5 text-gray-800 dark:text-white">
+      <h2 className="text-sm sm:text-base md:text-lg font-semibold mb-4 sm:mb-5 text-gray-800 dark:text-white px-1">
         All Blog's Comments ({allComments.length})
       </h2>
 
@@ -111,14 +111,12 @@ const Comments = () => {
 
                 <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
                   {allComments.map((comment) => {
-                    // ✅ Safely get blog ID
                     const blogId = comment.blog?._id;
                     const isValidBlogId = blogId && blogId !== "undefined";
-                    
+
                     return (
                       <tr key={comment._id} className="hover:bg-gray-50 dark:hover:bg-slate-800 transition">
-                        
-                        {/* BLOG COLUMN */}
+
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <img
@@ -136,12 +134,10 @@ const Comments = () => {
                           </div>
                         </td>
 
-                        {/* USER COLUMN */}
                         <td className="px-4 py-3">
                           {comment.user?.firstName || "Unknown"} {comment.user?.lastName || ""}
                         </td>
 
-                        {/* COMMENT COLUMN */}
                         <td className="px-4 py-3">
                           <p className="text-gray-700 dark:text-gray-300 max-w-[300px] break-words">
                             {comment.text}
@@ -155,7 +151,6 @@ const Comments = () => {
                           </p>
                         </td>
 
-                        {/* VIEW BUTTON - ✅ Fixed: Only show if blog ID exists */}
                         <td className="px-4 py-3 text-center">
                           {isValidBlogId ? (
                             <Link
@@ -175,38 +170,44 @@ const Comments = () => {
               </table>
             </div>
 
-            {/* ================= MOBILE CARDS ================= */}
+            {/* ================= MOBILE CARDS (RESPONSIVE FIX) ================= */}
             <div className="md:hidden divide-y divide-gray-200 dark:divide-slate-700">
               {allComments.map((comment) => {
                 const blogId = comment.blog?._id;
                 const isValidBlogId = blogId && blogId !== "undefined";
-                
+
                 return (
-                  <div key={comment._id} className="p-4 flex gap-3 items-start">
-                    
+                  <div key={comment._id} className="p-3 sm:p-4 flex gap-3 items-start">
+
+                    {/* IMAGE - smaller on mobile */}
                     <img
                       src={getCorrectImageUrl(comment.blog)}
                       alt={comment.blog?.title}
-                      className="w-12 h-12 rounded-md object-cover flex-shrink-0"
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-md object-cover flex-shrink-0"
                       onError={(e) => {
                         e.target.onerror = null;
                         e.target.src = "https://placehold.co/100x100/6366f1/white?text=No+Image";
                       }}
                     />
 
+                    {/* CONTENT - takes remaining space */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 dark:text-white truncate">
+                      {/* Blog Title */}
+                      <p className="text-xs sm:text-sm font-medium text-gray-800 dark:text-white break-words line-clamp-2">
                         {comment.blog?.title || "Unknown Blog"}
                       </p>
-                      
+
+                      {/* User Name */}
                       <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
                         by {comment.user?.firstName || "Unknown"} {comment.user?.lastName || ""}
                       </p>
-                      
+
+                      {/* Comment Text */}
                       <p className="text-xs text-gray-700 dark:text-gray-300 mt-2 break-words">
                         {comment.text}
                       </p>
-                      
+
+                      {/* Date */}
                       <p className="text-xs text-gray-400 mt-1">
                         {comment.createdAt && new Date(comment.createdAt).toLocaleDateString("en-IN", {
                           day: "numeric",
@@ -215,17 +216,17 @@ const Comments = () => {
                       </p>
                     </div>
 
-                    {/* ✅ Fixed: Only show link if blog ID exists */}
+                    {/* VIEW BUTTON - compact on mobile */}
                     {isValidBlogId ? (
                       <Link
                         to={`/view-blog/${blogId}`}
-                        className="p-2 rounded-md bg-gray-100 dark:bg-slate-700 flex-shrink-0"
+                        className="p-1.5 sm:p-2 rounded-md bg-gray-100 dark:bg-slate-700 flex-shrink-0"
                       >
-                        <ExternalLink size={14} />
+                        <ExternalLink size={14} className="sm:w-4 sm:h-4" />
                       </Link>
                     ) : (
-                      <span className="p-2 rounded-md bg-gray-100 dark:bg-slate-700 flex-shrink-0 text-gray-400">
-                        <ExternalLink size={14} />
+                      <span className="p-1.5 sm:p-2 rounded-md bg-gray-100 dark:bg-slate-700 flex-shrink-0 text-gray-400">
+                        <ExternalLink size={14} className="sm:w-4 sm:h-4" />
                       </span>
                     )}
                   </div>
@@ -233,19 +234,19 @@ const Comments = () => {
               })}
             </div>
 
-            {/* ================= PAGINATION ================= */}
+            {/* ================= PAGINATION (RESPONSIVE) ================= */}
             {totalPages > 1 && (
-              <div className="flex justify-center mt-5 pb-4">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+              <div className="flex justify-center mt-4 sm:mt-5 pb-3 sm:pb-4">
+                <div className="flex items-center gap-2 sm:gap-3 px-3 py-1.5 rounded-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
                   <button
                     disabled={page === 1}
                     onClick={() => setPage(page - 1)}
                     className="p-1 rounded-full disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-slate-800 transition"
                   >
-                    <ChevronLeft size={16} />
+                    <ChevronLeft size={16} className="sm:w-4 sm:h-4" />
                   </button>
 
-                  <span className="text-xs text-gray-600 dark:text-gray-400">
+                  <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     {page} / {totalPages}
                   </span>
 
@@ -254,7 +255,7 @@ const Comments = () => {
                     onClick={() => setPage(page + 1)}
                     className="p-1 rounded-full disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-slate-800 transition"
                   >
-                    <ChevronRight size={16} />
+                    <ChevronRight size={16} className="sm:w-4 sm:h-4" />
                   </button>
                 </div>
               </div>

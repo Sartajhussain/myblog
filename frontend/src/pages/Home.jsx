@@ -289,13 +289,13 @@ const Home = () => {
                           </div>
 
                           {/* RIGHT IMAGE */}
-                          <div className="order-1 lg:order-2 relative h-64 lg:h-[450px] overflow-hidden group">
+                          <div className="order-1 lg:order-2 relative h-64 lg:h-[450px] rounded-md overflow-hidden group">
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10 lg:hidden" />
                             
                             <img
                               src={getCorrectImageUrl(item)}
                               alt={item.title}
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110  rounded-md"
                               onError={(e) => {
                                 console.error(`❌ Image failed to load for blog: ${item.title}`);
                                 console.error(`   Attempted URL: ${getCorrectImageUrl(item)}`);

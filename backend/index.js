@@ -22,6 +22,13 @@ const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT || 8000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
+/* ================= FRONTEND PATH ================= */
+const distPath = path.resolve(__dirname, "../frontend/dist");
+const indexPath = path.join(distPath, "index.html");
+
+console.log("DIST PATH:", distPath);
+console.log("EXISTS:", fs.existsSync(indexPath));
+
 /* =========================
    IMPORTANT: TRUST PROXY (Render FIX)
 ========================= */
@@ -94,16 +101,13 @@ app.use("/api/v1/contact", contactLimiter, contactRoutes);
 /* =========================
    FRONTEND SERVE (SAFE)
 ========================= */
-const distPath = path.join(__dirname, "../frontend/dist");
-const indexPath = path.join(distPath, "index.html");
-
 const isProduction = NODE_ENV === "production";
 
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
 }
 
-/* SPA fallback */
+/* SPA fallback - YE SABSE LAST MEIN HONA CHAHIYE */
 app.get(/.*/, (req, res) => {
   if (isProduction && fs.existsSync(indexPath)) {
     return res.sendFile(indexPath);
