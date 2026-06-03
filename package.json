@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
-  "scripts": {
-    "dev": "nodemon backend/index.js",
-    "start": "node backend/index.js",
-    "build": "npm install && cd frontend && npm install && npm run build"
-  },
+ "scripts": {
+  "dev": "nodemon backend/index.js",
+  "start": "node backend/index.js",
+  "build": "cd frontend && npm install && npm run build"
+},
   "author": "",
   "license": "ISC",
   "description": "",
