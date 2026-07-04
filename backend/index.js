@@ -12,12 +12,13 @@ import { fileURLToPath } from "url";
 import rateLimit from "express-rate-limit";
 import fs from "fs";
 
-dotenv.config();
-
-const app = express();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, ".env") });
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
+const app = express();
 
 const PORT = process.env.PORT || 8000;
 const NODE_ENV = process.env.NODE_ENV || "development";
@@ -43,15 +44,21 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:5173",
   "http://127.0.0.1:5174",
-  "https://blog-application-774e.onrender.com"
+  "https://blog-application-774e.onrender.com",
 ];
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  if (origin.includes("localhost") || origin.includes("127.0.0.1")) return true;
+  if (origin.endsWith(".onrender.com") || origin.endsWith(".vercel.app") || origin.endsWith(".netlify.app")) return true;
+  return false;
+};
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         return callback(null, true);
       }
 
@@ -91,8 +98,12 @@ const contactLimiter = rateLimit({
 });
 
 /* =========================
-   API ROUTES
+   HEALTH + API ROUTES
 ========================= */
+app.get("/health", (req, res) => {
+  res.status(200).json({ success: true, message: "Server is healthy" });
+});
+
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/comment", commentRoutes);

@@ -1,37 +1,13 @@
 import React from "react";
 import BlogList from "./BlogList";
 import BlogSideBar from "./BlogSideBar";
-import { API_BASE_URL } from "../utils/api";
+import { getBlogImageUrl } from "../utils/profileImage";
 
 const RecentBlog = ({ blogs = [] }) => {
-  
-  // ✅ Function to fix image URLs - same as Home component
-  const getCorrectImageUrl = (blog) => {
-    // Try all possible image fields
-    const imagePath = blog.thumbnail || blog.image || blog.coverImage;
-    
-    if (!imagePath) {
-      return "https://placehold.co/600x400/6366f1/white?text=Blog+Image";
-    }
-    
-    // If it's already a full URL
-    if (imagePath.startsWith('http')) {
-      return imagePath;
-    }
-    
-    // If it's a local path from backend
-    if (imagePath.startsWith('/uploads') || imagePath.startsWith('uploads')) {
-      return `${API_BASE_URL}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
-    }
-    
-    // Default fallback
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.title || 'Blog')}&background=6366f1&color=fff&size=400`;
-  };
-
   // ✅ Process blogs with correct image URLs
-  const processedBlogs = blogs.map(blog => ({
+  const processedBlogs = blogs.map((blog) => ({
     ...blog,
-    imageUrl: getCorrectImageUrl(blog)
+    imageUrl: getBlogImageUrl(blog),
   }));
 
   return (
@@ -55,7 +31,7 @@ const RecentBlog = ({ blogs = [] }) => {
                 key={item._id || index} 
                 blog={{
                   ...item,
-                  thumbnail: getCorrectImageUrl(item) // Pass fixed image URL
+                  thumbnail: getBlogImageUrl(item),
                 }} 
               />
             ))

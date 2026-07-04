@@ -14,6 +14,7 @@ import {
 } from "../components/ui/carousel";
 
 import { API_BASE_URL } from "../utils/api";
+import { getBlogImageFallback, getBlogImageUrl } from "../utils/profileImage";
 import AllUser from "./AllUser";
 
 import {
@@ -41,25 +42,6 @@ const Home = () => {
       day: "numeric",
       year: "numeric",
     });
-  };
-
-  // ✅ FUNCTION TO GET CORRECT IMAGE URL
-  const getCorrectImageUrl = (blog) => {
-    const imagePath = blog.thumbnail || blog.image || blog.coverImage;
-    
-    if (!imagePath) {
-      return "https://placehold.co/1200x800/6366f1/white?text=Blog+Image";
-    }
-    
-    if (imagePath.startsWith('http')) {
-      return imagePath;
-    }
-    
-    if (imagePath.startsWith('/uploads') || imagePath.startsWith('uploads')) {
-      return `${API_BASE_URL}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
-    }
-    
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(blog.title || 'Blog')}&background=6366f1&color=fff&size=400`;
   };
 
   // ✅ FETCH BLOGS DIRECTLY FROM DB
@@ -293,17 +275,12 @@ const Home = () => {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10 lg:hidden" />
                             
                             <img
-                              src={getCorrectImageUrl(item)}
+                              src={getBlogImageUrl(item)}
                               alt={item.title}
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110  rounded-md"
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 rounded-md"
                               onError={(e) => {
-                                console.error(`❌ Image failed to load for blog: ${item.title}`);
-                                console.error(`   Attempted URL: ${getCorrectImageUrl(item)}`);
                                 e.currentTarget.onerror = null;
-                                e.currentTarget.src = `https://placehold.co/1200x800/6366f1/white?text=${encodeURIComponent(item.title?.substring(0, 20) || 'Blog')}`;
-                              }}
-                              onLoad={() => {
-                                console.log(`✅ Image loaded for: ${item.title}`);
+                                e.currentTarget.src = getBlogImageFallback(item?.title || "Blog");
                               }}
                             />
                             

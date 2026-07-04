@@ -314,7 +314,7 @@ px-4 md:px-8 py-12">
           <div className="w-full md:w-2/3 text-center md:text-left">
             <h2 className="text-3xl font-bold mb-4">
               <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent animate-gradient">
-                Welcome Back! 👋
+                Welcome Back!
               </span>
             </h2>
 

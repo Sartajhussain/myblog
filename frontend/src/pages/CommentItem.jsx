@@ -113,7 +113,8 @@ const CommentItem = ({
         fetchPriority="high"
         className="w-10 h-10 rounded-full object-cover"
         onError={(e) => {
-          e.target.src = "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg";
+          e.currentTarget.onerror = null;
+          e.currentTarget.src = getProfileImage(null);
         }}
       />
 

@@ -5,6 +5,7 @@ import { Badge } from "../components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../utils/api";
+import { getBlogImageFallback, getBlogImageUrl } from "../utils/profileImage";
 import { setPublicBlogs } from "../redux/blogSlice";
 
 const BlogSideBar = () => {
@@ -118,27 +119,6 @@ const BlogSideBar = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  /* =======================
-     GET CORRECT IMAGE URL
-  ======================= */
-  const getCorrectImageUrl = (blog) => {
-    const imagePath = blog?.thumbnail || blog?.image || blog?.coverImage;
-    
-    if (!imagePath || imagePath === "null" || imagePath === "undefined") {
-      return "https://placehold.co/100x100/6366f1/white?text=No+Image";
-    }
-    
-    if (imagePath.startsWith('http')) {
-      return imagePath;
-    }
-    
-    if (imagePath.startsWith('/uploads') || imagePath.startsWith('uploads')) {
-      return `${API_BASE_URL}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
-    }
-    
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(blog?.title || 'Blog')}&background=6366f1&color=fff&size=100`;
   };
 
   /* =======================
@@ -280,12 +260,12 @@ const BlogSideBar = () => {
                 }}
               >
                 <img
-                  src={getCorrectImageUrl(item)}
+                  src={getBlogImageUrl(item)}
                   alt={item?.title}
                   className="w-14 h-14 object-cover rounded"
                   onError={(e) => {
-                    console.error(`Image failed for: ${item?.title}`);
-                    e.currentTarget.src = "https://placehold.co/100x100/6366f1/white?text=Error";
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = getBlogImageFallback(item?.title || "Blog");
                   }}
                 />
 
