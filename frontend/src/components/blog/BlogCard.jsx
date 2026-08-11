@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 
 import { API_BASE_URL } from "../../utils/api";
+import { getBlogImage } from "../../utils/getBlogImage";
 
 import CommentsSection from "../CommentsSection";
 
@@ -28,8 +29,19 @@ const BlogCard = ({ blog }) => {
 
   const [showComments, setShowComments] = useState(false);
 
-  /* ✅ FIXED */
-  const [commentCount, setCommentCount] = useState(0);
+  const [commentCount, setCommentCount] = useState(
+    Number(blog?.commentCount) ||
+      Number(blog?.comments?.length) ||
+      0
+  );
+
+  useEffect(() => {
+    setCommentCount(
+      Number(blog?.commentCount) ||
+        Number(blog?.comments?.length) ||
+        0
+    );
+  }, [blog?.commentCount, blog?.comments]);
 
   const { user: currentUser } = useSelector(
     (state) => state.auth
@@ -54,44 +66,6 @@ const BlogCard = ({ blog }) => {
     );
 
   }, [currentUser, blog]);
-
-  /* =========================
-     COMMENT COUNT
-  ========================= */
-  useEffect(() => {
-
-    const fetchCommentCount = async () => {
-
-      try {
-
-        const res = await axios.get(
-          `${API_BASE_URL}/api/v1/comment/blog/${blog?._id}`,
-          {
-            withCredentials: true,
-          }
-        );
-
-        if (res.data.success) {
-
-          /* ✅ FIXED */
-          setCommentCount(
-            Number(res.data.comments?.length) || 0
-          );
-        }
-
-      } catch (error) {
-
-        console.log(error);
-
-        setCommentCount(0);
-      }
-    };
-
-    if (blog?._id) {
-      fetchCommentCount();
-    }
-
-  }, [blog?._id]);
 
   /* =========================
      LIKE BLOG
@@ -164,44 +138,9 @@ const BlogCard = ({ blog }) => {
     }
   };
 
-  /* =========================
-     IMAGE URL
-  ========================= */
-  const getBlogImageUrl = () => {
-
-    const image =
-      blog?.thumbnail ||
-      blog?.image ||
-      blog?.coverImage;
-
-    if (
-      !image ||
-      image === "null" ||
-      image === "undefined" ||
-      image === ""
-    ) {
-      return null;
-    }
-
-    if (
-      image.startsWith("http://") ||
-      image.startsWith("https://")
-    ) {
-      return image;
-    }
-
-    if (image.startsWith("/uploads")) {
-      return `${API_BASE_URL}${image}`;
-    }
-
-    if (image.startsWith("uploads")) {
-      return `${API_BASE_URL}/${image}`;
-    }
-
-    return `${API_BASE_URL}/${image}`;
-  };
-
-  const blogImageUrl = getBlogImageUrl();
+  const blogImageUrl = getBlogImage(
+    blog?.thumbnail || blog?.image || blog?.coverImage
+  );
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden flex flex-col">
@@ -215,10 +154,12 @@ const BlogCard = ({ blog }) => {
             src={blogImageUrl}
             alt={blog?.title || "blog"}
             loading="lazy"
+            decoding="async"
+            width="800"
+            height="400"
             onError={(e) => {
-              e.target.onerror = null;
-
-              e.target.src =
+              e.currentTarget.onerror = null;
+              e.currentTarget.src =
                 "https://placehold.co/800x400?text=Blog+Image+Not+Found";
             }}
             className="w-full h-52 sm:h-64 object-cover"
@@ -270,12 +211,12 @@ const BlogCard = ({ blog }) => {
           <p>
             {blog?.createdAt
               ? new Date(
-                  blog.createdAt
-                ).toLocaleDateString("en-IN", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })
+                blog.createdAt
+              ).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })
               : ""}
           </p>
 

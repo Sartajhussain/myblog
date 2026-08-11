@@ -147,11 +147,17 @@ export const getMyBlogs = async (req, res) => {
   try {
     const blogs = await Blog.find({ author: req.user.id })
       .populate("author", "firstName lastName profilePic")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const enrichedBlogs = blogs.map((blog) => ({
+      ...blog,
+      commentCount: blog.comments?.length || 0,
+    }));
 
     res.json({
       success: true,
-      blogs,
+      blogs: enrichedBlogs,
     });
 
   } catch (err) {
@@ -167,11 +173,17 @@ export const getPublicFeed = async (req, res) => {
   try {
     const blogs = await Blog.find({ isPublished: true })
       .populate("author", "firstName lastName profilePic")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const enrichedBlogs = blogs.map((blog) => ({
+      ...blog,
+      commentCount: blog.comments?.length || 0,
+    }));
 
     res.json({
       success: true,
-      blogs,
+      blogs: enrichedBlogs,
     });
 
   } catch (err) {

@@ -16,6 +16,7 @@ import { API_BASE_URL } from "../utils/api";
 import { useNavigate } from "react-router-dom";
 
 const UserProfileModal = ({ isOpen, user, onClose }) => {
+    
     const navigate = useNavigate();
     const [userBlogs, setUserBlogs] = useState([]);
     const [userComments, setUserComments] = useState([]);
@@ -29,36 +30,34 @@ const UserProfileModal = ({ isOpen, user, onClose }) => {
 
     const fetchUserData = async () => {
         if (!user?._id) return;
-        
+
         setLoading(true);
         try {
             console.log("🔍 Fetching data for user:", user._id, user.firstName);
-            
+
             let blogs = [];
             let comments = [];
-            
+
             // ✅ FETCH BLOGS
             try {
-                // Try to get user's blogs
                 const blogsRes = await axios.get(
                     `${API_BASE_URL}/api/v1/blog/user/${user._id}`,
                     { withCredentials: true }
                 );
-                
+
                 if (blogsRes.data.success) {
                     blogs = blogsRes.data.blogs || [];
                     console.log(`✅ Found ${blogs.length} blogs for user`);
                 }
             } catch (err) {
                 console.log("Blog fetch error:", err.response?.status);
-                
-                // If endpoint fails, try alternative
+
                 try {
                     const allBlogsRes = await axios.get(
                         `${API_BASE_URL}/api/v1/blog/feed`,
                         { withCredentials: true }
                     );
-                    
+
                     if (allBlogsRes.data.success) {
                         blogs = (allBlogsRes.data.blogs || []).filter(
                             blog => blog.author?._id === user._id || blog.author === user._id
@@ -69,53 +68,49 @@ const UserProfileModal = ({ isOpen, user, onClose }) => {
                     console.log("Alternative blog fetch also failed");
                 }
             }
-            
+
             setUserBlogs(blogs);
-            
-            // ✅ FETCH COMMENTS
+
+            // ✅ FETCH COMMENTS - SIRF CURRENT USER KE BLOG KE COMMENTS
             try {
-                // Try to get user's comments
-                const commentsRes = await axios.get(
-                    `${API_BASE_URL}/api/v1/comment/user/${user._id}`,
-                    { withCredentials: true }
-                );
+                const userBlogIds = blogs.map(blog => blog._id);
+                console.log("📚 User Blog IDs:", userBlogIds);
                 
-                if (commentsRes.data.success) {
-                    comments = commentsRes.data.comments || [];
-                    console.log(`✅ Found ${comments.length} comments for user`);
-                }
-            } catch (err) {
-                console.log("Comment fetch error:", err.response?.status);
-                
-                // If endpoint fails, fetch comments from blogs
-                try {
-                    const allComments = [];
-                    for (const blog of blogs) {
+                if (userBlogIds.length > 0) {
+                    // 🔥 FIX: Sirf current user ke blogs ke comments fetch karo
+                    // Har blog ke comments individually fetch karo
+                    let allComments = [];
+                    
+                    for (const blogId of userBlogIds) {
                         try {
-                            const blogCommentsRes = await axios.get(
-                                `${API_BASE_URL}/api/v1/comment/blog/${blog._id}`,
+                            const commentsRes = await axios.get(
+                                `${API_BASE_URL}/api/v1/comment/blog/${blogId}`,
                                 { withCredentials: true }
                             );
                             
-                            if (blogCommentsRes.data.success) {
-                                const blogComments = (blogCommentsRes.data.comments || []).filter(
-                                    comment => comment.user?._id === user._id || comment.user === user._id
-                                );
-                                allComments.push(...blogComments);
+                            if (commentsRes.data.success) {
+                                const blogComments = commentsRes.data.comments || [];
+                                console.log(`📝 Blog ${blogId} has ${blogComments.length} comments`);
+                                allComments = [...allComments, ...blogComments];
                             }
-                        } catch (err2) {
-                            console.log(`Error fetching comments for blog ${blog._id}`);
+                        } catch (err) {
+                            console.log(`Error fetching comments for blog ${blogId}:`, err);
                         }
                     }
+                    
                     comments = allComments;
-                    console.log(`✅ Found ${comments.length} comments from blogs for user`);
-                } catch (err2) {
-                    console.log("Alternative comment fetch failed");
+                    console.log(`✅ Total ${comments.length} comments found on user's blogs`);
+                } else {
+                    comments = [];
+                    console.log("⚠️ No blogs found, so 0 comments");
                 }
+            } catch (err) {
+                console.log("Comment fetch error:", err);
+                comments = [];
             }
-            
+
             setUserComments(comments);
-            
+
         } catch (error) {
             console.error("❌ Error fetching user data:", error);
         } finally {
@@ -150,6 +145,13 @@ const UserProfileModal = ({ isOpen, user, onClose }) => {
         onClose();
         navigate(`/view-blog/${blogId}`);
     };
+
+    const handleViewAllComments = () => {
+        onClose();
+        navigate('/dashboard/comments');
+    };
+
+  
 
     if (!isOpen || !user) return null;
 
@@ -191,27 +193,27 @@ const UserProfileModal = ({ isOpen, user, onClose }) => {
 
                         <div className="flex gap-3 mt-4 text-gray-700 dark:text-gray-300 text-lg md:text-xl">
                             {user.instagram && (
-                                <a href={user.instagram} target="_blank" rel="noopener noreferrer" 
-                                   className="hover:scale-110 transition-transform">
-                                    <FiInstagram className="text-pink-500"/>
+                                <a href={user.instagram} target="_blank" rel="noopener noreferrer"
+                                    className="hover:scale-110 transition-transform">
+                                    <FiInstagram className="text-pink-500" />
                                 </a>
                             )}
                             {user.linkedin && (
                                 <a href={user.linkedin} target="_blank" rel="noopener noreferrer"
-                                   className="hover:scale-110 transition-transform">
+                                    className="hover:scale-110 transition-transform">
                                     <FiLinkedin className="text-[#0A66C2]" />
                                 </a>
                             )}
                             {user.github && (
                                 <a href={user.github} target="_blank" rel="noopener noreferrer"
-                                   className="hover:scale-110 transition-transform">
+                                    className="hover:scale-110 transition-transform">
                                     <FiGithub className="text-black dark:text-white" />
                                 </a>
                             )}
                             {user.facebook && (
                                 <a href={user.facebook} target="_blank" rel="noopener noreferrer"
-                                   className="hover:scale-110 transition-transform">
-                                    <FiFacebook className="text-[#1877F2]"/>
+                                    className="hover:scale-110 transition-transform">
+                                    <FiFacebook className="text-[#1877F2]" />
                                 </a>
                             )}
                         </div>
@@ -238,7 +240,11 @@ const UserProfileModal = ({ isOpen, user, onClose }) => {
                                 </p>
                             </div>
 
-                            <div className="p-3 md:p-4 bg-gray-100 dark:bg-gray-700 rounded-xl text-center transition hover:scale-105">
+                            {/* BLOGS CARD - Clickable */}
+                            <div 
+                               
+                                className="p-3 md:p-4 bg-gray-100 dark:bg-gray-700 rounded-xl text-center transition hover:scale-105 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                            >
                                 <h3 className="font-bold text-sm md:text-base text-gray-900 dark:text-white">
                                     {loading ? "..." : userBlogs.length}
                                 </h3>
@@ -247,7 +253,11 @@ const UserProfileModal = ({ isOpen, user, onClose }) => {
                                 </p>
                             </div>
 
-                            <div className="p-3 md:p-4 bg-gray-100 dark:bg-gray-700 rounded-xl text-center transition hover:scale-105">
+                            {/* COMMENTS CARD - Clickable */}
+                            <div 
+                                onClick={handleViewAllComments}
+                                className="p-3 md:p-4 bg-gray-100 dark:bg-gray-700 rounded-xl text-center transition hover:scale-105 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                            >
                                 <h3 className="font-bold text-sm md:text-base text-gray-900 dark:text-white">
                                     {loading ? "..." : userComments.length}
                                 </h3>

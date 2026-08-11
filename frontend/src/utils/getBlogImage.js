@@ -13,6 +13,16 @@ export const getBlogImage = (thumbnail) => {
 
   // full image url
   if (thumbnail.startsWith("http")) {
+    if (
+      thumbnail.includes("res.cloudinary.com") &&
+      thumbnail.includes("/upload/")
+    ) {
+      return thumbnail.replace(
+        "/upload/",
+        "/upload/f_auto,q_auto,w_800/"
+      );
+    }
+
     return thumbnail;
   }
 

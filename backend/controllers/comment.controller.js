@@ -93,6 +93,46 @@ export const getAllComments = async (req, res) => {
   }
 };
 
+// ================= GET COMMENTS FOR CURRENT USER'S BLOGS =================
+export const getCommentsForMyBlogs = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
+
+    const userBlogIds = await Blog.find({ author: userId }).select("_id").lean();
+    const blogIds = userBlogIds.map((blog) => blog._id);
+
+    const totalComments = await Comment.countDocuments({
+      blog: { $in: blogIds },
+    });
+
+    const comments = await Comment.find({
+      blog: { $in: blogIds },
+    })
+      .populate("user", "firstName lastName profilePic")
+      .populate("blog", "title thumbnail author")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      success: true,
+      comments,
+      currentPage: page,
+      totalPages: Math.ceil(totalComments / limit),
+      totalComments,
+    });
+  } catch (err) {
+    console.log("GET COMMENTS FOR MY BLOGS ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch comments for your blogs",
+    });
+  }
+};
+
 // ================= UPDATE COMMENT =================
 export const updateComment = async (req, res) => {
   try {

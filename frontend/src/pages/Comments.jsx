@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import { ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -11,6 +12,7 @@ import Skeleton from "../components/Skeleton";
 const commentsCache = {};
 
 const Comments = () => {
+  const { user } = useSelector((state) => state.auth);
   const cached = commentsCache[1]; // default starting page
 
   const [allComments, setAllComments] = useState(cached?.comments || []);
@@ -44,6 +46,13 @@ const Comments = () => {
 
   // ✅ FETCH COMMENTS FROM DB
   const fetchComments = async (targetPage, isBackgroundRefresh = false) => {
+    if (!user) {
+      setAllComments([]);
+      setTotalPages(1);
+      setLoading(false);
+      return;
+    }
+
     try {
       // only show the skeleton if this isn't a silent background refresh
       if (!isBackgroundRefresh) {
@@ -51,7 +60,7 @@ const Comments = () => {
       }
 
       const res = await axios.get(
-        `${API_BASE_URL}/api/v1/comment/all?page=${targetPage}`,
+        `${API_BASE_URL}/api/v1/comment/my-blogs?page=${targetPage}`,
         { withCredentials: true }
       );
 
@@ -94,7 +103,7 @@ const Comments = () => {
     }
 
     window.scrollTo(0, 0);
-  }, [page]);
+  }, [page, user]);
 
   // ✅ LOADING STATE
   if (loading) {

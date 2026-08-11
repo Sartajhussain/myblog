@@ -8,6 +8,7 @@ import {
   deleteComment,
   updateComment,
   getAllComments,
+  getCommentsForMyBlogs,
 } from "../controllers/comment.controller.js";
 
 import { isAuthenticated } from "../middleware/isAuthenticated.js";
@@ -22,6 +23,9 @@ router.get("/blog/:blogId", getComments);
 
 // ✅ ALL COMMENTS
 router.get("/all", isAuthenticated, getAllComments);
+
+// ✅ COMMENTS FOR CURRENT USER'S BLOGS
+router.get("/my-blogs", isAuthenticated, getCommentsForMyBlogs);
 
 // ✅ UPDATE
 router.put("/:commentId", isAuthenticated, updateComment);
