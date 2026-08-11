@@ -6,11 +6,18 @@ import { API_BASE_URL } from "../utils/api";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Skeleton from "../components/Skeleton";
 
+// ✅ Module-level cache — keyed by page number, survives unmount/remount
+// (resets only on a real page refresh, since it's just an in-memory JS object)
+const commentsCache = {};
+
 const Comments = () => {
-  const [allComments, setAllComments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const cached = commentsCache[1]; // default starting page
+
+  const [allComments, setAllComments] = useState(cached?.comments || []);
+  const [totalPages, setTotalPages] = useState(cached?.totalPages || 1);
+  // ✅ only show skeleton if we don't already have cached data for this page
+  const [loading, setLoading] = useState(!cached);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
 
   // ✅ FUNCTION TO GET CORRECT IMAGE URL
   const getCorrectImageUrl = (blog) => {
@@ -36,12 +43,15 @@ const Comments = () => {
   };
 
   // ✅ FETCH COMMENTS FROM DB
-  const fetchComments = async () => {
+  const fetchComments = async (targetPage, isBackgroundRefresh = false) => {
     try {
-      setLoading(true);
+      // only show the skeleton if this isn't a silent background refresh
+      if (!isBackgroundRefresh) {
+        setLoading(true);
+      }
 
       const res = await axios.get(
-        `${API_BASE_URL}/api/v1/comment/all?page=${page}`,
+        `${API_BASE_URL}/api/v1/comment/all?page=${targetPage}`,
         { withCredentials: true }
       );
 
@@ -51,11 +61,16 @@ const Comments = () => {
           (comment) => comment.blog?._id && comment.blog?._id !== "undefined"
         );
 
-        console.log("Total comments:", res.data.comments?.length);
-        console.log("Valid comments:", validComments.length);
+        const newTotalPages = res.data.totalPages || 1;
 
         setAllComments(validComments);
-        setTotalPages(res.data.totalPages || 1);
+        setTotalPages(newTotalPages);
+
+        // ✅ update cache for this page
+        commentsCache[targetPage] = {
+          comments: validComments,
+          totalPages: newTotalPages,
+        };
       }
     } catch (err) {
       console.log("Error fetching comments:", err);
@@ -65,7 +80,19 @@ const Comments = () => {
   };
 
   useEffect(() => {
-    fetchComments();
+    const pageCache = commentsCache[page];
+
+    if (pageCache) {
+      // ✅ we already have this page cached — show it instantly,
+      // then silently refresh in the background
+      setAllComments(pageCache.comments);
+      setTotalPages(pageCache.totalPages);
+      setLoading(false);
+      fetchComments(page, true);
+    } else {
+      fetchComments(page, false);
+    }
+
     window.scrollTo(0, 0);
   }, [page]);
 

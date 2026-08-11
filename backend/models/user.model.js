@@ -23,7 +23,7 @@ const userschema = new mongoose.Schema(
         },
         profilePic: {
             type: String,
-            default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
+            default: "", // ✅ empty rakho — frontend pehle se onError pe local fallback image dikha deta hai
         },
         occupation: {
             type: String,
@@ -40,6 +40,10 @@ const userschema = new mongoose.Schema(
         },
         facebook: {
             type: String,
+        },
+        isVerified: {
+            type: Boolean,
+            default: false,
         },
         otp: {
             type: String,

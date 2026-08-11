@@ -13,6 +13,7 @@ import {
   FiFilter,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
+import Skeleton from "../components/Skeleton";
 
 const Blog = () => {
   const navigate = useNavigate();
@@ -25,7 +26,9 @@ const Blog = () => {
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
-  const [loading, setLoading] = useState(true);
+  // ✅ only show the skeleton if Redux doesn't already have blogs
+  const [loading, setLoading] = useState(myBlogs.length === 0);
+
   const refreshMyBlogs = async () => {
     try {
       const { data } = await axios.get(
@@ -42,11 +45,13 @@ const Blog = () => {
     }
   };
 
-  // ✅ FETCH BLOGS WITH CACHE
+  // ✅ FETCH BLOGS (skips visible loading if we already have cached data)
   useEffect(() => {
-    const fetchBlogs = async () => {
+    const fetchBlogs = async (isBackgroundRefresh) => {
       try {
-        setLoading(true);
+        if (!isBackgroundRefresh) {
+          setLoading(true);
+        }
 
         const { data } = await axios.get(
           `${API_BASE_URL}/api/v1/blog/my-blogs`,
@@ -64,13 +69,19 @@ const Blog = () => {
 
       } catch (error) {
         console.log(error);
-        toast.error("Failed to load blogs");
+        // don't spam the error toast on a silent background refresh
+        if (!isBackgroundRefresh) {
+          toast.error("Failed to load blogs");
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBlogs();
+    // ✅ if we already have blogs from a previous visit (Redux/persist),
+    // show them instantly and just refresh silently in the background
+    const hasCachedData = myBlogs.length > 0;
+    fetchBlogs(hasCachedData);
   }, []);
 
   // ✅ FILTER BLOGS
@@ -199,8 +210,9 @@ const Blog = () => {
   // ✅ LOADING
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="p-6 md:ml-72 md:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <div className="h-8 w-40 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse mb-6" />
+        <Skeleton type="blogList" count={5} className="space-y-3" />
       </div>
     );
   }

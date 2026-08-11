@@ -25,14 +25,19 @@ import {
   User,
 } from "lucide-react";
 
+// ✅ Module-level cache — survives component unmount/remount
+// (resets only on full page refresh, since it's just a JS variable in memory)
+let cachedBlogs = null;
+
 const Home = () => {
   const navigate = useNavigate();
 
   // ✅ DIRECT STATE - No Redux dependency
-  const [blogs, setBlogs] = useState([]);
+  const [blogs, setBlogs] = useState(cachedBlogs || []);
   const [api, setApi] = useState(null);
   const [current, setCurrent] = useState(0);
-  const [loading, setLoading] = useState(true);
+  // ✅ only show skeleton if we don't already have cached data
+  const [loading, setLoading] = useState(!cachedBlogs);
   const [error, setError] = useState(null);
 
   // ✅ DATE FORMAT
@@ -45,13 +50,15 @@ const Home = () => {
   };
 
   // ✅ FETCH BLOGS DIRECTLY FROM DB
-  const fetchBlogsFromDB = async () => {
+  const fetchBlogsFromDB = async (isBackgroundRefresh = false) => {
     try {
-      setLoading(true);
+      // only show the skeleton if this isn't a silent background refresh
+      if (!isBackgroundRefresh) {
+        setLoading(true);
+      }
       setError(null);
-      
+
       console.log("🔄 Home: Fetching blogs directly from DB...");
-      console.log("API URL:", `${API_BASE_URL}/api/v1/blog/feed`);
 
       const { data } = await axios.get(
         `${API_BASE_URL}/api/v1/blog/feed`,
@@ -64,51 +71,34 @@ const Home = () => {
         }
       );
 
-      console.log("📦 API Response:", data);
-
       if (data?.success) {
         const publishedBlogs = (data.blogs || []).filter(
           (blog) => blog.isPublished === true
         );
 
         console.log(`✅ Found ${publishedBlogs.length} published blogs`);
-        
-        // Debug: Log first blog to check structure
-        if (publishedBlogs.length > 0) {
-          console.log("📝 First blog sample:", {
-            id: publishedBlogs[0]._id,
-            title: publishedBlogs[0].title,
-            category: publishedBlogs[0].category,
-            author: publishedBlogs[0].author,
-            thumbnail: publishedBlogs[0].thumbnail,
-            image: publishedBlogs[0].image,
-            coverImage: publishedBlogs[0].coverImage,
-            isPublished: publishedBlogs[0].isPublished
-          });
-        }
 
         setBlogs(publishedBlogs);
+        cachedBlogs = publishedBlogs; // ✅ update cache
       } else {
         console.error("❌ API returned success: false", data);
-        setError("Failed to fetch blogs");
-        setBlogs([]);
+        // don't wipe existing data on a failed background refresh
+        if (!isBackgroundRefresh) {
+          setError("Failed to fetch blogs");
+          setBlogs([]);
+        }
       }
     } catch (err) {
       console.error("❌ FETCH BLOG ERROR:", err);
-      console.error("Error details:", {
-        message: err.message,
-        code: err.code,
-        response: err.response?.data,
-        status: err.response?.status
-      });
-      
-      setError(err.response?.data?.message || err.message || "Failed to load blogs");
-      setBlogs([]);
-      
-      // Retry logic
+
+      if (!isBackgroundRefresh) {
+        setError(err.response?.data?.message || err.message || "Failed to load blogs");
+        setBlogs([]);
+      }
+
       if (err.code === "ECONNABORTED" || err.message?.includes("timeout")) {
         console.log("⏱️ Timeout, retrying in 2 seconds...");
-        setTimeout(() => fetchBlogsFromDB(), 2000);
+        setTimeout(() => fetchBlogsFromDB(isBackgroundRefresh), 2000);
       }
     } finally {
       setLoading(false);
@@ -117,7 +107,12 @@ const Home = () => {
 
   // ✅ INITIAL FETCH
   useEffect(() => {
-    fetchBlogsFromDB();
+    if (cachedBlogs) {
+      // We already have data — show it instantly, refresh silently in background
+      fetchBlogsFromDB(true);
+    } else {
+      fetchBlogsFromDB(false);
+    }
   }, []);
 
   // ✅ CAROUSEL SELECT
@@ -132,7 +127,7 @@ const Home = () => {
   // ✅ Manual refresh function
   const refreshBlogs = () => {
     console.log("🔄 Manual refresh triggered");
-    fetchBlogsFromDB();
+    fetchBlogsFromDB(false);
   };
 
   // ✅ Make refresh function available globally
@@ -146,10 +141,17 @@ const Home = () => {
   // ✅ LOADING UI
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-10">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <Skeleton type="blogCard" count={3} />
-          <Skeleton type="blogCard" count={1} />
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* HERO SKELETON */}
+        <section className="relative mt-5 w-full max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
+          <Skeleton type="homeHero" count={1} />
+        </section>
+
+        {/* RECENT BLOGS SKELETON */}
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Skeleton type="blogCard" count={3} className="contents space-y-0" />
+          </div>
         </div>
       </div>
     );
