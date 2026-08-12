@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import missionImg from "../assets/mission.jpg";
 import storyImg from "../assets/story.jpg";
 import sartaj from "../assets/sartaj-2.jpeg";
+import pdf from "../assets/sartaj-frontend_dev.pdf"; // Imported but not used
 
 // Icons
 import {
@@ -23,10 +24,10 @@ const About = () => {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Resume Download Function
+  // Resume Download Function - FIXED
   const handleDownload = () => {
     const link = document.createElement("a");
-    link.href = "/sartaj-frontend_dev.pdf";
+    link.href = pdf; // Use the imported pdf variable
     link.download = "Sartaj_Hussain_Resume.pdf";
     document.body.appendChild(link);
     link.click();
@@ -35,23 +36,23 @@ const About = () => {
 
   // Projects Data
   const projects = [
-     {
+    {
       title: "MERN Blog App",
       desc: "Full-stack blog with JWT role-based authorization and complete CRUD REST APIs.",
       link: "https://blog-application-774e.onrender.com/",
-      tech: ["React.js","Nodejs","MERN Stack", "Atlas", "Render"],
+      tech: ["React.js", "Nodejs", "MERN Stack", "Atlas", "Render"],
     },
     {
       title: "Eragento - Premium Bags",
       desc: "Full-featured international e-commerce storefront with secure payment gateways.",
       link: "https://eragento.com.au/",
-      tech: ["Php", "CodeIgniter", "MySQL","reactjs","javascript"],
+      tech: ["Php", "CodeIgniter", "MySQL", "reactjs", "javascript"],
     },
     {
       title: "Spirit Masters - Bartending",
       desc: "Professional corporate website with polished service pages and custom booking UI.",
       link: "https://www.spiritmasters.in/",
-      tech: ["Php", "CodeIgniter", "MySQL","reactjs","javascript"],
+      tech: ["Php", "CodeIgniter", "MySQL", "reactjs", "javascript"],
     },
     {
       title: "The Best Cab - Booking",
@@ -63,9 +64,9 @@ const About = () => {
       title: "Komplytek Academy - E-Learning",
       desc: "E-learning e-commerce platform supporting course purchases and access management.",
       link: "https://komplytek.com/academy/",
-      tech: ["Php", "CodeIgniter", "MySQL","reactjs"],
+      tech: ["Php", "CodeIgniter", "MySQL", "reactjs"],
     },
-   
+
   ];
 
   const techStack = [
@@ -84,7 +85,7 @@ const About = () => {
 
   return (
     <div className="bg-slate-950 text-slate-100 transition-colors duration-300 min-h-screen font-sans selection:bg-cyan-500 selection:text-black overflow-x-hidden relative">
-      
+
       {/* Background Decorative Ambient Glows */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
@@ -95,7 +96,7 @@ const About = () => {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-12 gap-12 items-center w-full">
-          
+
           {/* Text Content */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 border border-slate-800 backdrop-blur-md text-xs font-semibold tracking-wide text-cyan-400">
@@ -315,7 +316,7 @@ const About = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
           <div className="bg-slate-900 border border-slate-800 w-full max-w-4xl max-h-[85vh] rounded-3xl shadow-2xl overflow-hidden relative flex flex-col">
-            
+
             {/* Modal Header */}
             <div className="flex justify-between items-center p-6 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-10">
               <div>

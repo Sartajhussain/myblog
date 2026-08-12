@@ -2,42 +2,52 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import connectDb from "./database/db.js";
+
 import userRoutes from "./routes/user.routes.js";
 import blogRoutes from "./routes/blog.routes.js";
 import commentRoutes from "./routes/comment.route.js";
 import contactRoutes from "./routes/contactRoutes.js";
+import aiRoute from "./routes/ai.route.js";
+
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import rateLimit from "express-rate-limit";
 import fs from "fs";
 
+// PATH CONFIGURATION
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, ".env") });
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+// ENVIRONMENT VARIABLES
+dotenv.config({
+  path: path.resolve(__dirname, ".env"),
+});
 
+console.log(
+  "Gemini API:",
+  process.env.GEMINI_API_KEY ? "Configured" : "Missing"
+);
+
+// APP
 const app = express();
 
 const PORT = process.env.PORT || 8000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
-/* ================= FRONTEND PATH ================= */
+// FRONTEND PATH
 const distPath = path.resolve(__dirname, "../frontend/dist");
 const indexPath = path.join(distPath, "index.html");
 
+console.log("=================================");
 console.log("DIST PATH:", distPath);
-console.log("EXISTS:", fs.existsSync(indexPath));
+console.log("INDEX EXISTS:", fs.existsSync(indexPath));
+console.log("=================================");
 
-/* =========================
-   IMPORTANT: TRUST PROXY (Render FIX)
-========================= */
+// TRUST PROXY
 app.set("trust proxy", 1);
 
-/* =========================
-   CORS (FIXED - IMPORTANT)
-========================= */
+// CORS
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
@@ -51,43 +61,45 @@ const isAllowedOrigin = (origin) => {
   if (!origin) return true;
   if (allowedOrigins.includes(origin)) return true;
   if (origin.includes("localhost") || origin.includes("127.0.0.1")) return true;
-  if (origin.endsWith(".onrender.com") || origin.endsWith(".vercel.app") || origin.endsWith(".netlify.app")) return true;
+  if (
+    origin.endsWith(".onrender.com") ||
+    origin.endsWith(".vercel.app") ||
+    origin.endsWith(".netlify.app")
+  ) {
+    return true;
+  }
   return false;
 };
 
 app.use(
   cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
       if (isAllowedOrigin(origin)) {
-        return callback(null, true);
+        callback(null, true);
+      } else {
+        console.log("❌ Blocked CORS origin:", origin);
+        callback(new Error("Not allowed by CORS"));
       }
-
-      console.log("❌ Blocked CORS origin:", origin);
-      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
   })
 );
 
-/* =========================
-   MIDDLEWARES
-========================= */
+// BODY MIDDLEWARE
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// UPLOADS
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-/* =========================
-   DEBUG (TEMP - REMOVE LATER)
-========================= */
+// REQUEST LOGGER
 app.use((req, res, next) => {
-  console.log("➡️ Request:", req.method, req.url);
+  console.log(`➡️ ${req.method} ${req.originalUrl}`);
   next();
 });
 
-/* =========================
-   RATE LIMIT (contact)
-========================= */
+// CONTACT RATE LIMITER
 const contactLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 5,
@@ -97,48 +109,59 @@ const contactLimiter = rateLimit({
   },
 });
 
-/* =========================
-   HEALTH + API ROUTES
-========================= */
+// HEALTH CHECK
 app.get("/health", (req, res) => {
-  res.status(200).json({ success: true, message: "Server is healthy" });
+  res.status(200).json({
+    success: true,
+    message: "Server is healthy",
+  });
 });
 
+// API ROUTES
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/comment", commentRoutes);
 app.use("/api/v1/contact", contactLimiter, contactRoutes);
 
-/* =========================
-   FRONTEND SERVE (SAFE)
-========================= */
+// AI ROUTE
+app.use("/api/v1/ai", aiRoute);
+
+// FRONTEND STATIC FILES
 const isProduction = NODE_ENV === "production";
 
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
 }
 
-/* SPA fallback - YE SABSE LAST MEIN HONA CHAHIYE */
+// SPA FALLBACK
 app.get(/.*/, (req, res) => {
   if (isProduction && fs.existsSync(indexPath)) {
     return res.sendFile(indexPath);
   }
 
-  res.status(404).json({
+  return res.status(404).json({
     success: false,
     message: "Frontend not built or not found",
   });
 });
 
-/* =========================
-   DB + SERVER START
-========================= */
-app.listen(PORT, async () => {
+// DATABASE + SERVER
+const startServer = async () => {
   try {
     await connectDb();
-    console.log(`✅ Server running on port ${PORT}`);
-    console.log(`🌍 Mode: ${NODE_ENV}`);
+
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+      console.log(`🌍 Mode: ${NODE_ENV}`);
+      console.log(
+        "Gemini API:",
+        process.env.GEMINI_API_KEY ? "Configured" : "Missing"
+      );
+    });
   } catch (error) {
     console.error("❌ DB Connection Failed:", error);
+    process.exit(1);
   }
-});
+};
+
+startServer();

@@ -210,7 +210,7 @@ const Blog = () => {
   // ✅ LOADING
   if (loading) {
     return (
-      <div className="p-6 md:ml-72 md:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <div className="p-6 md:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
         <div className="h-8 w-40 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse mb-6" />
         <Skeleton type="blogList" count={5} className="space-y-3" />
       </div>
@@ -218,9 +218,9 @@ const Blog = () => {
   }
 
   return (
-    <div className="p-6 md:ml-72 md:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="p-6 md:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <div className="flex flex-col mt-4 md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
           My Blogs
         </h1>

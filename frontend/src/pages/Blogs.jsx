@@ -14,29 +14,18 @@ const Blogs = () => {
   const dispatch = useDispatch();
 
   // ✅ REDUX
-  const { publicBlogs = [] } = useSelector(
-    (state) => state.blog
-  );
+  const { publicBlogs = [] } = useSelector((state) => state.blog);
 
-  const [categoryFilter, setCategoryFilter] =
-    useState("All");
-
+  const [categoryFilter, setCategoryFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-
   const [loading, setLoading] = useState(true);
 
   const blogsPerPage = 6;
 
-  // ✅ FETCH BLOGS
+  // ✅ FETCH BLOGS (Always fetch latest data to show newly created blogs)
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        // ✅ CACHE
-        if (publicBlogs.length > 0) {
-          setLoading(false);
-          return;
-        }
-
         setLoading(true);
 
         const { data } = await axios.get(
@@ -47,57 +36,42 @@ const Blogs = () => {
         );
 
         if (data?.success) {
-          dispatch(
-            setPublicBlogs(data.blogs || [])
-          );
+          // Backend response structure check (data.blogs || data.feed)
+          dispatch(setPublicBlogs(data.blogs || data.feed || []));
         }
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching blogs:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchBlogs();
-  }, []);
+  }, [dispatch]);
 
-  // ✅ IMAGE
+  // ✅ IMAGE HELPER
   const getImage = (img) => {
-    if (
-      !img ||
-      img === "null" ||
-      img === "undefined" ||
-      img === ""
-    ) {
+    if (!img || img === "null" || img === "undefined" || img === "") {
       return null;
     }
-
     return getBlogImage(img);
   };
-      
+
   // ✅ FILTER BLOGS
   const filteredBlogs =
     categoryFilter === "All"
       ? publicBlogs
-      : publicBlogs.filter(
-          (b) => b.category === categoryFilter
-        );
+      : publicBlogs.filter((b) => b.category === categoryFilter);
 
   // ✅ PAGINATION
-  const indexOfLastBlog =
-    currentPage * blogsPerPage;
-
-  const indexOfFirstBlog =
-    indexOfLastBlog - blogsPerPage;
-
+  const indexOfLastBlog = currentPage * blogsPerPage;
+  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
   const currentBlogs = filteredBlogs.slice(
     indexOfFirstBlog,
     indexOfLastBlog
   );
 
-  const totalPages = Math.ceil(
-    filteredBlogs.length / blogsPerPage
-  );
+  const totalPages = Math.ceil(filteredBlogs.length / blogsPerPage);
 
   const handleReadMore = (id) => {
     navigate(`/view-blog/${id}`);
@@ -127,63 +101,57 @@ const Blogs = () => {
               {currentBlogs.map((item) => (
                 <div
                   key={item._id}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition duration-300 overflow-hidden group"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition duration-300 overflow-hidden group flex flex-col justify-between"
                 >
-                  {getImage(
-                    item.thumbnail ||
-                      item.image ||
-                      item.coverImage
-                  ) && (
-                    <img
-                      src={getImage(
-                        item.thumbnail ||
-                          item.image ||
-                          item.coverImage
-                      )}
-                      alt={item.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition duration-300"
-                      onError={(e) => {
-                        e.target.onerror = null;
+                  <div>
+                    {getImage(
+                      item.thumbnail || item.image || item.coverImage
+                    ) && (
+                      <img
+                        src={getImage(
+                          item.thumbnail || item.image || item.coverImage
+                        )}
+                        alt={item.title}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition duration-300"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src =
+                            "https://placehold.co/600x400?text=No+Image";
+                        }}
+                      />
+                    )}
 
-                        e.target.src =
-                          "https://placehold.co/600x400?text=No+Image";
-                      }}
-                    />
-                  )}
-
-                  <div className="p-5 space-y-3">
-                    <div className="text-xs text-gray-500 flex justify-between">
-                      Posted By{" "}
-                      {item.author?.firstName}{" "}
-                      {item.author?.lastName}
-
-                      <span>
-                        {new Date(
-                          item.createdAt
-                        ).toLocaleDateString(
-                          "en-IN",
-                          {
+                    <div className="p-5 space-y-3">
+                      <div className="text-xs text-gray-500 flex justify-between">
+                        <span>
+                          Posted By {item.author?.firstName || "Admin"}{" "}
+                          {item.author?.lastName || ""}
+                        </span>
+                        <span>
+                          {new Date(
+                            item.createdAt || Date.now()
+                          ).toLocaleDateString("en-IN", {
                             day: "numeric",
                             month: "short",
                             year: "numeric",
-                          }
-                        )}
-                      </span>
+                          })}
+                        </span>
+                      </div>
+
+                      <h2 className="text-lg font-semibold line-clamp-2 dark:text-white">
+                        {item.title}
+                      </h2>
+
+                      <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                        {item.subtitle}
+                      </p>
                     </div>
+                  </div>
 
-                    <h2 className="text-lg font-semibold line-clamp-2 dark:text-white">
-                      {item.title}
-                    </h2>
-
-                    <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
-                      {item.subtitle}
-                    </p>
-
+                  <div className="p-5 pt-0">
                     <button
-                      onClick={() =>
-                        handleReadMore(item._id)
-                      }
-                      className="mt-2 px-4 py-2 bg-black text-white rounded-lg text-sm"
+                      onClick={() => handleReadMore(item._id)}
+                      className="w-full sm:w-auto mt-2 px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800 transition"
                     >
                       Read More
                     </button>
@@ -204,9 +172,7 @@ const Blogs = () => {
         <div className="order-1 lg:order-2">
           <PublishedBlogSideBar
             blogs={publicBlogs}
-            setCategoryFilter={
-              setCategoryFilter
-            }
+            setCategoryFilter={setCategoryFilter}
           />
         </div>
       </div>

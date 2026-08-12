@@ -14,59 +14,70 @@ const __dirname = path.dirname(__filename);
 export const createBlog = async (req, res) => {
   try {
     const { title, category, subtitle, description } = req.body;
-    const { blogId } = req.params; // FIXED: Properly extract blogId
+    const { blogId } = req.params;
 
-    if (!title || !category) {
+    if (blogId && !mongoose.isValidObjectId(blogId)) {
       return res.status(400).json({
         success: false,
-        message: "Blog title and category is required",
+        message: "Invalid blog id",
+      });
+    }
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Blog title is required",
+      });
+    }
+
+    if (!category || !category.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Blog category is required",
+      });
+    }
+
+    if (!description || !description.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Blog description is required",
       });
     }
 
     let thumbnail = null;
 
-    // ✅ CLOUDINARY IMAGE UPLOAD
     if (req.file) {
       const result = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: "blogs",
-          },
-          (error, result) => {
+          { folder: "blogs" },
+          (error, uploaded) => {
             if (error) {
               reject(error);
-            } else {
-              resolve(result);
+              return;
             }
+            resolve(uploaded);
           }
         );
 
-        streamifier
-          .createReadStream(req.file.buffer)
-          .pipe(stream);
+        streamifier.createReadStream(req.file.buffer).pipe(stream);
       });
 
-      // ✅ SAVE CLOUDINARY URL
       thumbnail = result.secure_url;
     }
 
     const blogData = {
-      title,
-      category,
-      subtitle,
-      description,
+      title: title.trim(),
+      category: category.trim(),
+      subtitle: subtitle ? subtitle.trim() : "",
+      description: description.trim(),
       author: req.user.id,
     };
 
-    // ✅ ONLY IF IMAGE EXISTS
     if (thumbnail) {
       blogData.thumbnail = thumbnail;
     }
 
-    let blog; // FIXED: Declare blog variable at top level
-
-    // ================= UPDATE BLOG =================
-    if (blogId) { // FIXED: Use blogId variable instead of req.params.blogId
+    if (blogId) {
       const existingBlog = await Blog.findById(blogId);
 
       if (!existingBlog) {
@@ -83,7 +94,10 @@ export const createBlog = async (req, res) => {
         });
       }
 
-      // ✅ DELETE OLD CLOUDINARY IMAGE
+      if (!thumbnail && existingBlog.thumbnail) {
+        blogData.thumbnail = existingBlog.thumbnail;
+      }
+
       if (
         thumbnail &&
         existingBlog.thumbnail &&
@@ -91,25 +105,18 @@ export const createBlog = async (req, res) => {
       ) {
         try {
           const parts = existingBlog.thumbnail.split("/");
-          const fileName =
-            parts[parts.length - 1].split(".")[0];
-
-          const folderName =
-            parts[parts.length - 2];
-
+          const fileName = parts[parts.length - 1].split(".")[0];
+          const folderName = parts[parts.length - 2];
           const publicId = `${folderName}/${fileName}`;
-
           await cloudinary.uploader.destroy(publicId);
         } catch (err) {
           console.log("Old image delete failed:", err);
         }
       }
 
-      blog = await Blog.findByIdAndUpdate(
-        blogId, // FIXED: Use blogId variable
-        blogData,
-        { new: true }
-      );
+      const blog = await Blog.findByIdAndUpdate(blogId, blogData, {
+        new: true,
+      });
 
       return res.status(200).json({
         success: true,
@@ -118,8 +125,7 @@ export const createBlog = async (req, res) => {
       });
     }
 
-    // ================= CREATE BLOG =================
-    blog = await Blog.create({
+    const blog = await Blog.create({
       ...blogData,
       likes: [],
       isPublished: false,
@@ -130,14 +136,12 @@ export const createBlog = async (req, res) => {
       message: "Blog Created Successfully",
       blog,
     });
-
   } catch (error) {
-    console.log("BLOG ERROR:", error);
+    console.error("BLOG ERROR:", error);
 
     return res.status(500).json({
       success: false,
-      message: "Failed to create/update blog",
-      error: error.message,
+      message: error.message || "Failed to create/update blog",
     });
   }
 };

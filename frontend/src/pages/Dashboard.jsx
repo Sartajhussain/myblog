@@ -4,18 +4,14 @@ import { Outlet } from "react-router-dom";
 
 const Dashboard = () => {
   return (
-    <div className="min-h-screen flex bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
+      <Sidebar />
 
-      {/* Sidebar */}
-      <div className="hidden md:block">
-        <Sidebar />
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 px-4 md:px-10 py-0 md:py-12">
-        <Outlet />
-      </div>
-
+      <main className="md:pl-64 lg:pl-72 px-4 md:px-6 lg:px-8 py-4 md:py-8 min-h-screen">
+        <div className="max-w-6xl mx-auto">
+          <Outlet />
+        </div>
+      </main>
     </div>
   );
 };
