@@ -482,7 +482,7 @@ const UpdateBlog = () => {
   }
 
   return (
-    <div className="min-h-screen pt-20 pb-24 md:ml-72 px-4 py-10 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen pt-20 pb-24 px-4 py-10 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-10">
 
         <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-900 dark:text-white">
@@ -501,17 +501,16 @@ const UpdateBlog = () => {
           <button
             onClick={publishHandler}
             disabled={publishLoading}
-            className={`px-4 py-2 rounded-lg text-white transition ${
-              isPublished
+            className={`px-4 py-2 rounded-lg text-white transition ${isPublished
                 ? "bg-yellow-600 hover:bg-yellow-700"
                 : "bg-green-600 hover:bg-green-700"
-            } disabled:opacity-50`}
+              } disabled:opacity-50`}
           >
             {publishLoading
               ? "Processing..."
               : isPublished
-              ? "Unpublish"
-              : "Publish"}
+                ? "Unpublish"
+                : "Publish"}
           </button>
 
           <button
@@ -535,9 +534,8 @@ const UpdateBlog = () => {
             value={blogData.title}
             onChange={handleChange}
             placeholder="Enter blog title"
-            className={`w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white ${
-              errors.title ? "border-red-500" : "border-gray-300"
-            }`}
+            className={`w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white ${errors.title ? "border-red-500" : "border-gray-300"
+              }`}
           />
 
           {errors.title && (
@@ -557,9 +555,8 @@ const UpdateBlog = () => {
             value={blogData.subtitle}
             onChange={handleChange}
             placeholder="Enter blog subtitle"
-            className={`w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white ${
-              errors.subtitle ? "border-red-500" : "border-gray-300"
-            }`}
+            className={`w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white ${errors.subtitle ? "border-red-500" : "border-gray-300"
+              }`}
           />
 
           {errors.subtitle && (
@@ -576,9 +573,8 @@ const UpdateBlog = () => {
           <select
             value={blogData.category}
             onChange={selectCategory}
-            className={`w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white ${
-              errors.category ? "border-red-500" : "border-gray-300"
-            }`}
+            className={`w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white ${errors.category ? "border-red-500" : "border-gray-300"
+              }`}
           >
             <option value="">Select Category</option>
             <option value="tech">Technology</option>
@@ -673,14 +669,13 @@ Create a detailed article suitable for direct publishing.
 
           {/* JODIT EDITOR WITH INSIDE AI LOADING ANIMATION */}
           <div
-            className={`relative rounded-lg overflow-hidden border ${
-              errors.description ? "border-red-500" : "border-gray-300 dark:border-gray-700"
-            }`}
+            className={`relative rounded-lg overflow-hidden border ${errors.description ? "border-red-500" : "border-gray-300 dark:border-gray-700"
+              }`}
           >
             {/* IN-EDITOR PREMIUM AI WAVE / SKELETON OVERLAY */}
             {aiLoading && (
               <div className="absolute inset-0 z-20 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-6 flex flex-col justify-between animate-pulse pointer-events-none">
-                
+
                 {/* Header Info Banner inside Editor */}
                 <div className="flex items-center justify-between border-b border-purple-200/50 dark:border-purple-800/50 pb-3">
                   <div className="flex items-center gap-2">
@@ -754,9 +749,8 @@ Create a detailed article suitable for direct publishing.
             file:text-sm file:font-semibold
             file:bg-black file:text-white
             hover:file:bg-gray-800
-            dark:file:bg-white dark:file:text-black dark:hover:file:bg-gray-100 ${
-              errors.thumbnail ? "border-red-500" : ""
-            }`}
+            dark:file:bg-white dark:file:text-black dark:hover:file:bg-gray-100 ${errors.thumbnail ? "border-red-500" : ""
+              }`}
           />
 
           {errors.thumbnail && (

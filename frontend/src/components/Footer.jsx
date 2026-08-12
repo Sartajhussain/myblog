@@ -92,7 +92,7 @@ transition-colors duration-300">
             </li>
 
             {/* ❌ FIXED */}
-            <li>
+            {/* <li>
               <Link to="#" className="hover:text-black dark:hover:text-white transition">
                 Privacy Policy
               </Link>
@@ -102,7 +102,7 @@ transition-colors duration-300">
               <Link to="#" className="hover:text-black dark:hover:text-white transition">
                 Terms of Service
               </Link>
-            </li>
+            </li> */}
 
           </ul>
         </div>

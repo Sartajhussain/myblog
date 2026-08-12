@@ -172,16 +172,16 @@ const CreateBlogs = () => {
   // =====================================================
 
   return (
-    <div className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center p-3 sm:p-6 md:p-8">
-  <div className="w-full max-w-2xl border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xl p-5 sm:p-8 space-y-6">
+    <div className="w-full  min-h-[calc(100vh-4rem)] flex items-center justify-center p-3 sm:p-6 md:p-8">
+  <div className="w-full max-w-2xl border border-slate-200/80 dark:border-slate-800 dark:bg-gray-800 rounded-3xl shadow-xl p-5 sm:p-8 space-y-6">
 
     {/* HEADER */}
 
-    <div className="space-y-2">
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-semibold">
+    <div className="space-y-2 ">
+      {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-semibold">
         <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
         AI Assistant Ready
-      </div>
+      </div> */}
 
       <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
         Create Your Blog
@@ -362,7 +362,7 @@ const CreateBlogs = () => {
         className={`w-full py-3.5 px-6 rounded-xl font-bold text-xs sm:text-sm text-white shadow-lg transition-all duration-300 flex items-center justify-center gap-2 ${
           loading
             ? "bg-slate-400 dark:bg-slate-700 cursor-not-allowed shadow-none"
-            : "bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-95 active:scale-[0.99] shadow-purple-500/25"
+            : "dark:bg-black hover:opacity-95 active:scale-[0.99] shadow-purple-500/25"
         }`}
       >
         {loading ? (

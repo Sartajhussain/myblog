@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { 
   FaUser, 
   FaBlog, 
@@ -8,12 +9,21 @@ import {
   FaPlus, 
   FaHome 
 } from "react-icons/fa";
+import { getProfileImage } from "../utils/profileImage";
+import userimg from "../assets/userprofile.png";
 
 const Sidebar = () => {
+  const { user } = useSelector((store) => store.auth);
+  const navigate = useNavigate();
 
-  const { user } = useSelector(
-    (store) => store.auth
-  );
+  // Exact profile picture check with fallback to local asset
+  const avatarUrl =
+    user?.profilePic ||
+    user?.avatar ||
+    user?.profileImage ||
+    user?.profilePicture ||
+    (getProfileImage ? getProfileImage(user?.profilePic) : null) ||
+    userimg;
 
   return (
     <aside
@@ -27,15 +37,14 @@ const Sidebar = () => {
         transition-colors duration-300
       "
     >
-
       {/* Logo / Title */}
       <div className="mb-8 mt-16">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
           Dashboard
         </h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        {/* <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           Welcome back, {user?.firstName || "User"}!
-        </p>
+        </p> */}
       </div>
 
       {/* Menu */}
@@ -47,10 +56,10 @@ const Sidebar = () => {
             <NavLink
               to={user ? "/dashboard/profile" : "/login"}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm md:text-base ${
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm md:text-base font-medium ${
                   isActive
-                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white"
+                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-sm"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white"
                 }`
               }
             >
@@ -64,10 +73,10 @@ const Sidebar = () => {
             <NavLink
               to={user ? "/dashboard/blog" : "/login"}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm md:text-base ${
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm md:text-base font-medium ${
                   isActive
-                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white"
+                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-sm"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white"
                 }`
               }
             >
@@ -81,10 +90,10 @@ const Sidebar = () => {
             <NavLink
               to={user ? "/dashboard/comments" : "/login"}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm md:text-base ${
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm md:text-base font-medium ${
                   isActive
-                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white"
+                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-sm"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white"
                 }`
               }
             >
@@ -98,10 +107,10 @@ const Sidebar = () => {
             <NavLink
               to={user ? "/dashboard/create-blogs" : "/login"}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm md:text-base ${
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm md:text-base font-medium ${
                   isActive
-                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white"
+                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-sm"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white"
                 }`
               }
             >
@@ -110,11 +119,11 @@ const Sidebar = () => {
             </NavLink>
           </li>
 
-          {/* HOME - Optional */}
+          {/* HOME */}
           <li className="pt-4 border-t border-gray-200 dark:border-slate-700">
             <NavLink
               to="/"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm md:text-base text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-black dark:hover:text-white"
             >
               <FaHome size={18} />
               <span>Home</span>
@@ -124,16 +133,24 @@ const Sidebar = () => {
         </ul>
       </nav>
 
-      {/* User Avatar at Bottom - Optional */}
+      {/* USER PROFILE SECTION */}
       {user && (
-        <div className="mt-auto pt-4 border-t border-gray-200 dark:border-slate-700">
-          <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-gray-50 dark:bg-slate-800">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center text-white text-sm font-bold">
-              {user?.firstName?.charAt(0) || "U"}
+        <div className="mt-auto pt-4 border-t border-gray-200 dark:border-slate-700 cursor-pointer" onClick={() => navigate("/dashboard/profile")}>
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-100 dark:bg-slate-800/80 group">
+            <div className="relative shrink-0">
+              <img
+                src={avatarUrl}
+                alt={user?.firstName || "User"}
+                onError={(e) => { 
+                  e.target.onerror = null;
+                  e.target.src = userimg;
+                }}
+                className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-300 dark:ring-gray-600 group-hover:ring-gray-900 dark:group-hover:ring-white transition-all duration-200"
+              />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                {user?.firstName} {user?.lastName}
+              <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                {user?.firstName ? `${user?.firstName} ${user?.lastName || ""}` : user?.name || "User"}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                 {user?.email}
@@ -142,6 +159,7 @@ const Sidebar = () => {
           </div>
         </div>
       )}
+
     </aside>
   );
 };
