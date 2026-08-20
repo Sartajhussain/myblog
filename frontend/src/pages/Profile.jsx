@@ -82,6 +82,7 @@ const Profile = () => {
   }, [dispatch, user]);
 
   // Fetch blogs & total likes, and comments count
+  // Fetch blogs & total likes, and comments count
   useEffect(() => {
     const fetchStats = async () => {
       if (!user?._id) return;
@@ -103,19 +104,28 @@ const Profile = () => {
           );
           setTotalLikes(likesCount);
 
+          // Calculate fallback comments directly from blogs array in case API fails
+          const estimatedComments = blogs.reduce((acc, blog) => {
+            if (Array.isArray(blog.comments)) {
+              return acc + blog.comments.length;
+            } else if (typeof blog.comments === "number") {
+              return acc + blog.comments;
+            }
+            return acc;
+          }, 0);
+
           try {
             const commentsRes = await axios.get(
-              `${API_BASE_URL}/api/v1/comment/my-comments`,
+              `${API_BASE_URL}/api/v1/comment/my-blogs`, // `/my-comments` ki jagah `/my-blogs` karein
               { withCredentials: true }
             );
-            if (commentsRes.data.success) {
-              setTotalComments(commentsRes.data.comments?.length || 0);
+            if (commentsRes.data.success && Array.isArray(commentsRes.data.comments)) {
+              setTotalComments(commentsRes.data.comments.length);
+            } else {
+              setTotalComments(estimatedComments);
             }
-          } catch {
-            const estimatedComments = blogs.reduce(
-              (acc, blog) => acc + (blog.comments ? blog.comments.length : 0),
-              0
-            );
+          } catch (commentErr) {
+            console.warn("My-Comments API failed, using fallback:", commentErr);
             setTotalComments(estimatedComments);
           }
         }
@@ -192,7 +202,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen pt-20 pb-24 md:pb-0 md:pt-0 flex items-center justify-center bg-gradient-to-br from-gray-50 via-purple-50/20 to-pink-50/20 dark:from-slate-900 dark:via-purple-950/20 dark:to-pink-950/20 transition-colors duration-300 px-4 md:px-8 py-12">
       <div className="w-full max-w-5xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-6 md:p-10 shadow-2xl border border-purple-200/50 dark:border-purple-500/30 flex flex-col md:flex-row items-center md:items-start gap-10">
-        
+
         {/* Profile Picture & Left Section */}
         <div className="w-full md:w-1/3 flex flex-col items-center text-center">
           <div className="relative group">
@@ -481,32 +491,32 @@ const Profile = () => {
                     {input.file?.name || "No new file selected"}
                   </span>
                   <div className="flex justify-end gap-3 ">
-                <button
-                  type="button"
-                  onClick={handleModalClose}
-                  className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-800 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-medium hover:opacity-90 transition shadow-lg shadow-purple-500/25 flex items-center gap-2 disabled:opacity-50"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="animate-spin w-4 h-4" /> Saving...
-                    </>
-                  ) : (
-                    "Save Changes"
-                  )}
-                </button>
-              </div>
+                    <button
+                      type="button"
+                      onClick={handleModalClose}
+                      className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-800 transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-medium hover:opacity-90 transition shadow-lg shadow-purple-500/25 flex items-center gap-2 disabled:opacity-50"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="animate-spin w-4 h-4" /> Saving...
+                        </>
+                      ) : (
+                        "Save Changes"
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              
+
             </form>
           </div>
         </div>

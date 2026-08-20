@@ -8,7 +8,6 @@ export { likeComment } from "./likeComment.controller.js";
 // ================= ADD COMMENT =================
 export const addComment = async (req, res) => {
   try {
-
     const { text } = req.body;
     const { blogId } = req.params;
 
@@ -30,26 +29,24 @@ export const addComment = async (req, res) => {
 
     const comment = await Comment.create({
       text,
-      user: req.user.id,
+      user: req.user.id || req.user._id,
       blog: blog._id,
     });
 
     blog.comments.push(comment._id);
-
     await blog.save();
 
-    const populatedComment = await Comment.findById(comment._id)
-      .populate("user", "firstName lastName profilePic");
+    const populatedComment = await Comment.findById(comment._id).populate(
+      "user",
+      "firstName lastName profilePic"
+    );
 
     return res.status(201).json({
       success: true,
       comment: populatedComment,
     });
-
   } catch (error) {
-
     console.log("ADD COMMENT ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to add comment",
@@ -60,32 +57,31 @@ export const addComment = async (req, res) => {
 // ================= GET ALL COMMENTS =================
 export const getAllComments = async (req, res) => {
   try {
-
     const page = parseInt(req.query.page) || 1;
-    const limit = 5;
-    const skip = (page - 1) * limit;
-
     const totalComments = await Comment.countDocuments();
 
-    const comments = await Comment.find()
+    let query = Comment.find()
       .populate("user", "firstName lastName profilePic")
       .populate("blog", "title thumbnail")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      .sort({ createdAt: -1 });
+
+    // Agar frontend limit bhejta hai tabhi limit lagayein
+    if (req.query.limit) {
+      const limit = parseInt(req.query.limit);
+      const skip = (page - 1) * limit;
+      query = query.skip(skip).limit(limit);
+    }
+
+    const comments = await query;
 
     res.status(200).json({
       success: true,
       comments,
       currentPage: page,
-      totalPages: Math.ceil(totalComments / limit),
       totalComments,
     });
-
   } catch (err) {
-
     console.log("GET ALL COMMENTS ERROR:", err);
-
     res.status(500).json({
       success: false,
       message: "Failed to fetch comments",
@@ -96,37 +92,40 @@ export const getAllComments = async (req, res) => {
 // ================= GET COMMENTS FOR CURRENT USER'S BLOGS =================
 export const getCommentsForMyBlogs = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const page = parseInt(req.query.page) || 1;
-    const limit = 5;
-    const skip = (page - 1) * limit;
+    const userId = req.user.id || req.user._id;
 
+    // 1. User ke saare blogs ki IDs nikalein
     const userBlogIds = await Blog.find({ author: userId }).select("_id").lean();
     const blogIds = userBlogIds.map((blog) => blog._id);
 
+    // 2. Database mein total comments count
     const totalComments = await Comment.countDocuments({
       blog: { $in: blogIds },
     });
 
-    const comments = await Comment.find({
-      blog: { $in: blogIds },
-    })
+    // 3. Dynamic Query (Default: Saare comments, Limit sirf jab req.query.limit ho)
+    let query = Comment.find({ blog: { $in: blogIds } })
       .populate("user", "firstName lastName profilePic")
       .populate("blog", "title thumbnail author")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      .sort({ createdAt: -1 });
 
-    res.status(200).json({
+    if (req.query.limit) {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit);
+      const skip = (page - 1) * limit;
+      query = query.skip(skip).limit(limit);
+    }
+
+    const comments = await query;
+
+    return res.status(200).json({
       success: true,
       comments,
-      currentPage: page,
-      totalPages: Math.ceil(totalComments / limit),
       totalComments,
     });
   } catch (err) {
     console.log("GET COMMENTS FOR MY BLOGS ERROR:", err);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to fetch comments for your blogs",
     });
@@ -136,7 +135,6 @@ export const getCommentsForMyBlogs = async (req, res) => {
 // ================= UPDATE COMMENT =================
 export const updateComment = async (req, res) => {
   try {
-
     const { commentId } = req.params;
     const { text } = req.body;
 
@@ -156,7 +154,9 @@ export const updateComment = async (req, res) => {
       });
     }
 
-    if (comment.user.toString() !== req.user.id) {
+    const currentUserId = (req.user.id || req.user._id).toString();
+
+    if (comment.user.toString() !== currentUserId) {
       return res.status(403).json({
         success: false,
         message: "You can only edit your own comments",
@@ -164,21 +164,19 @@ export const updateComment = async (req, res) => {
     }
 
     comment.text = text;
-
     await comment.save();
 
-    const updatedComment = await Comment.findById(comment._id)
-      .populate("user", "firstName lastName profilePic");
+    const updatedComment = await Comment.findById(comment._id).populate(
+      "user",
+      "firstName lastName profilePic"
+    );
 
     res.status(200).json({
       success: true,
       comment: updatedComment,
     });
-
   } catch (err) {
-
     console.log("UPDATE COMMENT ERROR:", err);
-
     res.status(500).json({
       success: false,
       message: "Failed to update comment",
@@ -189,7 +187,6 @@ export const updateComment = async (req, res) => {
 // ================= DELETE COMMENT =================
 export const deleteComment = async (req, res) => {
   try {
-
     const { commentId } = req.params;
 
     const comment = await Comment.findById(commentId);
@@ -201,13 +198,15 @@ export const deleteComment = async (req, res) => {
       });
     }
 
-    if (comment.user.toString() !== req.user.id) {
+    const currentUserId = (req.user.id || req.user._id).toString();
+
+    if (comment.user.toString() !== currentUserId) {
       return res.status(403).json({
         success: false,
         message: "You can only delete your own comments",
       });
     }
-   
+
     // REMOVE COMMENT ID FROM BLOG
     await Blog.findByIdAndUpdate(comment.blog, {
       $pull: {
@@ -221,11 +220,8 @@ export const deleteComment = async (req, res) => {
       success: true,
       message: "Comment deleted",
     });
-
   } catch (err) {
-
     console.log("DELETE COMMENT ERROR:", err);
-
     res.status(500).json({
       success: false,
       message: "Failed to delete comment",

@@ -27,6 +27,9 @@ router.get("/all", isAuthenticated, getAllComments);
 // ✅ COMMENTS FOR CURRENT USER'S BLOGS
 router.get("/my-blogs", isAuthenticated, getCommentsForMyBlogs);
 
+// 🛠️ FIX: ADDED MISSING `/my-comments` ROUTE
+router.get("/my-comments", isAuthenticated, getCommentsForMyBlogs);
+
 // ✅ UPDATE
 router.put("/:commentId", isAuthenticated, updateComment);
 

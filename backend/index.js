@@ -117,31 +117,35 @@ app.get("/health", (req, res) => {
   });
 });
 
-// API ROUTES
+// 1. ALL API ROUTES
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/comment", commentRoutes);
 app.use("/api/v1/contact", contactLimiter, contactRoutes);
-
-// AI ROUTE
 app.use("/api/v1/ai", aiRoute);
 
-// FRONTEND STATIC FILES
-const isProduction = NODE_ENV === "production";
+// 2. API 404 HANDLER (KISI BHI GALAT /api REQUEST KO INDEX.HTML PAR BHEJNE SE ROKNE KE LIYE)
+app.use("/api/*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `API Route ${req.originalUrl} not found`,
+  });
+});
 
+// 3. FRONTEND STATIC FILES
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
 }
 
-// SPA FALLBACK
-app.get(/.*/, (req, res) => {
-  if (isProduction && fs.existsSync(indexPath)) {
+// 4. SPA FALLBACK (ONLY FOR NON-API PAGE ROUTES)
+app.get("*", (req, res) => {
+  if (fs.existsSync(indexPath)) {
     return res.sendFile(indexPath);
   }
 
   return res.status(404).json({
     success: false,
-    message: "Frontend not built or not found",
+    message: "Frontend build not found",
   });
 });
 
