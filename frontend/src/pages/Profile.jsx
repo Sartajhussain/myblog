@@ -494,7 +494,7 @@ const Profile = () => {
                     <button
                       type="button"
                       onClick={handleModalClose}
-                      className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-800 transition"
+                      className="px-5 py-2.5 rounded-xl border border-gray-200 md:block hidden dark:border-slate-700 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-800 transition"
                     >
                       Cancel
                     </button>
