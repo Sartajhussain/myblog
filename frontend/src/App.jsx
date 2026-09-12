@@ -27,6 +27,7 @@ import AllUserProfile from "./pages/AllUserProfile";
 
 import { setUser } from "./redux/authSlice";
 import { API_BASE_URL } from "./utils/api";
+import VerifyEmail from "./pages/VerifyEmail";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -71,6 +72,7 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
 

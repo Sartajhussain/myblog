@@ -1,17 +1,18 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-
 import { getDataUri } from "../utils/dataUri.js";
 import cloudinary from "../utils/cloudinary.js";
+import { sendVerificationMail } from "../utils/sendMail.js";
 
+// ================= HELPER =================
+const generateOtp = () =>
+  Math.floor(100000 + Math.random() * 900000).toString();
 
-
+// ================= REGISTER =================
 export const userRegister = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
-
-
 
     if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({
@@ -35,8 +36,30 @@ export const userRegister = async (req, res) => {
       });
     }
 
-    // check if user exists
     const existingUser = await User.findOne({ email });
+
+    // ✅ Agar user hai lekin verified nahi -> naya OTP bhejo
+    if (existingUser && !existingUser.isVerified) {
+      const otp = generateOtp();
+
+      existingUser.verifyOtp = otp;
+      existingUser.verifyOtpExpires = Date.now() + 10 * 60 * 1000;
+      await existingUser.save();
+
+      try {
+        await sendVerificationMail(email, otp, existingUser.firstName);
+      } catch (mailErr) {
+        console.log("Email send failed:", mailErr.message);
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "OTP resent to your email. Please verify.",
+        email: existingUser.email,
+      });
+    }
+
+    // ✅ Agar user already verified hai
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -44,22 +67,32 @@ export const userRegister = async (req, res) => {
       });
     }
 
+    // ✅ Naya user banao + OTP generate
     const hashpassword = await bcrypt.hash(password, 10);
+    const otp = generateOtp();
 
-    // create user
     const newUser = await User.create({
       firstName,
       lastName,
       email,
-      password: hashpassword   
+      password: hashpassword,
+      isVerified: false,
+      verifyOtp: otp,
+      verifyOtpExpires: Date.now() + 10 * 60 * 1000,
     });
+
+    // ✅ Email bhejo
+    try {
+      await sendVerificationMail(email, otp, firstName);
+    } catch (mailErr) {
+      console.log("Email send failed:", mailErr.message);
+    }
 
     return res.status(201).json({
       success: true,
-      message: "user registered successfully",
-      user: newUser,
+      message: "Registered! Please check your email for OTP.",
+      email: newUser.email,
     });
-
   } catch (error) {
     console.log("error while registering user", error);
     return res.status(500).json({
@@ -69,11 +102,12 @@ export const userRegister = async (req, res) => {
     });
   }
 };
+
+// ================= LOGIN =================
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    /* ================= VALIDATION ================= */
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -81,7 +115,6 @@ export const login = async (req, res) => {
       });
     }
 
-    /* ================= FIND USER ================= */
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
@@ -91,11 +124,7 @@ export const login = async (req, res) => {
       });
     }
 
-    /* ================= CHECK PASSWORD ================= */
-    const isPasswordValid = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       return res.status(400).json({
@@ -104,34 +133,36 @@ export const login = async (req, res) => {
       });
     }
 
-    /* ================= JWT TOKEN ================= */
+    // ✅ EMAIL VERIFICATION CHECK
+    if (!user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your email first",
+        needsVerification: true,
+        email: user.email,
+      });
+    }
+
     if (!process.env.JWT_SECRET) {
       throw new Error("JWT_SECRET is missing");
     }
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
-    /* ================= COOKIE OPTIONS ================= */
     const isProduction = process.env.NODE_ENV === "production";
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction, // render/live ke liye
+      secure: isProduction,
       sameSite: isProduction ? "None" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
     });
 
-    /* ================= REMOVE PASSWORD ================= */
     user.password = undefined;
 
-    /* ================= RESPONSE ================= */
     return res.status(200).json({
       success: true,
       message: `Welcome back ${user.firstName}`,
@@ -149,10 +180,8 @@ export const login = async (req, res) => {
         facebook: user.facebook,
       },
     });
-
   } catch (error) {
     console.log("LOGIN ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Login failed",
@@ -160,18 +189,13 @@ export const login = async (req, res) => {
   }
 };
 
-
-
+// ================= LOGOUT =================
 export const logout = async (_, res) => {
   try {
-
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite:
-        process.env.NODE_ENV === "production"
-          ? "None"
-          : "Lax",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       path: "/",
     });
 
@@ -179,11 +203,8 @@ export const logout = async (_, res) => {
       success: true,
       message: "Logged out successfully",
     });
-
   } catch (error) {
-
     console.log("Logout Error:", error);
-
     return res.status(500).json({
       success: false,
       message: "Logout failed",
@@ -191,6 +212,7 @@ export const logout = async (_, res) => {
   }
 };
 
+// ================= GET CURRENT USER =================
 export const getCurrentUser = async (req, res) => {
   try {
     if (!req.user?.id) {
@@ -222,13 +244,13 @@ export const getCurrentUser = async (req, res) => {
   }
 };
 
+// ================= UPDATE PROFILE =================
 export const updateProfile = async (req, res) => {
   try {
-
     if (!req.user || !req.user.id) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized"
+        message: "Unauthorized",
       });
     }
 
@@ -249,7 +271,9 @@ export const updateProfile = async (req, res) => {
 
     if (req.file) {
       const fileUrl = getDataUri(req.file);
-      const cloudinaryresponse = await cloudinary.uploader.upload(fileUrl.content);
+      const cloudinaryresponse = await cloudinary.uploader.upload(
+        fileUrl.content
+      );
       photoUrl = cloudinaryresponse.secure_url;
     }
 
@@ -281,7 +305,6 @@ export const updateProfile = async (req, res) => {
       message: "Profile updated successfully",
       user: userData,
     });
-
   } catch (error) {
     console.error("PROFILE UPDATE ERROR:", error);
     return res.status(500).json({
@@ -291,27 +314,21 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-
+// ================= GET ALL USERS =================
 export const getAllUsers = async (req, res) => {
   try {
-
-    const users = await User.find()
-      .select("-password -__v");
+    const users = await User.find().select("-password -__v");
 
     res.status(200).json({
       success: true,
       message: "Users fetched successfully",
       users,
     });
-
   } catch (error) {
-
     console.error("GET ALL USERS ERROR:", error);
-
     res.status(500).json({
       success: false,
       message: "Server error while fetching users",
     });
-
   }
 };
