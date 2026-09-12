@@ -252,7 +252,7 @@ const Login = () => {
     }`;
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200 flex flex-col md:flex-row min-h-[100dvh]">
+    <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200 pt-[100px] md:pt-7 flex flex-col md:flex-row min-h-[100dvh]">
       {/* LEFT IMAGE */}
       <div className="hidden md:flex md:w-1/2 items-center justify-center bg-gray-200 dark:bg-gray-800">
         <img
