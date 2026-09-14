@@ -5,8 +5,7 @@ import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { Loader2 } from "lucide-react";
 import { setLoading, setUser } from "../redux/authSlice";
-import { FiEye, FiEyeOff } from "react-icons/fi";
-import loginImg from "../assets/login-img.png";
+import { FiEye, FiEyeOff, FiCheck } from "react-icons/fi";
 import { API_BASE_URL } from "../utils/api";
 
 const Login = () => {
@@ -32,6 +31,22 @@ const Login = () => {
   // auto-verify OTP
   const otpRef = React.useRef([]);
   const verifyingRef = React.useRef(false);
+
+  // ✅ Rotating tagline
+  const taglines = [
+    "Welcome back, writer.",
+    "Your stories await.",
+    "Continue your journey.",
+    "Pick up where you left.",
+  ];
+  const [taglineIndex, setTaglineIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTaglineIndex((prev) => (prev + 1) % taglines.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
 
   // ============ VALIDATION ============
   const validateField = (name, value) => {
@@ -91,7 +106,6 @@ const Login = () => {
     } catch (error) {
       const data = error.response?.data;
 
-      // ✅ Verification needed → OTP page pe bhejo
       if (data?.needsVerification) {
         toast.error("Please verify your email first");
         navigate("/verify-email", { state: { email: data.email } });
@@ -253,16 +267,98 @@ const Login = () => {
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200 pt-[100px] md:pt-7 flex flex-col md:flex-row min-h-[100dvh]">
-      {/* LEFT IMAGE */}
-      <div className="hidden md:flex md:w-1/2 items-center justify-center bg-gray-200 dark:bg-gray-800">
-        <img
-          src={loginImg}
-          alt="Login Visual"
-          className="w-[90%] h-[90%] object-cover"
-        />
+
+      {/* =====================================================
+          LEFT — MODERN ANIMATED PANEL
+          (matches app theme: gray + orange accent)
+      ===================================================== */}
+      <div className="hidden md:flex md:w-1/2 relative overflow-hidden bg-gray-200 dark:bg-gray-800 items-center justify-center">
+
+        {/* Floating Blob 1 — orange */}
+        <div className="absolute top-[-80px] left-[-80px] w-72 h-72 bg-[oklch(0.71_0.2_46.45)] opacity-20 dark:opacity-15 rounded-full blur-3xl animate-blob"></div>
+
+        {/* Floating Blob 2 — orange lighter */}
+        <div className="absolute bottom-[-60px] right-[-60px] w-80 h-80 bg-[oklch(0.8_0.15_60)] opacity-20 dark:opacity-15 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+
+        {/* Floating Blob 3 — subtle gray */}
+        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-gray-400 dark:bg-gray-600 opacity-20 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
+
+        {/* Grid Overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.06] dark:opacity-[0.08]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, currentColor 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+        ></div>
+
+        {/* Content */}
+        <div className="relative z-10 px-10 lg:px-16 max-w-lg">
+
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-white/70 dark:bg-gray-900/60 backdrop-blur-md border border-gray-300 dark:border-gray-700 px-4 py-1.5 rounded-full text-xs font-medium mb-6 text-gray-700 dark:text-gray-300 animate-fade-in">
+            <span className="w-2 h-2 bg-[oklch(0.71_0.2_46.45)] rounded-full animate-pulse"></span>
+            Welcome back to the community
+          </div>
+
+          {/* Heading */}
+          <h1 className="text-4xl lg:text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100 animate-fade-in-up">
+            Glad to see <br />
+            <span className="text-[oklch(0.71_0.2_46.45)]">
+              you again.
+            </span>
+          </h1>
+
+          {/* Rotating Tagline */}
+          <div className="mt-4 h-8 overflow-hidden">
+            <p
+              key={taglineIndex}
+              className="text-lg lg:text-xl text-gray-700 dark:text-gray-300 animate-fade-in-up"
+            >
+              {taglines[taglineIndex]}
+            </p>
+          </div>
+
+          {/* Feature List */}
+          <ul className="mt-10 space-y-4">
+            {[
+              "Access your saved drafts",
+              "Continue reading where you left",
+              "Engage with your readers",
+            ].map((feature, i) => (
+              <li
+                key={i}
+                className="flex items-center gap-3 text-sm lg:text-base text-gray-700 dark:text-gray-300 animate-fade-in-up"
+                style={{ animationDelay: `${i * 200 + 400}ms` }}
+              >
+                <span className="w-6 h-6 flex items-center justify-center bg-[oklch(0.71_0.2_46.45)]/15 dark:bg-[oklch(0.71_0.2_46.45)]/25 text-[oklch(0.71_0.2_46.45)] rounded-full shrink-0">
+                  <FiCheck size={14} />
+                </span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+
+          {/* Bottom Dots */}
+          <div className="mt-12 flex gap-2">
+            {taglines.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1.5 rounded-full transition-all duration-500 ${
+                  i === taglineIndex
+                    ? "w-8 bg-[oklch(0.71_0.2_46.45)]"
+                    : "w-1.5 bg-gray-400 dark:bg-gray-600"
+                }`}
+              ></div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* RIGHT FORM */}
+      {/* =====================================================
+          RIGHT — FORM (unchanged)
+      ===================================================== */}
       <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-6 md:p-16 overflow-y-auto">
         <div className="w-full max-w-sm p-8 rounded-2xl shadow-lg bg-white dark:bg-gray-800">
           <h2 className="text-3xl font-bold text-center mb-2">{heading}</h2>
@@ -281,7 +377,7 @@ const Login = () => {
                 : step === 1
                 ? handleForgotPassword
                 : step === 2
-                ? (e) => e.preventDefault() // auto verify
+                ? (e) => e.preventDefault()
                 : handleResetPassword
             }
             noValidate
@@ -409,7 +505,7 @@ const Login = () => {
               </div>
             )}
 
-            {/* BUTTON — dark/light mode */}
+            {/* BUTTON */}
             {step !== 2 && (
               <button
                 type="submit"

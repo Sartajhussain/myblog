@@ -8,6 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { API_BASE_URL } from "../utils/api";
 import { setPublicBlogs } from "../redux/blogSlice";
+import { Calendar, ArrowRight, FileText } from "lucide-react";
 
 const Blogs = () => {
   const navigate = useNavigate();
@@ -22,7 +23,14 @@ const Blogs = () => {
 
   const blogsPerPage = 6;
 
-  // ✅ FETCH BLOGS (Always fetch latest data to show newly created blogs)
+  // ✅ RESET TO PAGE 1 WHENEVER CATEGORY CHANGES
+  // (fixes: switching category while on page 2+ showed "No blogs found"
+  // because currentPage stayed out of range for the new, shorter list)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryFilter]);
+
+  // ✅ FETCH BLOGS
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
@@ -36,7 +44,6 @@ const Blogs = () => {
         );
 
         if (data?.success) {
-          // Backend response structure check (data.blogs || data.feed)
           dispatch(setPublicBlogs(data.blogs || data.feed || []));
         }
       } catch (error) {
@@ -78,13 +85,45 @@ const Blogs = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 mt-13 px-4 md:px-8 py-10 relative">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-10">
+    <div className="relative min-h-screen overflow-hidden bg-gray-50 dark:bg-gray-900 mt-13 px-4 md:px-8 py-10 transition-colors duration-300">
+
+      {/* =====================================================
+          BACKGROUND GLOW — same theme as About/Contact/Footer/AllUser
+      ===================================================== */}
+
+      <div className="pointer-events-none absolute top-[-100px] left-[-100px] w-[450px] h-[450px] bg-[oklch(0.71_0.2_46.45)] opacity-[0.1] dark:opacity-[0.08] rounded-full blur-3xl animate-blob" />
+      <div className="pointer-events-none absolute bottom-[-100px] right-[-100px] w-[450px] h-[450px] bg-[oklch(0.8_0.15_60)] opacity-[0.1] dark:opacity-[0.07] rounded-full blur-3xl animate-blob animation-delay-2000" />
+      <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gray-400 dark:bg-gray-600 opacity-[0.08] dark:opacity-[0.06] rounded-full blur-3xl animate-blob animation-delay-4000" />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.05] dark:opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, currentColor 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
+
+      {/* =====================================================
+          MAIN CONTENT
+      ===================================================== */}
+      <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-10">
         {/* BLOG SECTION */}
         <div className="lg:col-span-3 order-2 lg:order-1">
-          <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
-            Published Blogs
-          </h1>
+
+          {/* HEADER */}
+          <div className="flex items-end justify-between flex-wrap gap-3 mb-8">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                Published Blogs
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                {filteredBlogs.length} {filteredBlogs.length === 1 ? "post" : "posts"}
+                {categoryFilter !== "All" && (
+                  <span className="capitalize"> in "{categoryFilter}"</span>
+                )}
+              </p>
+            </div>
+          </div>
 
           {loading ? (
             <Skeleton
@@ -93,79 +132,101 @@ const Blogs = () => {
               className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6"
             />
           ) : currentBlogs.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400">
-              No blogs found.
-            </p>
+            <div className="flex flex-col items-center justify-center text-center py-16 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-800/30">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[oklch(0.71_0.2_46.45)]/10 text-[oklch(0.6_0.2_46.45)] mb-3">
+                <FileText className="w-6 h-6" />
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 font-medium">
+                No blogs found
+              </p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                Try a different category.
+              </p>
+            </div>
           ) : (
             <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
-              {currentBlogs.map((item) => (
-                <div
-                  key={item._id}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition duration-300 overflow-hidden group flex flex-col justify-between"
-                >
-                  <div>
-                    {getImage(
-                      item.thumbnail || item.image || item.coverImage
-                    ) && (
-                      <img
-                        src={getImage(
-                          item.thumbnail || item.image || item.coverImage
-                        )}
-                        alt={item.title}
-                        className="w-full h-48 object-cover group-hover:scale-105 transition duration-300"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src =
-                            "https://placehold.co/600x400?text=No+Image";
-                        }}
-                      />
-                    )}
+              {currentBlogs.map((item) => {
+                const img = getImage(
+                  item.thumbnail || item.image || item.coverImage
+                );
 
-                    <div className="p-5 space-y-3">
-                      <div className="text-xs text-gray-500 flex justify-between">
-                        <span>
-                          Posted By {item.author?.firstName || "Admin"}{" "}
-                          {item.author?.lastName || ""}
+                return (
+                  <div
+                    key={item._id}
+                    onClick={() => handleReadMore(item._id)}
+                    className="flex flex-col rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/60 overflow-hidden group cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                  >
+                    {/* IMAGE */}
+                    <div className="relative h-44 overflow-hidden bg-gray-100 dark:bg-gray-800">
+                      {img ? (
+                        <img
+                          src={img}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src =
+                              "https://placehold.co/600x400?text=No+Image";
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600">
+                          <FileText className="w-8 h-8" />
+                        </div>
+                      )}
+
+                      {item.category && (
+                        <span className="absolute top-3 left-3 text-[11px] font-medium capitalize px-2.5 py-1 rounded-full bg-black/60 text-white backdrop-blur-sm">
+                          {item.category}
                         </span>
-                        <span>
-                          {new Date(
-                            item.createdAt || Date.now()
-                          ).toLocaleDateString("en-IN", {
+                      )}
+                    </div>
+
+                    {/* CONTENT */}
+                    <div className="flex flex-col flex-1 p-5">
+                      <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 mb-2">
+                        <span className="truncate">
+                          {item.author?.firstName || "Admin"} {item.author?.lastName || ""}
+                        </span>
+                        <span className="flex items-center gap-1 flex-shrink-0">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(item.createdAt || Date.now()).toLocaleDateString("en-IN", {
                             day: "numeric",
                             month: "short",
-                            year: "numeric",
                           })}
                         </span>
                       </div>
 
-                      <h2 className="text-lg font-semibold line-clamp-2 dark:text-white">
+                      <h2 className="text-base font-semibold line-clamp-2 text-gray-900 dark:text-white leading-snug">
                         {item.title}
                       </h2>
 
-                      <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
-                        {item.subtitle}
-                      </p>
+                      {item.subtitle && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1.5">
+                          {item.subtitle}
+                        </p>
+                      )}
+
+                      <div className="mt-auto pt-4 flex items-center gap-1.5 text-sm font-medium text-[oklch(0.6_0.2_46.45)]">
+                        Read more
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </div>
                     </div>
                   </div>
-
-                  <div className="p-5 pt-0">
-                    <button
-                      onClick={() => handleReadMore(item._id)}
-                      className="w-full sm:w-auto mt-2 px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800 transition"
-                    >
-                      Read More
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            setCurrentPage={setCurrentPage}
-          />
+          {totalPages > 1 && (
+            <div className="mt-10">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                setCurrentPage={setCurrentPage}
+              />
+            </div>
+          )}
         </div>
 
         {/* SIDEBAR */}

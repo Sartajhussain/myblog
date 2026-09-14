@@ -4,7 +4,6 @@ import Skeleton from "../components/Skeleton";
 import { useSelector } from "react-redux";
 
 const PublicFeed = () => {
-  // ✅ REDUX DATA
   const { publicBlogs = [], loading = false } = useSelector(
     (state) => state.blog
   );

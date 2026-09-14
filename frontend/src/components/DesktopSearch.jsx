@@ -1,6 +1,7 @@
 import { FiSearch } from "react-icons/fi";
 import { getBlogImage } from "../utils/getBlogImage";
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";   // ✅ ADDED
 
 const DesktopSearch = ({
   search,
@@ -8,15 +9,14 @@ const DesktopSearch = ({
   searchResults = [],
   handleClick,
 }) => {
+  const navigate = useNavigate();   // ✅ ADDED
 
   const [imagesLoaded, setImagesLoaded] = useState({});
   const dropdownRef = useRef(null);
 
   // Close dropdown on outside click
   useEffect(() => {
-
     const handleClickOutside = (event) => {
-
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target)
@@ -28,12 +28,8 @@ const DesktopSearch = ({
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-
   }, [setSearch]);
 
   // Image loaded
@@ -46,9 +42,7 @@ const DesktopSearch = ({
 
   // Image error
   const handleImageError = (e, id) => {
-
-    e.target.src =
-      "https://placehold.co/100x100?text=No+Image";
+    e.target.src = "https://placehold.co/100x100?text=No+Image";
 
     setImagesLoaded((prev) => ({
       ...prev,
@@ -56,15 +50,17 @@ const DesktopSearch = ({
     }));
   };
 
-  return (
-    <div
-      className="relative w-full md:w-auto"
-      ref={dropdownRef}
-    >
+  // ✅ VIEW ALL HANDLER
+  const handleViewAll = () => {
+    const q = search.trim();
+    setSearch(""); // dropdown close
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+  };
 
+  return (
+    <div className="relative w-full md:w-auto" ref={dropdownRef}>
       {/* Search Input */}
       <div className="relative ml-10 md:ml-0">
-
         <input
           type="text"
           placeholder="Search..."
@@ -76,12 +72,14 @@ const DesktopSearch = ({
             pr-3 md:pr-4
             py-1.5 md:py-2
             text-xs md:text-sm
-            border rounded-full
-            focus:ring-2 focus:ring-gray-500
-            dark:bg-gray-800
-            dark:border-gray-700
-            dark:text-white
+            border border-gray-300 dark:border-gray-700
+            rounded-full
+            bg-white dark:bg-gray-800
+            text-gray-900 dark:text-white
+            placeholder:text-gray-400
+            focus:ring-2 focus:ring-[oklch(0.71_0.2_46.45)] focus:border-[oklch(0.71_0.2_46.45)]
             transition-all duration-200
+            outline-none
           "
         />
 
@@ -95,12 +93,10 @@ const DesktopSearch = ({
             text-gray-500 dark:text-gray-400
           "
         />
-
       </div>
 
       {/* SEARCH RESULTS */}
       {search?.trim() && searchResults?.length > 0 && (
-
         <div
           className="
             absolute mt-2 z-50 top-full
@@ -108,51 +104,42 @@ const DesktopSearch = ({
             -translate-x-1/2 md:translate-x-0
             w-[92vw] md:w-[400px] lg:w-[450px]
             max-w-[calc(100vw-1rem)]
-            bg-white dark:bg-gray-800
+            bg-white/95 dark:bg-gray-800/95
+            backdrop-blur-md
             shadow-2xl rounded-xl overflow-hidden
             border border-gray-200 dark:border-gray-700
             animate-fade-in
           "
         >
-
           <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
-
             {searchResults.slice(0, 5).map((item) => (
-
               <div
                 key={item._id}
                 onClick={() => handleClick(item._id)}
                 className="
                   flex items-center gap-3 p-3
                   cursor-pointer
-                  hover:bg-gray-100
-                  dark:hover:bg-gray-700
+                  hover:bg-[oklch(0.71_0.2_46.45)]/10
                   transition-all duration-200
                   group
                 "
               >
-
                 {/* IMAGE */}
                 <div className="relative flex-shrink-0">
-
                   <img
                     src={getBlogImage(
-                      item.thumbnail ||
-                      item.image ||
-                      item.coverImage
+                      item.thumbnail || item.image || item.coverImage
                     )}
                     alt={item.title}
                     className="
                       w-10 h-10 rounded-lg object-cover
                       ring-1 ring-gray-200
                       dark:ring-gray-600
-                      group-hover:ring-blue-500
+                      group-hover:ring-[oklch(0.71_0.2_46.45)]
                       transition-all duration-200
                     "
                     onLoad={() => handleImageLoad(item._id)}
-                    onError={(e) =>
-                      handleImageError(e, item._id)
-                    }
+                    onError={(e) => handleImageError(e, item._id)}
                   />
 
                   {!imagesLoaded[item._id] && (
@@ -164,20 +151,17 @@ const DesktopSearch = ({
                       "
                     />
                   )}
-
                 </div>
 
                 {/* BLOG INFO */}
                 <div className="flex-1 min-w-0">
-
                   <p
                     className="
                       text-xs md:text-sm
                       font-semibold
                       text-gray-800 dark:text-gray-200
                       line-clamp-1
-                      group-hover:text-blue-600
-                      dark:group-hover:text-blue-400
+                      group-hover:text-[oklch(0.71_0.2_46.45)]
                       transition-colors
                     "
                   >
@@ -185,22 +169,16 @@ const DesktopSearch = ({
                   </p>
 
                   <div className="hidden md:flex items-center gap-2 mt-1">
-
                     <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {item.author?.firstName}{" "}
-                      {item.author?.lastName}
+                      {item.author?.firstName} {item.author?.lastName}
                     </span>
 
-                    <span className="text-xs text-gray-400">
-                      •
-                    </span>
+                    <span className="text-xs text-gray-400">•</span>
 
                     <span className="text-xs text-gray-500 dark:text-gray-400">
                       {item.likes?.length || 0} likes
                     </span>
-
                   </div>
-
                 </div>
 
                 {/* ARROW */}
@@ -208,55 +186,33 @@ const DesktopSearch = ({
                   className="
                     w-4 h-4
                     text-gray-400
+                    group-hover:text-[oklch(0.71_0.2_46.45)]
                     opacity-0
                     group-hover:opacity-100
-                    transition-opacity duration-200
+                    transition-all duration-200
                     flex-shrink-0
                   "
                 />
-
               </div>
-
             ))}
-
           </div>
 
           {/* VIEW ALL */}
           {searchResults.length > 5 && (
-
-            <div
-              className="
-                border-t border-gray-200
-                dark:border-gray-700
-                p-2
-                bg-gray-50 dark:bg-gray-800/50
-              "
-            >
-
+            <div className="border-t border-gray-200 dark:border-gray-700 p-2 bg-gray-50/80 dark:bg-gray-800/50">
               <button
-                className="
-                  w-full text-center
-                  text-xs md:text-sm
-                  text-blue-600 dark:text-blue-400
-                  hover:text-blue-700
-                  py-2 transition-colors
-                  font-medium
-                "
+                onClick={handleViewAll}
+                className="w-full text-center text-xs md:text-sm text-[oklch(0.71_0.2_46.45)] hover:text-[oklch(0.65_0.2_46.45)] py-2 transition-colors font-medium"
               >
                 View all {searchResults.length} results →
               </button>
-
             </div>
-
           )}
-
         </div>
-
       )}
 
       {/* NO RESULTS */}
       {search?.trim() && searchResults?.length === 0 && (
-
         <div
           className="
             absolute mt-2 z-50 top-full
@@ -264,16 +220,15 @@ const DesktopSearch = ({
             -translate-x-1/2 md:translate-x-0
             w-[92vw] md:w-[400px]
             max-w-[calc(100vw-1rem)]
-            bg-white dark:bg-gray-800
+            bg-white/95 dark:bg-gray-800/95
+            backdrop-blur-md
             shadow-xl rounded-xl overflow-hidden
             border border-gray-200 dark:border-gray-700
             p-4 text-center
             animate-fade-in
           "
         >
-
           <div className="flex flex-col items-center gap-2">
-
             <FiSearch
               className="
                 w-6 h-6 md:w-8 md:h-8
@@ -281,52 +236,34 @@ const DesktopSearch = ({
               "
             />
 
-            <p
-              className="
-                text-xs md:text-sm
-                text-gray-500 dark:text-gray-400
-              "
-            >
+            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
               No blogs found matching{" "}
-              <span
-                className="
-                  font-semibold
-                  text-gray-700 dark:text-gray-300
-                "
-              >
+              <span className="font-semibold text-gray-700 dark:text-gray-300">
                 "{search}"
               </span>
             </p>
-
           </div>
-
         </div>
-
       )}
-
     </div>
   );
 };
 
 // ChevronRight Icon
 const ChevronRight = ({ className }) => (
-
   <svg
     className={className}
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
   >
-
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
       d="M9 5l7 7-7 7"
     />
-
   </svg>
-
 );
 
 export default DesktopSearch;

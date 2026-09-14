@@ -1,31 +1,39 @@
 import { Blog } from "../models/blog.model.js";
+import Comment from "../models/comment.model.js";
 import cloudinary from "../utils/cloudinary.js";
 import streamifier from "streamifier";
 import mongoose from "mongoose";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
-/* ================= CREATE / UPDATE BLOG ================= */
-
-/* ================= CREATE / UPDATE BLOG ================= */
+/* =====================================================
+   CREATE / UPDATE BLOG
+===================================================== */
 
 export const createBlog = async (req, res) => {
   try {
-    const { title, category, subtitle, description } = req.body;
+    const {
+      title,
+      category,
+      subtitle,
+      description,
+    } = req.body;
+
     const { blogId } = req.params;
 
-    if (blogId && !mongoose.isValidObjectId(blogId)) {
+    /* ================= BLOG ID VALIDATION ================= */
+
+    if (
+      blogId &&
+      !mongoose.isValidObjectId(blogId)
+    ) {
       return res.status(400).json({
         success: false,
         message: "Invalid blog id",
       });
     }
 
-    // ================= TITLE VALIDATION =================
+
+    /* ================= TITLE VALIDATION ================= */
 
     if (!title || !title.trim()) {
       return res.status(400).json({
@@ -34,7 +42,8 @@ export const createBlog = async (req, res) => {
       });
     }
 
-    // ================= CATEGORY VALIDATION =================
+
+    /* ================= CATEGORY VALIDATION ================= */
 
     if (!category || !category.trim()) {
       return res.status(400).json({
@@ -43,56 +52,78 @@ export const createBlog = async (req, res) => {
       });
     }
 
+
     let thumbnail = null;
 
-    // ================= CLOUDINARY UPLOAD =================
+
+    /* ================= CLOUDINARY UPLOAD ================= */
 
     if (req.file) {
-      const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: "blogs",
-          },
-          (error, uploaded) => {
-            if (error) {
-              reject(error);
-              return;
-            }
+      const result = await new Promise(
+        (resolve, reject) => {
 
-            resolve(uploaded);
-          }
-        );
+          const stream =
+            cloudinary.uploader.upload_stream(
+              {
+                folder: "blogs",
+              },
+              (error, uploaded) => {
 
-        streamifier
-          .createReadStream(req.file.buffer)
-          .pipe(stream);
-      });
+                if (error) {
+                  reject(error);
+                  return;
+                }
+
+                resolve(uploaded);
+              }
+            );
+
+
+          streamifier
+            .createReadStream(req.file.buffer)
+            .pipe(stream);
+        }
+      );
 
       thumbnail = result.secure_url;
     }
 
-    // ================= BLOG DATA =================
+
+    /* ================= BLOG DATA ================= */
 
     const blogData = {
       title: title.trim(),
+
       category: category.trim(),
-      subtitle: subtitle ? subtitle.trim() : "",
-      description: description ? description.trim() : "",
+
+      subtitle: subtitle
+        ? subtitle.trim()
+        : "",
+
+      description: description
+        ? description.trim()
+        : "",
+
       author: req.user.id,
     };
 
-    // ================= THUMBNAIL =================
+
+    /* ================= THUMBNAIL ================= */
 
     if (thumbnail) {
       blogData.thumbnail = thumbnail;
     }
 
-    // =====================================================
-    // UPDATE EXISTING BLOG
-    // =====================================================
+
+    /* =====================================================
+       UPDATE EXISTING BLOG
+    ===================================================== */
 
     if (blogId) {
-      const existingBlog = await Blog.findById(blogId);
+
+      const existingBlog =
+        await Blog.findById(blogId);
+
 
       if (!existingBlog) {
         return res.status(404).json({
@@ -101,38 +132,66 @@ export const createBlog = async (req, res) => {
         });
       }
 
-      if (existingBlog.author.toString() !== req.user.id) {
+
+      /* ================= AUTHORIZATION ================= */
+
+      if (
+        existingBlog.author.toString() !==
+        req.user.id
+      ) {
         return res.status(403).json({
           success: false,
           message: "Unauthorized",
         });
       }
 
-      // Keep old thumbnail if new thumbnail is not uploaded
-      if (!thumbnail && existingBlog.thumbnail) {
-        blogData.thumbnail = existingBlog.thumbnail;
+
+      /* ================= KEEP OLD IMAGE ================= */
+
+      if (
+        !thumbnail &&
+        existingBlog.thumbnail
+      ) {
+        blogData.thumbnail =
+          existingBlog.thumbnail;
       }
 
-      // Delete old Cloudinary image if new image uploaded
+
+      /* ================= DELETE OLD CLOUDINARY IMAGE ================= */
+
       if (
         thumbnail &&
         existingBlog.thumbnail &&
-        existingBlog.thumbnail.includes("cloudinary")
+        existingBlog.thumbnail.includes(
+          "cloudinary"
+        )
       ) {
+
         try {
-          const parts = existingBlog.thumbnail.split("/");
+
+          const parts =
+            existingBlog.thumbnail.split("/");
+
 
           const fileName =
-            parts[parts.length - 1].split(".")[0];
+            parts[parts.length - 1]
+              .split(".")[0];
+
 
           const folderName =
             parts[parts.length - 2];
 
+
           const publicId =
             `${folderName}/${fileName}`;
 
-          await cloudinary.uploader.destroy(publicId);
+
+          await cloudinary.uploader.destroy(
+            publicId
+          );
+
         } catch (err) {
+
           console.log(
             "Old image delete failed:",
             err
@@ -140,13 +199,18 @@ export const createBlog = async (req, res) => {
         }
       }
 
-      const blog = await Blog.findByIdAndUpdate(
-        blogId,
-        blogData,
-        {
-          new: true,
-        }
-      );
+
+      /* ================= UPDATE ================= */
+
+      const blog =
+        await Blog.findByIdAndUpdate(
+          blogId,
+          blogData,
+          {
+            new: true,
+          }
+        );
+
 
       return res.status(200).json({
         success: true,
@@ -155,26 +219,38 @@ export const createBlog = async (req, res) => {
       });
     }
 
-    // =====================================================
-    // CREATE NEW BLOG
-    // =====================================================
 
-    const blog = await Blog.create({
-      ...blogData,
-      likes: [],
-      isPublished: false,
-    });
+    /* =====================================================
+       CREATE NEW BLOG
+    ===================================================== */
+
+    const blog =
+      await Blog.create({
+        ...blogData,
+
+        likes: [],
+
+        isPublished: false,
+      });
+
 
     return res.status(201).json({
       success: true,
       message: "Blog Created Successfully",
       blog,
     });
+
   } catch (error) {
-    console.error("BLOG ERROR:", error);
+
+    console.error(
+      "BLOG ERROR:",
+      error
+    );
+
 
     return res.status(500).json({
       success: false,
+
       message:
         error.message ||
         "Failed to create/update blog",
@@ -182,221 +258,610 @@ export const createBlog = async (req, res) => {
   }
 };
 
-/* ================= GET MY BLOGS ================= */
-export const getMyBlogs = async (req, res) => {
+
+/* =====================================================
+   GET MY BLOGS
+===================================================== */
+
+export const getMyBlogs = async (
+  req,
+  res
+) => {
+
   try {
-    const blogs = await Blog.find({ author: req.user.id })
-      .populate("author", "firstName lastName profilePic")
-      .sort({ createdAt: -1 })
-      .lean();
 
-    const enrichedBlogs = blogs.map((blog) => ({
-      ...blog,
-      commentCount: blog.comments?.length || 0,
-    }));
+    const blogs =
+      await Blog.find({
+        author: req.user.id,
+      })
+        .populate(
+          "author",
+          "firstName lastName profilePic"
+        )
+        .sort({
+          createdAt: -1,
+        })
+        .lean();
 
-    res.json({
+
+    const enrichedBlogs =
+      blogs.map((blog) => ({
+        ...blog,
+
+        commentCount:
+          blog.comments?.length || 0,
+      }));
+
+
+    return res.status(200).json({
       success: true,
       blogs: enrichedBlogs,
     });
 
   } catch (err) {
-    res.status(500).json({
+
+    return res.status(500).json({
       success: false,
-      message: err.message // FIXED: Added error message
+      message: err.message,
     });
   }
 };
 
-/* ================= PUBLIC FEED ================= */
-export const getPublicFeed = async (req, res) => {
-  try {
-    const blogs = await Blog.find({ isPublished: true })
-      .populate("author", "firstName lastName profilePic")
-      .sort({ createdAt: -1 })
-      .lean();
 
-    const enrichedBlogs = blogs.map((blog) => ({
-      ...blog,
-      commentCount: blog.comments?.length || 0,
-    }));
+/* =====================================================
+   GET USER BLOGS (ONLY BLOGS - kept for backward compatibility)
+===================================================== */
 
-    res.json({
-      success: true,
-      blogs: enrichedBlogs,
-    });
+export const getUserBlogs = async (
+  req,
+  res
+) => {
 
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message // FIXED: Added error message
-    });
-  }
-};
-
-/* ================= SINGLE BLOG ================= */
-export const getSingleBlog = async (req, res) => {
   try {
 
-    const blog = await Blog.findById(req.params.blogId)
-      .populate("author", "firstName lastName profilePic")
-      .populate({
-        path: "comments",
-        populate: {
-          path: "user",
-          select: "firstName lastName profilePic",
-        },
-      });
+    const { userId } = req.params;
 
-    if (!blog) {
-      return res.status(404).json({
+
+    /* ================= VALIDATE USER ID ================= */
+
+    if (
+      !mongoose.isValidObjectId(userId)
+    ) {
+      return res.status(400).json({
         success: false,
-        message: "Blog not found" // FIXED: Added message
+        message: "Invalid user id",
       });
     }
 
-    res.status(200).json({
+
+    /* ================= FIND USER BLOGS ================= */
+
+    const blogs =
+      await Blog.find({
+        author: userId,
+      })
+        .populate(
+          "author",
+          "firstName lastName profilePic"
+        )
+        .sort({
+          createdAt: -1,
+        })
+        .lean();
+
+
+    /* ================= ADD COMMENT COUNT ================= */
+
+    const enrichedBlogs =
+      blogs.map((blog) => ({
+        ...blog,
+
+        commentCount:
+          blog.comments?.length || 0,
+      }));
+
+
+    /* ================= RESPONSE ================= */
+
+    return res.status(200).json({
       success: true,
-      blog,
+
+      blogs: enrichedBlogs,
+
+      totalBlogs:
+        enrichedBlogs.length,
     });
 
   } catch (error) {
 
-    console.log(error);
+    console.error(
+      "GET USER BLOGS ERROR:",
+      error
+    );
 
-    res.status(500).json({
+
+    return res.status(500).json({
       success: false,
-      message: error.message // FIXED: Added error message
+      message:
+        error.message ||
+        "Failed to fetch user blogs",
     });
   }
 };
 
-/* ================= DELETE BLOG ================= */
-export const deleteBlog = async (req, res) => {
-  try {
-    const blog = await Blog.findOneAndDelete({
-      _id: req.params.blogId,
-      author: req.user.id,
-    });
 
-    if (!blog) {
-      return res.status(404).json({
+/* =====================================================
+   GET USER BLOGS + COMMENTS (SINGLE API - OPTIMIZED)
+===================================================== */
+
+/*
+  Ye endpoint UserProfileModal ke liye hai.
+  Ek hi API call mein blogs + comments dono return karta hai.
+
+  GET:
+  /api/v1/blog/user/:userId/with-comments
+
+  Example:
+  /api/v1/blog/user/69831d6a23861404202937c4/with-comments
+*/
+
+export const getUserBlogsWithComments = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const { userId } = req.params;
+
+
+    /* ================= VALIDATE USER ID ================= */
+
+    if (
+      !mongoose.isValidObjectId(userId)
+    ) {
+      return res.status(400).json({
         success: false,
-        message: "Blog not found" // FIXED: Added message
+        message: "Invalid user id",
       });
     }
 
-    res.json({
-      success: true,
-      message: "Blog deleted successfully" // FIXED: Added message
-    });
 
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message // FIXED: Added error message
-    });
-  }
-};
+    /* =====================================================
+       1. FETCH USER BLOGS
+    ===================================================== */
 
-/* ================= PUBLISH BLOG ================= */
-export const publishBlog = async (req, res) => {
-  try {
-    const blog = await Blog.findById(req.params.blogId);
+    const blogs =
+      await Blog.find({
+        author: userId,
+      })
+        .populate(
+          "author",
+          "firstName lastName profilePic"
+        )
+        .sort({
+          createdAt: -1,
+        })
+        .lean();
 
-    if (!blog) {
-      return res.status(404).json({
-        success: false,
-        message: "Blog not found" // FIXED: Added message
+
+    /* ================= EMPTY CASE ================= */
+
+    if (!blogs || blogs.length === 0) {
+      return res.status(200).json({
+        success: true,
+        blogs: [],
+        comments: [],
+        totalBlogs: 0,
+        totalComments: 0,
       });
     }
 
-    blog.isPublished = !blog.isPublished;
 
-    await blog.save();
+    /* ================= BLOG IDS ================= */
 
-    res.json({
-      success: true,
-      message: blog.isPublished ? "Blog published" : "Blog unpublished", // FIXED: Added message
-      blog,
+    const blogIds = blogs.map(
+      (blog) => blog._id
+    );
+
+
+    /* =====================================================
+       2. FETCH ALL COMMENTS IN ONE QUERY ($in)
+    ===================================================== */
+
+    const comments =
+      await Comment.find({
+        blog: { $in: blogIds },
+      })
+        .populate(
+          "user",
+          "firstName lastName profilePic"
+        )
+        .populate(
+          "blog",
+          "title thumbnail"
+        )
+        .sort({
+          createdAt: -1,
+        })
+        .lean();
+
+
+    /* =====================================================
+       3. ENRICH BLOGS WITH COMMENT COUNT
+    ===================================================== */
+
+    const commentCountMap = {};
+
+    comments.forEach((comment) => {
+      const blogId =
+        comment.blog?._id?.toString() ||
+        comment.blog?.toString();
+
+      if (blogId) {
+        commentCountMap[blogId] =
+          (commentCountMap[blogId] || 0) + 1;
+      }
     });
 
-  } catch (err) {
-    res.status(500).json({
+
+    const enrichedBlogs = blogs.map((blog) => ({
+      ...blog,
+
+      commentCount:
+        commentCountMap[blog._id.toString()] || 0,
+    }));
+
+
+    /* =====================================================
+       4. RESPONSE
+    ===================================================== */
+
+    return res.status(200).json({
+      success: true,
+
+      blogs: enrichedBlogs,
+
+      comments,
+
+      totalBlogs: enrichedBlogs.length,
+
+      totalComments: comments.length,
+    });
+
+  } catch (error) {
+
+    console.error(
+      "GET USER BLOGS WITH COMMENTS ERROR:",
+      error
+    );
+
+
+    return res.status(500).json({
       success: false,
-      message: err.message // FIXED: Added error message
+      message:
+        error.message ||
+        "Failed to fetch user blogs with comments",
     });
   }
 };
 
-/* ================= LIKE BLOG ================= */
-export const likeBlog = async (req, res) => {
+
+/* =====================================================
+   PUBLIC FEED
+===================================================== */
+
+export const getPublicFeed = async (
+  req,
+  res
+) => {
+
   try {
 
-    const blog = await Blog.findById(req.params.blogId);
+    const blogs =
+      await Blog.find({
+        isPublished: true,
+      })
+        .populate(
+          "author",
+          "firstName lastName profilePic"
+        )
+        .sort({
+          createdAt: -1,
+        })
+        .lean();
+
+
+    const enrichedBlogs =
+      blogs.map((blog) => ({
+        ...blog,
+
+        commentCount:
+          blog.comments?.length || 0,
+      }));
+
+
+    return res.status(200).json({
+      success: true,
+      blogs: enrichedBlogs,
+    });
+
+  } catch (err) {
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+
+/* =====================================================
+   SINGLE BLOG
+===================================================== */
+
+export const getSingleBlog = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const blog =
+      await Blog.findById(
+        req.params.blogId
+      )
+        .populate(
+          "author",
+          "firstName lastName profilePic"
+        )
+        .populate({
+          path: "comments",
+
+          populate: {
+            path: "user",
+
+            select:
+              "firstName lastName profilePic",
+          },
+        });
+
 
     if (!blog) {
+
       return res.status(404).json({
         success: false,
         message: "Blog not found",
       });
     }
 
-    const userId = req.user.id;
 
-    const alreadyLiked = blog.likes.some(
-      (id) => id.toString() === userId
-    );
-
-    if (alreadyLiked) {
-
-      blog.likes = blog.likes.filter(
-        (id) => id.toString() !== userId
-      );
-
-    } else {
-
-      blog.likes.push(userId);
-    }
-
-    await blog.save();
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      totalLikes: blog.likes.length,
-      liked: !alreadyLiked,
+      blog,
     });
 
   } catch (error) {
 
     console.log(error);
 
-    res.status(500).json({
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+/* =====================================================
+   DELETE BLOG
+===================================================== */
+
+export const deleteBlog = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const blog =
+      await Blog.findOneAndDelete({
+        _id: req.params.blogId,
+
+        author: req.user.id,
+      });
+
+
+    if (!blog) {
+
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
+    }
+
+
+    return res.json({
+      success: true,
+      message:
+        "Blog deleted successfully",
+    });
+
+  } catch (err) {
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+
+/* =====================================================
+   PUBLISH BLOG
+===================================================== */
+
+export const publishBlog = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const blog =
+      await Blog.findById(
+        req.params.blogId
+      );
+
+
+    if (!blog) {
+
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
+    }
+
+
+    blog.isPublished =
+      !blog.isPublished;
+
+
+    await blog.save();
+
+
+    return res.json({
+      success: true,
+
+      message:
+        blog.isPublished
+          ? "Blog published"
+          : "Blog unpublished",
+
+      blog,
+    });
+
+  } catch (err) {
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+
+/* =====================================================
+   LIKE BLOG
+===================================================== */
+
+export const likeBlog = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const blog =
+      await Blog.findById(
+        req.params.blogId
+      );
+
+
+    if (!blog) {
+
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
+    }
+
+
+    const userId =
+      req.user.id;
+
+
+    const alreadyLiked =
+      blog.likes.some(
+        (id) =>
+          id.toString() === userId
+      );
+
+
+    if (alreadyLiked) {
+
+      blog.likes =
+        blog.likes.filter(
+          (id) =>
+            id.toString() !== userId
+        );
+
+    } else {
+
+      blog.likes.push(userId);
+    }
+
+
+    await blog.save();
+
+
+    return res.status(200).json({
+      success: true,
+
+      totalLikes:
+        blog.likes.length,
+
+      liked:
+        !alreadyLiked,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+
+    return res.status(500).json({
       success: false,
       message: "Failed to like blog",
     });
   }
 };
 
-/* ================= TOTAL LIKES ================= */
-export const fetMyTotallogslikes = async (req, res) => {
-  try {
-    const blogs = await Blog.find({ author: req.user.id });
 
-    const totalLikes = blogs.reduce(
-      (acc, b) => acc + b.likes.length,
-      0
-    );
+/* =====================================================
+   TOTAL LIKES
+===================================================== */
 
-    res.json({
-      success: true,
-      totalLikes,
-    });
+export const fetMyTotallogslikes =
+  async (req, res) => {
 
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message // FIXED: Added error message
-    });
-  }
-};
+    try {
+
+      const blogs =
+        await Blog.find({
+          author: req.user.id,
+        });
+
+
+      const totalLikes =
+        blogs.reduce(
+          (acc, blog) =>
+            acc + blog.likes.length,
+          0
+        );
+
+
+      return res.json({
+        success: true,
+        totalLikes,
+      });
+
+    } catch (err) {
+
+      return res.status(500).json({
+        success: false,
+        message: err.message,
+      });
+    }
+  };

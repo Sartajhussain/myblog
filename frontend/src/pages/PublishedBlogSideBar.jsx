@@ -1,11 +1,11 @@
-import React, { useEffect,useState} from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../utils/api";
 import { getBlogImage } from "../utils/getBlogImage";
+import { Filter, Flame, Tag, Calendar } from "lucide-react";
 
 const PublishedBlogSideBar = ({ blogs, setCategoryFilter }) => {
   const navigate = useNavigate();
-  const [activeTag, setActiveTag] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
 
   const publishedBlogs = blogs?.filter((b) => b.isPublished) || [];
 
@@ -22,7 +22,7 @@ const PublishedBlogSideBar = ({ blogs, setCategoryFilter }) => {
     window.scrollTo(0, 0);
   }, []);
 
-  // 🔥 FIXED IMAGE FUNCTION - Using getBlogImage utility
+  // 🔥 FIXED IMAGE FUNCTION
   const getImage = (img) => {
     if (!img || img === "null" || img === "undefined" || img === "") {
       return "https://placehold.co/100x100?text=No+Image";
@@ -30,93 +30,127 @@ const PublishedBlogSideBar = ({ blogs, setCategoryFilter }) => {
     return getBlogImage(img);
   };
 
+  const handleCategorySelect = (cat) => {
+    setActiveCategory(cat);
+    setCategoryFilter(cat);
+  };
+
   return (
-    <aside className="space-y-8 lg:sticky lg:top-24 h-fit">
+    <aside className="space-y-6 lg:sticky lg:top-24 h-fit">
 
-      {/* CATEGORY DROPDOWN */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border dark:border-gray-700">
-
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">
+      {/* CATEGORY FILTER */}
+      <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-md rounded-2xl p-6 border border-gray-100 dark:border-gray-800">
+        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-4">
+          <Filter className="w-4 h-4 text-[oklch(0.6_0.2_46.45)]" />
           Filter by Category
         </h2>
 
-        <select
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="w-full border dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
-        >
-          {categories.map((cat, index) => (
-            <option key={index} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
-
+        <div className="flex flex-wrap gap-2">
+          {categories.map((cat, index) => {
+            const isActive = activeCategory === cat;
+            return (
+              <button
+                key={index}
+                onClick={() => handleCategorySelect(cat)}
+                className={`text-xs font-medium capitalize px-3.5 py-1.5 rounded-full border transition-all duration-300 ${
+                  isActive
+                    ? "bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] text-white border-transparent shadow-sm"
+                    : "bg-transparent text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-[oklch(0.71_0.2_46.45)]/50 hover:text-[oklch(0.6_0.2_46.45)]"
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* POPULAR POSTS */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border dark:border-gray-700">
-
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+      <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-md rounded-2xl p-6 border border-gray-100 dark:border-gray-800">
+        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-4">
+          <Flame className="w-4 h-4 text-[oklch(0.6_0.2_46.45)]" />
           Popular Posts
         </h2>
 
-        <div className="space-y-4">
-          {popularPosts.map((post) => (
-            <div
-              key={post._id}
-              className="flex gap-3 items-center cursor-pointer"
-              onClick={() => navigate(`/view-blog/${post._id}`)}
-            >
+        {popularPosts.length === 0 ? (
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            No posts yet.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-1">
+            {popularPosts.map((post) => (
+              <div
+                key={post._id}
+                className="flex gap-3 items-center cursor-pointer group p-2 -mx-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors"
+                onClick={() => navigate(`/view-blog/${post._id}`)}
+              >
+                <img
+                  src={getImage(
+                    post.thumbnail || post.image || post.coverImage
+                  )}
+                  alt={post.title}
+                  className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src =
+                      "https://placehold.co/100x100?text=No+Image";
+                  }}
+                />
 
-              {/* ✅ FIXED IMAGE - Now using getBlogImage utility */}
-              <img
-                src={getImage(post.thumbnail || post.image || post.coverImage)}
-                alt={post.title}
-                className="w-14 h-14 object-cover rounded-lg"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "https://placehold.co/100x100?text=No+Image";
-                }}
-              />
-
-              <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
-                {post.title}
-              </p>
-            </div>
-          ))}
-        </div>
-
+                <div className="min-w-0">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 leading-snug group-hover:text-[oklch(0.6_0.2_46.45)] transition-colors">
+                    {post.title}
+                  </p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 flex items-center gap-1 mt-0.5">
+                    <Calendar className="w-3 h-3" />
+                    {post.createdAt
+                      ? new Date(post.createdAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                        })
+                      : "No date"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* TRENDING TAGS */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border dark:border-gray-700">
-
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+      <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-md rounded-2xl p-6 border border-gray-100 dark:border-gray-800">
+        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-4">
+          <Tag className="w-4 h-4 text-[oklch(0.6_0.2_46.45)]" />
           Trending Tags
         </h2>
 
-        <div className="flex flex-wrap gap-2">
-          {categories.slice(1).map((tag, index) => (
-            <span
-              key={index}
-              onClick={() => {
-                setCategoryFilter(tag);
-                setActiveTag(tag);
-              }}
-              className={`text-xs px-3 py-1 rounded-full cursor-pointer transition
-        ${activeTag === tag
-                  ? "bg-black text-white dark:bg-white dark:text-black"
-                  : "bg-gray-100 dark:bg-gray-700 hover:bg-black hover:text-white"
-                }
-      `}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-
+        {categories.length <= 1 ? (
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            No tags yet.
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {categories.slice(1).map((tag, index) => {
+              const isActive = activeCategory === tag;
+              return (
+                <span
+                  key={index}
+                  onClick={() => handleCategorySelect(tag)}
+                  className={`text-xs px-3 py-1 rounded-full cursor-pointer transition-all duration-200 capitalize
+                    ${
+                      isActive
+                        ? "bg-[oklch(0.71_0.2_46.45)] text-white shadow-sm"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-[oklch(0.71_0.2_46.45)] hover:text-white"
+                    }
+                  `}
+                >
+                  {tag}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
-
     </aside>
   );
 };

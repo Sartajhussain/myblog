@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiCheck } from "react-icons/fi";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { setLoading } from "../redux/authSlice.js";
 import { Loader2 } from "lucide-react";
-import loginImg from "../assets/login-img.png";
 import { API_BASE_URL } from "../utils/api";
 
 const Signup = () => {
@@ -22,7 +21,6 @@ const Signup = () => {
     password: "",
   });
 
-  // ✅ field-wise errors (inline)
   const [errors, setErrors] = useState({
     firstName: "",
     lastName: "",
@@ -34,6 +32,22 @@ const Signup = () => {
   const [touched, setTouched] = useState({});
 
   const { firstName, lastName, email, password } = user;
+
+  // ✅ Rotating tagline
+  const taglines = [
+    "Share your story.",
+    "Inspire the world.",
+    "Write. Publish. Grow.",
+    "Your ideas matter.",
+  ];
+  const [taglineIndex, setTaglineIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTaglineIndex((prev) => (prev + 1) % taglines.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
 
   // ================= VALIDATION =================
   const validateField = (name, value) => {
@@ -70,12 +84,10 @@ const Signup = () => {
     const { name, value } = e.target;
     setUser({ ...user, [name]: value });
 
-    // ✅ sirf tab validate karo jab field touched ho
     if (touched[name]) {
       setErrors({ ...errors, [name]: validateField(name, value) });
     }
 
-    // Password strength
     if (name === "password") {
       if (!value) setPasswordStrength("");
       else if (value.length < 8) setPasswordStrength("Too short");
@@ -89,7 +101,6 @@ const Signup = () => {
     }
   };
 
-  // ✅ onBlur pe touched mark karo + validate
   const handleBlur = (e) => {
     const { name, value } = e.target;
     setTouched({ ...touched, [name]: true });
@@ -100,7 +111,6 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Sab fields validate karo
     const newErrors = {
       firstName: validateField("firstName", firstName),
       lastName: validateField("lastName", lastName),
@@ -125,7 +135,10 @@ const Signup = () => {
       const response = await axios.post(
         `${API_BASE_URL}/api/v1/user/register`,
         user,
-        { headers: { "Content-Type": "application/json" }, withCredentials: true }
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
       );
 
       if (response.data.success) {
@@ -136,7 +149,6 @@ const Signup = () => {
       const msg = error.response?.data?.message || "Something went wrong";
       toast.error(msg);
 
-      // ✅ Backend error ko bhi field me dikhao
       if (msg.toLowerCase().includes("email")) {
         setErrors({ ...errors, email: msg });
       }
@@ -178,16 +190,101 @@ const Signup = () => {
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200 pt-[100px] md:pt-7 flex flex-col md:flex-row min-h-[100dvh]">
-      {/* LEFT IMAGE */}
-      <div className="hidden md:flex md:w-1/2 bg-gray-200  dark:bg-gray-800 items-center justify-center">
-        <img
-          src={loginImg}
-          alt="Signup Visual"
-          className="w-[90%] h-[90%] object-cover"
-        />
+
+      {/* =====================================================
+          LEFT — MODERN ANIMATED PANEL
+      ===================================================== */}
+            {/* =====================================================
+          LEFT — MODERN ANIMATED PANEL
+          (matches app theme: gray + orange accent)
+      ===================================================== */}
+      <div className="hidden md:flex md:w-1/2 relative overflow-hidden bg-gray-200 dark:bg-gray-800 items-center justify-center">
+
+        {/* Floating Blob 1 — orange */}
+        <div className="absolute top-[-80px] left-[-80px] w-72 h-72 bg-[oklch(0.71_0.2_46.45)] opacity-20 dark:opacity-15 rounded-full blur-3xl animate-blob"></div>
+
+        {/* Floating Blob 2 — orange lighter */}
+        <div className="absolute bottom-[-60px] right-[-60px] w-80 h-80 bg-[oklch(0.8_0.15_60)] opacity-20 dark:opacity-15 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+
+        {/* Floating Blob 3 — subtle gray */}
+        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-gray-400 dark:bg-gray-600 opacity-20 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
+
+        {/* Grid Overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.06] dark:opacity-[0.08]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, currentColor 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+        ></div>
+
+        {/* Content */}
+        <div className="relative z-10 px-10 lg:px-16 max-w-lg">
+
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-white/70 dark:bg-gray-900/60 backdrop-blur-md border border-gray-300 dark:border-gray-700 px-4 py-1.5 rounded-full text-xs font-medium mb-6 text-gray-700 dark:text-gray-300 animate-fade-in">
+            <span className="w-2 h-2 bg-[oklch(0.71_0.2_46.45)] rounded-full animate-pulse"></span>
+            Join thousands of writers
+          </div>
+
+          {/* Heading */}
+          <h1 className="text-4xl lg:text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100 animate-fade-in-up">
+            Welcome to <br />
+            <span className="text-[oklch(0.71_0.2_46.45)]">
+              Our Blog Community
+            </span>
+          </h1>
+
+          {/* Rotating Tagline */}
+          <div className="mt-4 h-8 overflow-hidden">
+            <p
+              key={taglineIndex}
+              className="text-lg lg:text-xl text-gray-700 dark:text-gray-300 animate-fade-in-up"
+            >
+              {taglines[taglineIndex]}
+            </p>
+          </div>
+
+          {/* Feature List */}
+          <ul className="mt-10 space-y-4">
+            {[
+              "Publish unlimited blogs for free",
+              "Engage with readers & comments",
+              "Grow your audience effortlessly",
+            ].map((feature, i) => (
+              <li
+                key={i}
+                className="flex items-center gap-3 text-sm lg:text-base text-gray-700 dark:text-gray-300 animate-fade-in-up"
+                style={{ animationDelay: `${i * 200 + 400}ms` }}
+              >
+                <span className="w-6 h-6 flex items-center justify-center bg-[oklch(0.71_0.2_46.45)]/15 dark:bg-[oklch(0.71_0.2_46.45)]/25 text-[oklch(0.71_0.2_46.45)] rounded-full shrink-0">
+                  <FiCheck size={14} />
+                </span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+
+          {/* Bottom Dots */}
+          <div className="mt-12 flex gap-2">
+            {taglines.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1.5 rounded-full transition-all duration-500 ${
+                  i === taglineIndex
+                    ? "w-8 bg-[oklch(0.71_0.2_46.45)]"
+                    : "w-1.5 bg-gray-400 dark:bg-gray-600"
+                }`}
+              ></div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* RIGHT FORM */}
+      {/* =====================================================
+          RIGHT — FORM (unchanged)
+      ===================================================== */}
       <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-6 md:p-16 overflow-y-auto">
         <div className="w-full max-w-sm bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">
@@ -215,7 +312,6 @@ const Signup = () => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                 />
-                {/* ✅ reserved space for error — no layout shift */}
                 <p className="text-[8px] leading-[10px] mt-0.5 min-h-[10px] text-red-500">
                   {touched.firstName && errors.firstName ? errors.firstName : ""}
                 </p>
@@ -296,7 +392,6 @@ const Signup = () => {
                 </div>
               </div>
 
-              {/* ✅ STRENGTH BAR — thin (h-0.5), fixed height, no jump */}
               <div className="mt-1 h-0.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className={`h-full ${getStrengthColor()} transition-all duration-300 rounded-full`}
@@ -304,7 +399,6 @@ const Signup = () => {
                 ></div>
               </div>
 
-              {/* Error + Strength text (8px) */}
               <div className="flex justify-between items-center mt-0.5 min-h-[10px]">
                 <p className="text-[8px] leading-[10px] text-red-500">
                   {touched.password && errors.password ? errors.password : ""}
@@ -329,7 +423,6 @@ const Signup = () => {
             </button>
           </form>
 
-          {/* FOOTER */}
           <p className="mt-6 text-gray-600 dark:text-gray-300 text-center text-sm">
             Already have an account?{" "}
             <Link

@@ -9,7 +9,7 @@ const MobileBottomNav = ({ user, isActive }) => {
   return (
     <div className="fixed bottom-0 left-0 w-full md:hidden bg-white dark:bg-gray-900 border-t shadow-lg z-50">
       <div className="flex justify-around items-center py-2">
-        {/* Home */}
+        {/* Home — public */}
         <Link to="/" onClick={() => window.scrollTo(0, 0)}>
           <div className="flex flex-col items-center text-[11px]">
             <div className={`p-2 rounded-full transition ${isActive("/") ? "bg-gray-200 dark:bg-gray-700" : ""}`}>
@@ -19,8 +19,8 @@ const MobileBottomNav = ({ user, isActive }) => {
           </div>
         </Link>
 
-        {/* Blogs */}
-        <Link to={user ? "/blogs" : "/login"} onClick={() => window.scrollTo(0, 0)}>
+        {/* Blogs — ✅ public (no login required) */}
+        <Link to="/blogs" onClick={() => window.scrollTo(0, 0)}>
           <div className="flex flex-col items-center text-[11px]">
             <div className={`p-2 rounded-full transition ${isActive("/blogs") ? "bg-gray-200 dark:bg-gray-700" : ""}`}>
               <FiBookOpen className="text-2xl" />
@@ -29,7 +29,7 @@ const MobileBottomNav = ({ user, isActive }) => {
           </div>
         </Link>
 
-        {/* Create Button */}
+        {/* Create Button — protected (login required) */}
         {user && (
           <Link to="/dashboard/create-blogs" onClick={() => window.scrollTo(0, 0)}>
             <div className="relative -top-7 bg-[oklch(0.71_0.2_46.45)] text-white p-4 rounded-full shadow-xl">
@@ -38,8 +38,8 @@ const MobileBottomNav = ({ user, isActive }) => {
           </Link>
         )}
 
-        {/* Feed */}
-        <Link to={user ? "/blog-feed" : "/login"} onClick={() => window.scrollTo(0, 0)}>
+        {/* Feed — ✅ public (no login required) */}
+        <Link to="/blog-feed" onClick={() => window.scrollTo(0, 0)}>
           <div className="flex flex-col items-center text-[11px]">
             <div className={`p-2 rounded-full transition ${isActive("/blog-feed") ? "bg-gray-200 dark:bg-gray-700" : ""}`}>
               <FiBookOpen className="text-2xl" />
@@ -48,7 +48,7 @@ const MobileBottomNav = ({ user, isActive }) => {
           </div>
         </Link>
 
-        {/* Profile/Login */}
+        {/* Profile / Login */}
         {user ? (
           <Link to="/dashboard/profile">
             <div className="flex flex-col items-center text-[11px]">

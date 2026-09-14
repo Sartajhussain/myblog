@@ -28,6 +28,7 @@ import AllUserProfile from "./pages/AllUserProfile";
 import { setUser } from "./redux/authSlice";
 import { API_BASE_URL } from "./utils/api";
 import VerifyEmail from "./pages/VerifyEmail";
+import SearchResults from "./pages/SearchResults";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -80,6 +81,7 @@ const App = () => {
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/blog-feed" element={<PublicFeed />} />
         <Route path="/view-blog/:blogId" element={<ViewBlog />} />
+        <Route path="/search" element={<SearchResults />} />
 
         {/* USERS */}
         <Route path="/AllUser" element={<AllUser />} />

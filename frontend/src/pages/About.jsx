@@ -1,11 +1,9 @@
 import React, { useState } from "react";
-// Images import (Paths match aapke existing code se hain)
 import missionImg from "../assets/mission.jpg";
 import storyImg from "../assets/story.jpg";
 import sartaj from "../assets/sartaj-2.jpeg";
-import pdf from "../assets/sartaj-frontend_dev.pdf"; // Imported but not used
+import pdf from "../assets/sartaj-frontend_dev.pdf";
 
-// Icons
 import {
   FaGithub,
   FaLinkedin,
@@ -21,20 +19,17 @@ import {
 } from "react-icons/fa";
 
 const About = () => {
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Resume Download Function - FIXED
   const handleDownload = () => {
     const link = document.createElement("a");
-    link.href = pdf; // Use the imported pdf variable
+    link.href = pdf;
     link.download = "Sartaj_Hussain_Resume.pdf";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // Projects Data
   const projects = [
     {
       title: "MERN Blog App",
@@ -66,7 +61,6 @@ const About = () => {
       link: "https://komplytek.com/academy/",
       tech: ["Php", "CodeIgniter", "MySQL", "reactjs"],
     },
-
   ];
 
   const techStack = [
@@ -84,18 +78,39 @@ const About = () => {
   ];
 
   return (
-    <div className="bg-slate-950 text-slate-100 transition-colors duration-300 min-h-screen font-sans selection:bg-cyan-500 selection:text-black overflow-x-hidden relative">
+    <div className="relative min-h-screen overflow-x-hidden font-sans selection:bg-cyan-500 selection:text-black transition-colors duration-300 bg-slate-950 text-slate-100">
 
-      {/* Background Decorative Ambient Glows */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
+      {/* =====================================================
+          BACKGROUND — SAME THEME AS LOGIN/SIGNUP/HOME
+          (orange-cyan-purple glows + grid + subtle blobs)
+      ===================================================== */}
+
+      {/* Orange glow — top-left (matches app accent) */}
+      <div className="pointer-events-none absolute top-[-100px] left-[-100px] w-[500px] h-[500px] bg-[oklch(0.71_0.2_46.45)] opacity-[0.08] rounded-full blur-3xl animate-blob" />
+
+      {/* Cyan glow — top-right (About page ka existing accent) */}
+      <div className="pointer-events-none absolute top-[150px] right-[-120px] w-[500px] h-[500px] bg-cyan-500 opacity-[0.08] rounded-full blur-3xl animate-blob animation-delay-2000" />
+
+      {/* Purple glow — mid-left */}
+      <div className="pointer-events-none absolute top-[900px] left-[10%] w-[450px] h-[450px] bg-purple-600 opacity-[0.08] rounded-full blur-3xl animate-blob animation-delay-4000" />
+
+      {/* Blue glow — bottom-right */}
+      <div className="pointer-events-none absolute bottom-[300px] right-[5%] w-[450px] h-[450px] bg-blue-600 opacity-[0.07] rounded-full blur-3xl animate-blob" />
+
+      {/* Grid Overlay — same as Login/Signup */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, currentColor 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+          color: "white",
+        }}
+      />
 
       {/* ================= HERO SECTION ================= */}
-      <section className="relative min-h-[90vh] flex items-center justify-center py-20">
-        {/* Subtle Grid Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
-
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-12 gap-12 items-center w-full">
+      <section className="relative z-10 min-h-[90vh] flex items-center justify-center py-20">
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-12 gap-12 items-center w-full">
 
           {/* Text Content */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
@@ -105,18 +120,26 @@ const About = () => {
             </div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1]">
-              Crafting <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">Digital</span> Experiences
+              Crafting{" "}
+              <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">
+                Digital
+              </span>{" "}
+              Experiences
             </h1>
 
             <p className="text-xl sm:text-2xl text-slate-300 font-medium">
-              Sartaj Hussain — <span className="text-cyan-400">Frontend Developer & MERN Specialist</span>
+              Sartaj Hussain —{" "}
+              <span className="text-cyan-400">
+                Frontend Developer & MERN Specialist
+              </span>
             </p>
 
             <p className="text-slate-400 max-w-xl mx-auto lg:mx-0 text-base sm:text-lg leading-relaxed">
-              Passionate about building fast, accessible, and high-performance web applications with React. Focused on delivering seamless interactive designs for global clients.
+              Passionate about building fast, accessible, and high-performance
+              web applications with React. Focused on delivering seamless
+              interactive designs for global clients.
             </p>
 
-            {/* CTA Buttons */}
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start pt-4">
               <button
                 onClick={handleDownload}
@@ -139,7 +162,6 @@ const About = () => {
           {/* Hero Image & Social Badges */}
           <div className="lg:col-span-5 flex justify-center items-center relative">
             <div className="relative group">
-              {/* Image Glow Effect */}
               <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-80 transition duration-500" />
 
               <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl">
@@ -150,7 +172,6 @@ const About = () => {
                 />
               </div>
 
-              {/* Floating Social Icons Card */}
               <div className="absolute -bottom-6 -right-2 sm:-right-6 bg-slate-900/90 border border-slate-800 backdrop-blur-xl p-3.5 rounded-2xl shadow-2xl flex gap-3">
                 <a
                   href="https://www.linkedin.com/in/sartaj-hussain/"
@@ -184,35 +205,46 @@ const About = () => {
               </div>
             </div>
           </div>
-
         </div>
       </section>
 
       {/* ================= STATS SECTION ================= */}
-      <section className="py-12 border-y border-slate-800/80 bg-slate-900/50 backdrop-blur-md">
+      <section className="relative z-10 py-12 border-y border-slate-800/80 bg-slate-900/50 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
           <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60">
-            <div className="text-3xl text-cyan-400 mb-2 flex justify-center"><FaCode /></div>
+            <div className="text-3xl text-cyan-400 mb-2 flex justify-center">
+              <FaCode />
+            </div>
             <h3 className="text-4xl font-extrabold text-white">2+ Years</h3>
-            <p className="text-slate-400 text-sm mt-1">Professional Experience</p>
+            <p className="text-slate-400 text-sm mt-1">
+              Professional Experience
+            </p>
           </div>
 
           <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60">
-            <div className="text-3xl text-purple-400 mb-2 flex justify-center"><FaRocket /></div>
+            <div className="text-3xl text-purple-400 mb-2 flex justify-center">
+              <FaRocket />
+            </div>
             <h3 className="text-4xl font-extrabold text-white">5+ Live</h3>
-            <p className="text-slate-400 text-sm mt-1">Production Applications</p>
+            <p className="text-slate-400 text-sm mt-1">
+              Production Applications
+            </p>
           </div>
 
           <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60">
-            <div className="text-3xl text-emerald-400 mb-2 flex justify-center"><FaUsers /></div>
+            <div className="text-3xl text-emerald-400 mb-2 flex justify-center">
+              <FaUsers />
+            </div>
             <h3 className="text-4xl font-extrabold text-white">30%</h3>
-            <p className="text-slate-400 text-sm mt-1">Page Speed Optimization</p>
+            <p className="text-slate-400 text-sm mt-1">
+              Page Speed Optimization
+            </p>
           </div>
         </div>
       </section>
 
       {/* ================= ABOUT & TECH STACK ================= */}
-      <section className="py-24 px-6 lg:px-12 max-w-7xl mx-auto">
+      <section className="relative z-10 py-24 px-6 lg:px-12 max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-700" />
@@ -225,16 +257,25 @@ const About = () => {
 
           <div className="space-y-8">
             <div className="space-y-3">
-              <span className="text-cyan-400 text-sm font-semibold tracking-wider uppercase">Engineering Philosophy</span>
+              <span className="text-cyan-400 text-sm font-semibold tracking-wider uppercase">
+                Engineering Philosophy
+              </span>
               <h2 className="text-4xl font-bold">Behind The Code</h2>
             </div>
 
             <p className="text-slate-300 leading-relaxed text-lg">
-              I specialize in React.js, Redux, and modern CSS architecture. My primary focus is building fluid user experiences backed by optimized codebases. I successfully reduced core page render times by <span className="font-semibold text-cyan-400">30%</span> for enterprise e-commerce applications.
+              I specialize in React.js, Redux, and modern CSS architecture. My
+              primary focus is building fluid user experiences backed by
+              optimized codebases. I successfully reduced core page render
+              times by{" "}
+              <span className="font-semibold text-cyan-400">30%</span> for
+              enterprise e-commerce applications.
             </p>
 
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-slate-200">Technologies I Work With</h3>
+              <h3 className="text-xl font-semibold text-slate-200">
+                Technologies I Work With
+              </h3>
               <div className="flex flex-wrap gap-2.5">
                 {techStack.map((skill, index) => (
                   <span
@@ -251,17 +292,24 @@ const About = () => {
       </section>
 
       {/* ================= MISSION & JOURNEY ================= */}
-      <section className="py-20 bg-slate-900/40 border-y border-slate-800/60">
+      <section className="relative z-10 py-20 bg-slate-900/40 border-y border-slate-800/60">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-16">
           <div className="lg:w-1/2 space-y-6">
-            <span className="text-purple-400 text-sm font-semibold tracking-wider uppercase">Background</span>
+            <span className="text-purple-400 text-sm font-semibold tracking-wider uppercase">
+              Background
+            </span>
             <h2 className="text-4xl font-bold">My Mission & Journey</h2>
             <div className="space-y-4 text-slate-300 text-lg leading-relaxed">
               <p>
-                <strong className="text-white">Mission:</strong> To craft intuitive digital products and mentor aspiring developers in mastering real-world web applications.
+                <strong className="text-white">Mission:</strong> To craft
+                intuitive digital products and mentor aspiring developers in
+                mastering real-world web applications.
               </p>
               <p>
-                <strong className="text-white">Journey:</strong> What started with raw HTML/CSS experiments evolved into engineering full-scale SaaS platforms and e-commerce ecosystems for clients in Australia and India.
+                <strong className="text-white">Journey:</strong> What started
+                with raw HTML/CSS experiments evolved into engineering
+                full-scale SaaS platforms and e-commerce ecosystems for clients
+                in Australia and India.
               </p>
             </div>
           </div>
@@ -280,7 +328,7 @@ const About = () => {
       </section>
 
       {/* ================= LET'S CONNECT ================= */}
-      <section className="py-24 px-6 lg:px-12 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+      <section className="relative z-10 py-24 px-6 lg:px-12 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
         <div className="lg:w-1/2 w-full order-2 lg:order-1">
           <div className="relative overflow-hidden rounded-3xl border border-slate-800 group">
             <img
@@ -292,13 +340,18 @@ const About = () => {
         </div>
 
         <div className="lg:w-1/2 space-y-6 order-1 lg:order-2">
-          <span className="text-cyan-400 text-sm font-semibold tracking-wider uppercase">Collaboration</span>
+          <span className="text-cyan-400 text-sm font-semibold tracking-wider uppercase">
+            Collaboration
+          </span>
           <h2 className="text-4xl font-bold">Let's Build Something Great</h2>
           <p className="text-slate-300 text-lg leading-relaxed">
-            From e-commerce solutions like <strong>Eragento</strong> to interactive platforms like <strong>Komplytek Academy</strong>, I take ownership from UI architecture to backend integration.
+            From e-commerce solutions like <strong>Eragento</strong> to
+            interactive platforms like <strong>Komplytek Academy</strong>, I
+            take ownership from UI architecture to backend integration.
           </p>
           <p className="text-slate-300 text-lg leading-relaxed">
-            Available for high-impact frontend roles and specialized client projects.
+            Available for high-impact frontend roles and specialized client
+            projects.
           </p>
 
           <div className="pt-4">
@@ -314,14 +367,16 @@ const About = () => {
 
       {/* ================= PROJECTS MODAL ================= */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
           <div className="bg-slate-900 border border-slate-800 w-full max-w-4xl max-h-[85vh] rounded-3xl shadow-2xl overflow-hidden relative flex flex-col">
-
-            {/* Modal Header */}
             <div className="flex justify-between items-center p-6 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-10">
               <div>
-                <h2 className="text-2xl font-bold text-white">Live Client Projects</h2>
-                <p className="text-xs text-slate-400 mt-1">Featured production projects built and deployed</p>
+                <h2 className="text-2xl font-bold text-white">
+                  Live Client Projects
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  Featured production projects built and deployed
+                </p>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -332,7 +387,6 @@ const About = () => {
               </button>
             </div>
 
-            {/* Modal Body */}
             <div className="p-6 overflow-y-auto space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {projects.map((project, index) => (
@@ -375,7 +429,6 @@ const About = () => {
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="p-5 border-t border-slate-800 flex justify-end bg-slate-900">
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -387,7 +440,6 @@ const About = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
