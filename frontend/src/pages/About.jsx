@@ -78,26 +78,25 @@ const About = () => {
   ];
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden font-sans selection:bg-cyan-500 selection:text-black transition-colors duration-300 bg-slate-950 text-slate-100">
+    <div className="relative min-h-screen overflow-x-hidden font-sans selection:bg-[oklch(0.71_0.2_46.45)] selection:text-white transition-colors duration-300 bg-slate-950 text-slate-100">
 
       {/* =====================================================
-          BACKGROUND — SAME THEME AS LOGIN/SIGNUP/HOME
-          (orange-cyan-purple glows + grid + subtle blobs)
+          BACKGROUND — orange theme glows + grid
       ===================================================== */}
 
-      {/* Orange glow — top-left (matches app accent) */}
+      {/* Orange glow — top-left */}
       <div className="pointer-events-none absolute top-[-100px] left-[-100px] w-[500px] h-[500px] bg-[oklch(0.71_0.2_46.45)] opacity-[0.08] rounded-full blur-3xl animate-blob" />
 
-      {/* Cyan glow — top-right (About page ka existing accent) */}
-      <div className="pointer-events-none absolute top-[150px] right-[-120px] w-[500px] h-[500px] bg-cyan-500 opacity-[0.08] rounded-full blur-3xl animate-blob animation-delay-2000" />
+      {/* Orange lighter — top-right */}
+      <div className="pointer-events-none absolute top-[150px] right-[-120px] w-[500px] h-[500px] bg-[oklch(0.8_0.15_60)] opacity-[0.08] rounded-full blur-3xl animate-blob animation-delay-2000" />
 
-      {/* Purple glow — mid-left */}
-      <div className="pointer-events-none absolute top-[900px] left-[10%] w-[450px] h-[450px] bg-purple-600 opacity-[0.08] rounded-full blur-3xl animate-blob animation-delay-4000" />
+      {/* Orange glow — mid-left */}
+      <div className="pointer-events-none absolute top-[900px] left-[10%] w-[450px] h-[450px] bg-[oklch(0.71_0.2_46.45)] opacity-[0.06] rounded-full blur-3xl animate-blob animation-delay-4000" />
 
-      {/* Blue glow — bottom-right */}
-      <div className="pointer-events-none absolute bottom-[300px] right-[5%] w-[450px] h-[450px] bg-blue-600 opacity-[0.07] rounded-full blur-3xl animate-blob" />
+      {/* Orange glow — bottom-right */}
+      <div className="pointer-events-none absolute bottom-[300px] right-[5%] w-[450px] h-[450px] bg-[oklch(0.8_0.15_60)] opacity-[0.07] rounded-full blur-3xl animate-blob" />
 
-      {/* Grid Overlay — same as Login/Signup */}
+      {/* Grid Overlay */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.06]"
         style={{
@@ -114,14 +113,14 @@ const About = () => {
 
           {/* Text Content */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 border border-slate-800 backdrop-blur-md text-xs font-semibold tracking-wide text-cyan-400">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 border border-slate-800 backdrop-blur-md text-xs font-semibold tracking-wide text-[oklch(0.71_0.2_46.45)]">
+              <span className="w-2 h-2 rounded-full bg-[oklch(0.71_0.2_46.45)] animate-ping" />
               AVAILABLE FOR NEW OPPORTUNITIES
             </div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1]">
               Crafting{" "}
-              <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] via-[oklch(0.8_0.15_60)] to-[oklch(0.71_0.2_46.45)] bg-clip-text text-transparent">
                 Digital
               </span>{" "}
               Experiences
@@ -129,7 +128,7 @@ const About = () => {
 
             <p className="text-xl sm:text-2xl text-slate-300 font-medium">
               Sartaj Hussain —{" "}
-              <span className="text-cyan-400">
+              <span className="text-[oklch(0.71_0.2_46.45)]">
                 Frontend Developer & MERN Specialist
               </span>
             </p>
@@ -143,18 +142,18 @@ const About = () => {
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start pt-4">
               <button
                 onClick={handleDownload}
-                className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold rounded-2xl shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-[1.02] transition-all duration-300"
+                className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] text-white font-bold rounded-2xl shadow-lg shadow-[oklch(0.71_0.2_46.45)]/20 hover:shadow-[oklch(0.71_0.2_46.45)]/40 hover:scale-[1.02] transition-all duration-300"
               >
-                <FaDownload className="text-slate-950 group-hover:translate-y-0.5 transition-transform" />
+                <FaDownload className="text-white group-hover:translate-y-0.5 transition-transform" />
                 Download Resume
               </button>
 
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center gap-3 px-8 py-4 bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-800 hover:border-slate-700 font-semibold rounded-2xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02]"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-800 hover:border-[oklch(0.71_0.2_46.45)]/40 font-semibold rounded-2xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02]"
               >
                 View Live Work
-                <FaArrowRight className="text-cyan-400 text-sm" />
+                <FaArrowRight className="text-[oklch(0.71_0.2_46.45)] text-sm" />
               </button>
             </div>
           </div>
@@ -162,7 +161,7 @@ const About = () => {
           {/* Hero Image & Social Badges */}
           <div className="lg:col-span-5 flex justify-center items-center relative">
             <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-80 transition duration-500" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] rounded-3xl blur-xl opacity-50 group-hover:opacity-80 transition duration-500" />
 
               <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl">
                 <img
@@ -177,7 +176,7 @@ const About = () => {
                   href="https://www.linkedin.com/in/sartaj-hussain/"
                   target="_blank"
                   rel="noreferrer"
-                  className="p-3 bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white rounded-xl transition-all duration-300 shadow-md hover:-translate-y-1"
+                  className="p-3 bg-slate-800 hover:bg-[oklch(0.71_0.2_46.45)] text-slate-300 hover:text-white rounded-xl transition-all duration-300 shadow-md hover:-translate-y-1"
                   aria-label="LinkedIn Profile"
                 >
                   <FaLinkedin size={20} />
@@ -187,7 +186,7 @@ const About = () => {
                   href="https://github.com/Sartajhussain"
                   target="_blank"
                   rel="noreferrer"
-                  className="p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all duration-300 shadow-md hover:-translate-y-1"
+                  className="p-3 bg-slate-800 hover:bg-[oklch(0.71_0.2_46.45)] text-slate-300 hover:text-white rounded-xl transition-all duration-300 shadow-md hover:-translate-y-1"
                   aria-label="GitHub Profile"
                 >
                   <FaGithub size={20} />
@@ -197,7 +196,7 @@ const About = () => {
                   href="https://www.instagram.com/sartaj_mansuri2002"
                   target="_blank"
                   rel="noreferrer"
-                  className="p-3 bg-slate-800 hover:bg-pink-600 text-slate-300 hover:text-white rounded-xl transition-all duration-300 shadow-md hover:-translate-y-1"
+                  className="p-3 bg-slate-800 hover:bg-[oklch(0.71_0.2_46.45)] text-slate-300 hover:text-white rounded-xl transition-all duration-300 shadow-md hover:-translate-y-1"
                   aria-label="Instagram Profile"
                 >
                   <FaInstagram size={20} />
@@ -212,7 +211,7 @@ const About = () => {
       <section className="relative z-10 py-12 border-y border-slate-800/80 bg-slate-900/50 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
           <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60">
-            <div className="text-3xl text-cyan-400 mb-2 flex justify-center">
+            <div className="text-3xl text-[oklch(0.71_0.2_46.45)] mb-2 flex justify-center">
               <FaCode />
             </div>
             <h3 className="text-4xl font-extrabold text-white">2+ Years</h3>
@@ -222,7 +221,7 @@ const About = () => {
           </div>
 
           <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60">
-            <div className="text-3xl text-purple-400 mb-2 flex justify-center">
+            <div className="text-3xl text-[oklch(0.8_0.15_60)] mb-2 flex justify-center">
               <FaRocket />
             </div>
             <h3 className="text-4xl font-extrabold text-white">5+ Live</h3>
@@ -232,7 +231,7 @@ const About = () => {
           </div>
 
           <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60">
-            <div className="text-3xl text-emerald-400 mb-2 flex justify-center">
+            <div className="text-3xl text-[oklch(0.71_0.2_46.45)] mb-2 flex justify-center">
               <FaUsers />
             </div>
             <h3 className="text-4xl font-extrabold text-white">30%</h3>
@@ -247,7 +246,7 @@ const About = () => {
       <section className="relative z-10 py-24 px-6 lg:px-12 max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-700" />
+            <div className="absolute -inset-1 bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-700" />
             <img
               src={sartaj}
               alt="Developer Workspace"
@@ -257,7 +256,7 @@ const About = () => {
 
           <div className="space-y-8">
             <div className="space-y-3">
-              <span className="text-cyan-400 text-sm font-semibold tracking-wider uppercase">
+              <span className="text-[oklch(0.71_0.2_46.45)] text-sm font-semibold tracking-wider uppercase">
                 Engineering Philosophy
               </span>
               <h2 className="text-4xl font-bold">Behind The Code</h2>
@@ -268,7 +267,7 @@ const About = () => {
               primary focus is building fluid user experiences backed by
               optimized codebases. I successfully reduced core page render
               times by{" "}
-              <span className="font-semibold text-cyan-400">30%</span> for
+              <span className="font-semibold text-[oklch(0.71_0.2_46.45)]">30%</span> for
               enterprise e-commerce applications.
             </p>
 
@@ -280,7 +279,7 @@ const About = () => {
                 {techStack.map((skill, index) => (
                   <span
                     key={index}
-                    className="px-4 py-2 text-sm font-medium rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 hover:text-cyan-300 transition-all duration-300"
+                    className="px-4 py-2 text-sm font-medium rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-[oklch(0.71_0.2_46.45)]/50 hover:text-[oklch(0.71_0.2_46.45)] transition-all duration-300"
                   >
                     {skill}
                   </span>
@@ -295,7 +294,7 @@ const About = () => {
       <section className="relative z-10 py-20 bg-slate-900/40 border-y border-slate-800/60">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-16">
           <div className="lg:w-1/2 space-y-6">
-            <span className="text-purple-400 text-sm font-semibold tracking-wider uppercase">
+            <span className="text-[oklch(0.8_0.15_60)] text-sm font-semibold tracking-wider uppercase">
               Background
             </span>
             <h2 className="text-4xl font-bold">My Mission & Journey</h2>
@@ -340,7 +339,7 @@ const About = () => {
         </div>
 
         <div className="lg:w-1/2 space-y-6 order-1 lg:order-2">
-          <span className="text-cyan-400 text-sm font-semibold tracking-wider uppercase">
+          <span className="text-[oklch(0.71_0.2_46.45)] text-sm font-semibold tracking-wider uppercase">
             Collaboration
           </span>
           <h2 className="text-4xl font-bold">Let's Build Something Great</h2>
@@ -357,7 +356,7 @@ const About = () => {
           <div className="pt-4">
             <a
               href="mailto:sartajhusain770@gmail.com"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-2xl shadow-lg shadow-cyan-500/20 transition-all duration-300 hover:scale-[1.02]"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-[oklch(0.71_0.2_46.45)] hover:bg-[oklch(0.65_0.2_46.45)] text-white font-bold rounded-2xl shadow-lg shadow-[oklch(0.71_0.2_46.45)]/20 transition-all duration-300 hover:scale-[1.02]"
             >
               <FaEnvelope /> Get In Touch
             </a>
@@ -367,7 +366,7 @@ const About = () => {
 
       {/* ================= PROJECTS MODAL ================= */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
           <div className="bg-slate-900 border border-slate-800 w-full max-w-4xl max-h-[85vh] rounded-3xl shadow-2xl overflow-hidden relative flex flex-col">
             <div className="flex justify-between items-center p-6 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-10">
               <div>
@@ -380,7 +379,7 @@ const About = () => {
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-2.5 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors"
+                className="p-2.5 text-slate-400 hover:text-white bg-slate-800 hover:bg-[oklch(0.71_0.2_46.45)] rounded-xl transition-colors"
                 aria-label="Close Modal"
               >
                 <FaTimes size={18} />
@@ -392,18 +391,18 @@ const About = () => {
                 {projects.map((project, index) => (
                   <div
                     key={index}
-                    className="group bg-slate-950/60 border border-slate-800 hover:border-cyan-500/40 p-5 rounded-2xl transition-all duration-300 flex flex-col justify-between"
+                    className="group bg-slate-950/60 border border-slate-800 hover:border-[oklch(0.71_0.2_46.45)]/40 p-5 rounded-2xl transition-all duration-300 flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex justify-between items-start gap-2 mb-3">
-                        <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">
+                        <h3 className="text-lg font-bold text-white group-hover:text-[oklch(0.71_0.2_46.45)] transition-colors">
                           {project.title}
                         </h3>
                         <a
                           href={project.link}
                           target="_blank"
                           rel="noreferrer"
-                          className="p-2 bg-slate-900 hover:bg-cyan-500 hover:text-slate-950 text-slate-400 rounded-lg transition-colors"
+                          className="p-2 bg-slate-900 hover:bg-[oklch(0.71_0.2_46.45)] hover:text-white text-slate-400 rounded-lg transition-colors"
                           aria-label={`Visit ${project.title}`}
                         >
                           <FaExternalLinkAlt size={14} />
@@ -418,7 +417,7 @@ const About = () => {
                       {project.tech.map((tech, i) => (
                         <span
                           key={i}
-                          className="text-xs bg-slate-900 border border-slate-800 text-cyan-400 px-3 py-1 rounded-lg"
+                          className="text-xs bg-slate-900 border border-slate-800 text-[oklch(0.71_0.2_46.45)] px-3 py-1 rounded-lg"
                         >
                           {tech}
                         </span>
