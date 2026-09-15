@@ -7,6 +7,7 @@ import userRoutes from "./routes/user.routes.js";
 import blogRoutes from "./routes/blog.routes.js";
 import commentRoutes from "./routes/comment.route.js";
 import contactRoutes from "./routes/contactRoutes.js";
+import newsletterRoutes from "./routes/newsletter.route.js";
 import aiRoute from "./routes/ai.route.js";
 
 import cors from "cors";
@@ -122,6 +123,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/comment", commentRoutes);
 app.use("/api/v1/contact", contactLimiter, contactRoutes);
+app.use("/api/v1/newsletter", newsletterRoutes);
 app.use("/api/v1/ai", aiRoute);
 
 // 2. API 404 HANDLER (KISI BHI GALAT /api REQUEST KO INDEX.HTML PAR BHEJNE SE ROKNE KE LIYE)

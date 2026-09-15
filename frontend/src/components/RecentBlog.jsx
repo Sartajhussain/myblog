@@ -14,7 +14,7 @@ const RecentBlog = ({ blogs = [] }) => {
     imageUrl: getBlogImageUrl(blog),
   }));
 
-  const visibleBlogs = processedBlogs.slice(0, 4);
+  const visibleBlogs = processedBlogs.slice(0, 5);
 
   return (
     <div className="relative overflow-hidden bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
@@ -44,9 +44,9 @@ const RecentBlog = ({ blogs = [] }) => {
       {/* =====================================================
           MAIN CONTENT
       ===================================================== */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-14 md:py-20">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-12 md:py-16">
         {/* SECTION HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 md:mb-14">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 md:mb-12">
           <div className="text-center sm:text-left mx-auto sm:mx-0">
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[oklch(0.6_0.2_46.45)] bg-[oklch(0.71_0.2_46.45)]/10 px-3 py-1 rounded-full">
               <Sparkles className="w-3.5 h-3.5" />

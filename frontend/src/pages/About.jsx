@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import missionImg from "../assets/mission.jpg";
 import storyImg from "../assets/story.jpg";
 import sartaj from "../assets/sartaj-2.jpeg";
@@ -21,6 +21,11 @@ import {
 const About = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  /* ✅ Scroll to top when About page mounts */
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, []);
+
   const handleDownload = () => {
     const link = document.createElement("a");
     link.href = pdf;
@@ -40,7 +45,7 @@ const About = () => {
     {
       title: "Eragento - Premium Bags",
       desc: "Full-featured international e-commerce storefront with secure payment gateways.",
-      link: "https://eragento.com.au/",
+      link: "https://ereganto.com.au/",
       tech: ["Php", "CodeIgniter", "MySQL", "reactjs", "javascript"],
     },
     {
@@ -71,6 +76,9 @@ const About = () => {
     "Node.js",
     "Express.js",
     "MongoDB",
+    "php",
+    "codeignitor",
+    "laravel",
     "RESTful APIs",
     "Git / GitHub",
     "JWT Auth",
@@ -84,19 +92,11 @@ const About = () => {
           BACKGROUND — orange theme glows + grid
       ===================================================== */}
 
-      {/* Orange glow — top-left */}
       <div className="pointer-events-none absolute top-[-100px] left-[-100px] w-[500px] h-[500px] bg-[oklch(0.71_0.2_46.45)] opacity-[0.08] rounded-full blur-3xl animate-blob" />
-
-      {/* Orange lighter — top-right */}
       <div className="pointer-events-none absolute top-[150px] right-[-120px] w-[500px] h-[500px] bg-[oklch(0.8_0.15_60)] opacity-[0.08] rounded-full blur-3xl animate-blob animation-delay-2000" />
-
-      {/* Orange glow — mid-left */}
       <div className="pointer-events-none absolute top-[900px] left-[10%] w-[450px] h-[450px] bg-[oklch(0.71_0.2_46.45)] opacity-[0.06] rounded-full blur-3xl animate-blob animation-delay-4000" />
-
-      {/* Orange glow — bottom-right */}
       <div className="pointer-events-none absolute bottom-[300px] right-[5%] w-[450px] h-[450px] bg-[oklch(0.8_0.15_60)] opacity-[0.07] rounded-full blur-3xl animate-blob" />
 
-      {/* Grid Overlay */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.06]"
         style={{
@@ -108,10 +108,9 @@ const About = () => {
       />
 
       {/* ================= HERO SECTION ================= */}
-      <section className="relative z-10 min-h-[90vh] flex items-center justify-center py-20">
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-12 gap-12 items-center w-full">
+      <section className="relative z-10 min-h-[90vh] flex items-center justify-center py-24 md:py-28">
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-12 gap-12 lg:gap-16 items-center w-full">
 
-          {/* Text Content */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 border border-slate-800 backdrop-blur-md text-xs font-semibold tracking-wide text-[oklch(0.71_0.2_46.45)]">
               <span className="w-2 h-2 rounded-full bg-[oklch(0.71_0.2_46.45)] animate-ping" />
@@ -148,17 +147,16 @@ const About = () => {
                 Download Resume
               </button>
 
-              <button
-                onClick={() => setIsModalOpen(true)}
+              <a
+                href="#live-work"
                 className="inline-flex items-center gap-3 px-8 py-4 bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-800 hover:border-[oklch(0.71_0.2_46.45)]/40 font-semibold rounded-2xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02]"
               >
                 View Live Work
                 <FaArrowRight className="text-[oklch(0.71_0.2_46.45)] text-sm" />
-              </button>
+              </a>
             </div>
           </div>
 
-          {/* Hero Image & Social Badges */}
           <div className="lg:col-span-5 flex justify-center items-center relative">
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] rounded-3xl blur-xl opacity-50 group-hover:opacity-80 transition duration-500" />
@@ -208,34 +206,34 @@ const About = () => {
       </section>
 
       {/* ================= STATS SECTION ================= */}
-      <section className="relative z-10 py-12 border-y border-slate-800/80 bg-slate-900/50 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
-          <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60">
-            <div className="text-3xl text-[oklch(0.71_0.2_46.45)] mb-2 flex justify-center">
+      <section className="relative z-10 py-14 md:py-16 border-y border-slate-800/80 bg-slate-900/50 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 text-center">
+          <div className="p-6 md:p-8 rounded-2xl bg-slate-900/40 border border-slate-800/60 hover:border-[oklch(0.71_0.2_46.45)]/30 transition-colors duration-300">
+            <div className="text-3xl text-[oklch(0.71_0.2_46.45)] mb-3 flex justify-center">
               <FaCode />
             </div>
             <h3 className="text-4xl font-extrabold text-white">2+ Years</h3>
-            <p className="text-slate-400 text-sm mt-1">
+            <p className="text-slate-400 text-sm mt-2">
               Professional Experience
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60">
-            <div className="text-3xl text-[oklch(0.8_0.15_60)] mb-2 flex justify-center">
+          <div className="p-6 md:p-8 rounded-2xl bg-slate-900/40 border border-slate-800/60 hover:border-[oklch(0.8_0.15_60)]/30 transition-colors duration-300">
+            <div className="text-3xl text-[oklch(0.8_0.15_60)] mb-3 flex justify-center">
               <FaRocket />
             </div>
             <h3 className="text-4xl font-extrabold text-white">5+ Live</h3>
-            <p className="text-slate-400 text-sm mt-1">
+            <p className="text-slate-400 text-sm mt-2">
               Production Applications
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60">
-            <div className="text-3xl text-[oklch(0.71_0.2_46.45)] mb-2 flex justify-center">
+          <div className="p-6 md:p-8 rounded-2xl bg-slate-900/40 border border-slate-800/60 hover:border-[oklch(0.71_0.2_46.45)]/30 transition-colors duration-300">
+            <div className="text-3xl text-[oklch(0.71_0.2_46.45)] mb-3 flex justify-center">
               <FaUsers />
             </div>
             <h3 className="text-4xl font-extrabold text-white">30%</h3>
-            <p className="text-slate-400 text-sm mt-1">
+            <p className="text-slate-400 text-sm mt-2">
               Page Speed Optimization
             </p>
           </div>
@@ -243,8 +241,8 @@ const About = () => {
       </section>
 
       {/* ================= ABOUT & TECH STACK ================= */}
-      <section className="relative z-10 py-24 px-6 lg:px-12 max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <section className="relative z-10 py-20 md:py-24 px-6 lg:px-12 max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-700" />
             <img
@@ -259,10 +257,10 @@ const About = () => {
               <span className="text-[oklch(0.71_0.2_46.45)] text-sm font-semibold tracking-wider uppercase">
                 Engineering Philosophy
               </span>
-              <h2 className="text-4xl font-bold">Behind The Code</h2>
+              <h2 className="text-3xl md:text-4xl font-bold">Behind The Code</h2>
             </div>
 
-            <p className="text-slate-300 leading-relaxed text-lg">
+            <p className="text-slate-300 leading-relaxed text-base md:text-lg">
               I specialize in React.js, Redux, and modern CSS architecture. My
               primary focus is building fluid user experiences backed by
               optimized codebases. I successfully reduced core page render
@@ -272,7 +270,7 @@ const About = () => {
             </p>
 
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-slate-200">
+              <h3 className="text-lg md:text-xl font-semibold text-slate-200">
                 Technologies I Work With
               </h3>
               <div className="flex flex-wrap gap-2.5">
@@ -291,14 +289,14 @@ const About = () => {
       </section>
 
       {/* ================= MISSION & JOURNEY ================= */}
-      <section className="relative z-10 py-20 bg-slate-900/40 border-y border-slate-800/60">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-16">
+      <section className="relative z-10 py-20 md:py-24 bg-slate-900/40 border-y border-slate-800/60">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="lg:w-1/2 space-y-6">
             <span className="text-[oklch(0.8_0.15_60)] text-sm font-semibold tracking-wider uppercase">
               Background
             </span>
-            <h2 className="text-4xl font-bold">My Mission & Journey</h2>
-            <div className="space-y-4 text-slate-300 text-lg leading-relaxed">
+            <h2 className="text-3xl md:text-4xl font-bold">My Mission & Journey</h2>
+            <div className="space-y-4 text-slate-300 text-base md:text-lg leading-relaxed">
               <p>
                 <strong className="text-white">Mission:</strong> To craft
                 intuitive digital products and mentor aspiring developers in
@@ -326,8 +324,95 @@ const About = () => {
         </div>
       </section>
 
+      {/* ================= LIVE WORK / PROJECTS SECTION ================= */}
+      <section
+        id="live-work"
+        className="relative z-10 py-20 md:py-24 px-6 lg:px-12 max-w-7xl mx-auto"
+      >
+        {/* Section Header */}
+        <div className="text-center mb-12 md:mb-16">
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[oklch(0.71_0.2_46.45)] bg-[oklch(0.71_0.2_46.45)]/10 px-3 py-1 rounded-full">
+            <FaRocket className="w-3 h-3" />
+            Live Work
+          </span>
+          <h2 className="mt-4 text-3xl md:text-5xl font-bold text-white leading-tight">
+            Featured{" "}
+            <span className="bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] bg-clip-text text-transparent">
+              Projects
+            </span>
+          </h2>
+          <p className="mt-3 text-sm md:text-base text-slate-400 max-w-xl mx-auto">
+            Real production applications built and deployed for clients across
+            Australia and India.
+          </p>
+        </div>
+
+        {/* Projects Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((project, index) => (
+            <a
+              key={index}
+              href={project.link}
+              target="_blank"
+              rel="noreferrer"
+              className="group relative flex flex-col justify-between bg-slate-900/60 border border-slate-800 hover:border-[oklch(0.71_0.2_46.45)]/50 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-[oklch(0.71_0.2_46.45)]/10 overflow-hidden"
+            >
+              {/* subtle gradient wash on hover */}
+              <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-[oklch(0.71_0.2_46.45)]/[0.06] to-transparent" />
+
+              <div className="relative">
+                <div className="flex justify-between items-start gap-3 mb-4">
+                  <div className="w-11 h-11 rounded-xl bg-[oklch(0.71_0.2_46.45)]/12 flex items-center justify-center">
+                    <FaCode className="text-[oklch(0.71_0.2_46.45)]" size={18} />
+                  </div>
+
+                  <div className="p-2 bg-slate-950/60 border border-slate-800 group-hover:bg-[oklch(0.71_0.2_46.45)] group-hover:border-transparent group-hover:text-white text-slate-400 rounded-lg transition-colors">
+                    <FaExternalLinkAlt size={13} />
+                  </div>
+                </div>
+
+                <h3 className="text-lg font-bold text-white group-hover:text-[oklch(0.71_0.2_46.45)] transition-colors leading-snug">
+                  {project.title}
+                </h3>
+
+                <p className="text-slate-400 text-sm mt-2 mb-5 leading-relaxed line-clamp-3">
+                  {project.desc}
+                </p>
+              </div>
+
+              <div className="relative flex flex-wrap gap-2 pt-4 border-t border-slate-800/60">
+                {project.tech.slice(0, 4).map((tech, i) => (
+                  <span
+                    key={i}
+                    className="text-[11px] font-medium bg-slate-950/60 border border-slate-800 text-slate-300 px-2.5 py-1 rounded-md"
+                  >
+                    {tech}
+                  </span>
+                ))}
+                {project.tech.length > 4 && (
+                  <span className="text-[11px] font-medium text-[oklch(0.71_0.2_46.45)] px-2.5 py-1">
+                    +{project.tech.length - 4} more
+                  </span>
+                )}
+              </div>
+            </a>
+          ))}
+        </div>
+
+        {/* Bottom CTA to open modal (all projects view) */}
+        <div className="flex justify-center mt-12">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="group inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white bg-[oklch(0.71_0.2_46.45)] hover:bg-[oklch(0.65_0.2_46.45)] shadow-lg shadow-[oklch(0.71_0.2_46.45)]/25 transition-all duration-300 hover:scale-[1.02]"
+          >
+            View All Projects
+            <FaArrowRight className="text-sm group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </div>
+      </section>
+
       {/* ================= LET'S CONNECT ================= */}
-      <section className="relative z-10 py-24 px-6 lg:px-12 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+      <section className="relative z-10 py-20 md:py-24 px-6 lg:px-12 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
         <div className="lg:w-1/2 w-full order-2 lg:order-1">
           <div className="relative overflow-hidden rounded-3xl border border-slate-800 group">
             <img
@@ -342,13 +427,13 @@ const About = () => {
           <span className="text-[oklch(0.71_0.2_46.45)] text-sm font-semibold tracking-wider uppercase">
             Collaboration
           </span>
-          <h2 className="text-4xl font-bold">Let's Build Something Great</h2>
-          <p className="text-slate-300 text-lg leading-relaxed">
+          <h2 className="text-3xl md:text-4xl font-bold">Let's Build Something Great</h2>
+          <p className="text-slate-300 text-base md:text-lg leading-relaxed">
             From e-commerce solutions like <strong>Eragento</strong> to
             interactive platforms like <strong>Komplytek Academy</strong>, I
             take ownership from UI architecture to backend integration.
           </p>
-          <p className="text-slate-300 text-lg leading-relaxed">
+          <p className="text-slate-300 text-base md:text-lg leading-relaxed">
             Available for high-impact frontend roles and specialized client
             projects.
           </p>

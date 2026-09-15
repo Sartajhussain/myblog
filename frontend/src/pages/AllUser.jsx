@@ -61,7 +61,7 @@ const AllUser = () => {
     }, []);
 
     return (
-        <div className="relative min-h-[250px] md:min-h-screen py-6 md:py-10 overflow-hidden bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+        <div className="relative min-h-[250px] md:min-h-screen py-12 md:py-16 overflow-hidden bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
 
             {/* =====================================================
                 BACKGROUND GLOW — same theme as About/Contact/Footer
@@ -89,10 +89,10 @@ const AllUser = () => {
             {/* =====================================================
                 MAIN CONTENT
             ===================================================== */}
-            <div className="relative z-10 w-full md:max-w-6xl mx-auto py-0 md:py-10 px-4">
+            <div className="relative z-10 w-full md:max-w-6xl mx-auto px-4">
 
                 {/* SECTION HEADER */}
-                <div className="text-center mb-10 md:mb-14">
+                <div className="text-center mb-10 md:mb-12">
                     <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[oklch(0.6_0.2_46.45)] bg-[oklch(0.71_0.2_46.45)]/10 px-3 py-1 rounded-full">
                         <PenSquare className="w-3.5 h-3.5" />
                         Meet the writers

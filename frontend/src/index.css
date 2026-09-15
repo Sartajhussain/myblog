@@ -79,3 +79,165 @@ body {
     margin-top: 50px;
   }
 }
+
+
+/* ============ HERO ANIMATIONS ============ */
+
+/* Fade up — text ke liye */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Badge floating */
+@keyframes floatBadge {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Sparkle rotate */
+@keyframes sparkleRotate {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(15deg) scale(1.1);
+  }
+  75% {
+    transform: rotate(-15deg) scale(1.1);
+  }
+}
+
+/* Shine sweep — heading ke liye */
+@keyframes shine {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Underline grow */
+@keyframes growLine {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* ============ ANIMATION CLASSES ============ */
+
+.anim-fadeUp {
+  animation: fadeUp 0.7s ease-out forwards;
+  opacity: 0;
+}
+
+.anim-float {
+  animation: floatBadge 3s ease-in-out infinite;
+}
+
+.anim-sparkle {
+  animation: sparkleRotate 2s ease-in-out infinite;
+}
+
+/* Delay helpers */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+.delay-700 { animation-delay: 0.7s; }
+
+/* Heading shine text */
+.shine-text {
+  background: linear-gradient(
+    90deg,
+    oklch(0.71 0.2 46.45) 0%,
+    oklch(0.85 0.15 46.45) 50%,
+    oklch(0.71 0.2 46.45) 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 3s linear infinite;
+}
+
+/* Underline grow effect */
+.underline-grow {
+  position: relative;
+  display: inline-block;
+}
+
+.underline-grow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 4px;
+  border-radius: 999px;
+  background: oklch(0.71 0.2 46.45 / 0.4);
+  animation: growLine 1s ease-out 1.2s forwards;
+  width: 0;
+}
+
+/* Button hover lift */
+.btn-lift {
+  transition: all 0.3s ease;
+}
+
+.btn-lift:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+.btn-lift:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* Arrow slide on hover */
+.btn-lift:hover .arrow-slide {
+  transform: translateX(4px);
+}
+
+.arrow-slide {
+  transition: transform 0.3s ease;
+}
+
+/* Reduced motion — accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .anim-fadeUp,
+  .anim-float,
+  .anim-sparkle,
+  .shine-text,
+  .underline-grow::after {
+    animation: none !important;
+  }
+  .anim-fadeUp {
+    opacity: 1;
+  }
+}
+.dark .shine-text {
+  background: linear-gradient(
+    90deg,
+    oklch(0.71 0.2 46.45) 0%,
+    oklch(0.9 0.12 46.45) 50%,
+    oklch(0.71 0.2 46.45) 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

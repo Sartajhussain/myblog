@@ -244,37 +244,43 @@ const Home = () => {
       {/* =====================================================
           HERO INTRO
       ===================================================== */}
-      <section className="relative z-10 pt-20 md:pt-28 pb-10 md:pb-14 w-full max-w-7xl mx-auto px-4 md:px-6 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[oklch(0.71_0.2_46.45)]/10 border border-[oklch(0.71_0.2_46.45)]/20 text-xs md:text-sm font-semibold text-[oklch(0.71_0.2_46.45)] mb-5">
-          <Sparkles className="w-3.5 h-3.5" />
+      <section className="relative z-10 pt-20 md:pt-28 pb-12 md:pb-16 w-full max-w-7xl mx-auto px-4 md:px-6 text-center">
+        {/* BADGE */}
+        <div className="anim-fadeUp anim-float inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[oklch(0.71_0.2_46.45)]/10 border border-[oklch(0.71_0.2_46.45)]/20 text-xs md:text-sm font-semibold text-[oklch(0.71_0.2_46.45)] mb-5">
+          <Sparkles className="anim-sparkle w-3.5 h-3.5" />
           Stories worth your time
         </div>
 
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white leading-[1.1] max-w-4xl mx-auto">
+        {/* HEADING */}
+        <h1 className="anim-fadeUp delay-100 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white leading-[1.1] max-w-4xl mx-auto">
           Where Ideas Find{" "}
-          <span className="text-[oklch(0.71_0.2_46.45)]">Their Voice</span>
+          <span className="shine-text underline-grow">Their Voice</span>
         </h1>
 
-        <p className="mt-5 text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
+        {/* PARAGRAPH */}
+        <p className="anim-fadeUp delay-200 mt-5 text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
           Discover insightful blogs, tutorials, and stories from developers,
           designers, and creators around the world.
         </p>
 
-        <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
+        {/* BUTTONS */}
+        <div className="anim-fadeUp delay-300 flex flex-wrap items-center justify-center gap-3 mt-8">
+          {/* Primary */}
           <button
             onClick={() => navigate("/blogs")}
-            className="group inline-flex items-center gap-2 bg-[oklch(0.71_0.2_46.45)] hover:bg-[oklch(0.65_0.2_46.45)] text-white px-6 py-3 rounded-full font-semibold text-sm shadow-lg shadow-[oklch(0.71_0.2_46.45)]/20 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+            className="btn-lift group inline-flex items-center gap-2 bg-[oklch(0.71_0.2_46.45)] hover:bg-[oklch(0.65_0.2_46.45)] text-white px-6 py-3 rounded-full font-semibold text-sm shadow-lg shadow-[oklch(0.71_0.2_46.45)]/20 hover:shadow-xl"
           >
             <BookOpen className="w-4 h-4" />
             Start Reading
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="arrow-slide w-4 h-4" />
           </button>
 
+          {/* Secondary */}
           <button
             onClick={() =>
               navigate(user ? "/dashboard/create-blogs" : "/signup")
             }
-            className="inline-flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:border-[oklch(0.71_0.2_46.45)] text-gray-900 dark:text-white px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 hover:scale-[1.02]"
+            className="btn-lift inline-flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:border-[oklch(0.71_0.2_46.45)] text-gray-900 dark:text-white px-6 py-3 rounded-full font-semibold text-sm"
           >
             <PenLine className="w-4 h-4" />
             Start Writing
@@ -285,151 +291,153 @@ const Home = () => {
       {/* =====================================================
           HERO CAROUSEL
       ===================================================== */}
-      <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
-        {carouselBlogs.length > 0 ? (
-          <>
-            <Carousel
-              setApi={setApi}
-              opts={{ loop: true, align: "center" }}
-              plugins={[
-                Autoplay({
-                  delay: 5000,
-                  stopOnInteraction: false,
-                  stopOnMouseEnter: true,
-                }),
-              ]}
-              className="w-full"
+      <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
+  {carouselBlogs.length > 0 ? (
+    <>
+      <Carousel
+        setApi={setApi}
+        opts={{ loop: true, align: "center" }}
+        plugins={[
+          Autoplay({
+            delay: 5000,
+            stopOnInteraction: false,
+            stopOnMouseEnter: true,
+          }),
+        ]}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-0">
+          {carouselBlogs.map((item) => (
+            <CarouselItem key={item._id} className="basis-full pl-0">
+              <Card className="rounded-2xl overflow-hidden border-0 bg-white dark:bg-gray-900 shadow-xl hover:shadow-2xl transition-all duration-500 p-0">
+                <CardContent className="p-0">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+                    {/* TEXT SIDE */}
+                    <div className="order-2 lg:order-1 p-6 md:p-8 lg:p-10 flex flex-col justify-center">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Badge className="bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] text-white border-0 px-3 py-1">
+                          Featured
+                        </Badge>
+                        <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {item.createdAt
+                            ? formatDate(item.createdAt)
+                            : "No Date"}
+                        </span>
+                      </div>
+
+                      <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white capitalize leading-tight">
+                        {item.title}
+                      </h2>
+
+                      <div className="flex items-center gap-2 mt-3 text-sm text-gray-600 dark:text-gray-400">
+                        <User className="w-4 h-4" />
+                        <span>
+                          By {item.author?.firstName || "Unknown"}{" "}
+                          {item.author?.lastName || ""}
+                        </span>
+                      </div>
+
+                      <p className="mt-4 text-gray-600 dark:text-gray-300 line-clamp-2 leading-relaxed">
+                        {item.subtitle ||
+                          item.content?.substring(0, 120) ||
+                          "Click to read this amazing blog post..."}
+                      </p>
+
+                      <div className="flex items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-4 h-4 text-red-500" />
+                          {item.likes?.length || 0} likes
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          {item.views?.length || 0} views
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={() => navigate(`/view-blog/${item._id}`)}
+                        className="group relative mt-6 w-fit bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-2.5 rounded-full overflow-hidden transition-all duration-300 hover:shadow-lg"
+                      >
+                        <span className="relative z-10 flex items-center gap-2">
+                          Read Article
+                          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </span>
+                        <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </button>
+                    </div>
+
+                    {/* IMAGE SIDE — flush, no gray bg behind */}
+                    <div className="order-1 lg:order-2 relative h-64 lg:h-full lg:min-h-[450px] overflow-hidden bg-gray-100 dark:bg-gray-800">
+                      <img
+                        src={getBlogImageUrl(item)}
+                        alt={item.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = getBlogImageFallback(
+                            item?.title || "Blog"
+                          );
+                        }}
+                      />
+                      {/* Mobile bottom fade only */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10 lg:hidden" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+
+      <div className="flex justify-center gap-2 mt-8">
+        {carouselBlogs.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => api?.scrollTo(index)}
+            className={`group relative transition-all duration-300 rounded-full ${
+              current === index
+                ? "w-8 h-2 bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)]"
+                : "w-2 h-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600"
+            }`}
+          >
+            <span
+              className={`absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap ${
+                current === index
+                  ? "text-[oklch(0.71_0.2_46.45)]"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
             >
-              <CarouselContent className="-ml-0">
-                {carouselBlogs.map((item) => (
-                  <CarouselItem key={item._id} className="basis-full pl-0">
-                    <Card className="rounded-2xl overflow-hidden border-0 bg-white dark:bg-gray-900 shadow-xl hover:shadow-2xl transition-all duration-500">
-                      <CardContent className="p-0">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-                          <div className="order-2 lg:order-1 p-6 md:p-8 lg:p-10 flex flex-col justify-center">
-                            <div className="flex items-center gap-2 mb-4">
-                              <Badge className="bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] text-white border-0 px-3 py-1">
-                                Featured
-                              </Badge>
-                              <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                <Calendar className="w-3.5 h-3.5" />
-                                {item.createdAt
-                                  ? formatDate(item.createdAt)
-                                  : "No Date"}
-                              </span>
-                            </div>
+              {index + 1}
+            </span>
+          </button>
+        ))}
+      </div>
 
-                            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white capitalize leading-tight">
-                              {item.title}
-                            </h2>
-
-                            <div className="flex items-center gap-2 mt-3 text-sm text-gray-600 dark:text-gray-400">
-                              <User className="w-4 h-4" />
-                              <span>
-                                By {item.author?.firstName || "Unknown"}{" "}
-                                {item.author?.lastName || ""}
-                              </span>
-                            </div>
-
-                            <p className="mt-4 text-gray-600 dark:text-gray-300 line-clamp-2 leading-relaxed">
-                              {item.subtitle ||
-                                item.content?.substring(0, 120) ||
-                                "Click to read this amazing blog post..."}
-                            </p>
-
-                            <div className="flex items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
-                              <span className="flex items-center gap-1">
-                                <Heart className="w-4 h-4 text-red-500" />
-                                {item.likes?.length || 0} likes
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Eye className="w-4 h-4" />
-                                {item.views?.length || 0} views
-                              </span>
-                            </div>
-
-                            <button
-                              onClick={() => navigate(`/view-blog/${item._id}`)}
-                              className="group relative mt-6 w-fit bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-2.5 rounded-full overflow-hidden transition-all duration-300 hover:shadow-lg"
-                            >
-                              <span className="relative z-10 flex items-center gap-2">
-                                Read Article
-                                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                              </span>
-                              <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            </button>
-                          </div>
-
-                          <div className="order-1 lg:order-2 relative h-64 lg:h-[450px] rounded-md overflow-hidden group">
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10 lg:hidden" />
-                            <img
-                              src={getBlogImageUrl(item)}
-                              alt={item.title}
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 rounded-md"
-                              onError={(e) => {
-                                e.currentTarget.onerror = null;
-                                e.currentTarget.src = getBlogImageFallback(
-                                  item?.title || "Blog"
-                                );
-                              }}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
-
-            <div className="flex justify-center gap-2 mt-8">
-              {carouselBlogs.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => api?.scrollTo(index)}
-                  className={`group relative transition-all duration-300 rounded-full ${
-                    current === index
-                      ? "w-8 h-2 bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)]"
-                      : "w-2 h-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600"
-                  }`}
-                >
-                  <span
-                    className={`absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap ${
-                      current === index
-                        ? "text-[oklch(0.71_0.2_46.45)]"
-                        : "text-gray-500 dark:text-gray-400"
-                    }`}
-                  >
-                    {index + 1}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <div className="text-center mt-4 text-xs text-gray-400 dark:text-gray-600">
-              {current + 1} / {carouselBlogs.length}
-            </div>
-          </>
-        ) : (
-          <div className="text-center py-20">
-            <p className="text-gray-500 dark:text-gray-400 text-lg mb-4">
-              No published blogs yet. Check back soon!
-            </p>
-            <button
-              onClick={refreshBlogs}
-              className="px-4 py-2 bg-[oklch(0.71_0.2_46.45)] text-white rounded-lg hover:bg-[oklch(0.65_0.2_46.45)] transition"
-            >
-              Refresh
-            </button>
-          </div>
-        )}
-      </section>
+      <div className="text-center mt-4 text-xs text-gray-400 dark:text-gray-600">
+        {current + 1} / {carouselBlogs.length}
+      </div>
+    </>
+  ) : (
+    <div className="text-center py-20">
+      <p className="text-gray-500 dark:text-gray-400 text-lg mb-4">
+        No published blogs yet. Check back soon!
+      </p>
+      <button
+        onClick={refreshBlogs}
+        className="px-4 py-2 bg-[oklch(0.71_0.2_46.45)] text-white rounded-lg hover:bg-[oklch(0.65_0.2_46.45)] transition"
+      >
+        Refresh
+      </button>
+    </div>
+  )}
+</section>
 
       {/* =====================================================
           FEATURES
       ===================================================== */}
-      <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24">
+      <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
         <SectionHeader
           eyebrow="Why Choose Us"
           title="Everything You Need to Share"
@@ -481,7 +489,7 @@ const Home = () => {
       {/* =====================================================
           STATS
       ===================================================== */}
-      <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24">
+      <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-6">
           <StatCard
             icon={<BookOpen className="w-5 h-5" />}
@@ -510,7 +518,7 @@ const Home = () => {
           TRENDING
       ===================================================== */}
       {trendingBlogs.length > 0 && (
-        <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24">
+        <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12 md:mb-14 gap-4">
             <div>
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-[0.15em] uppercase text-[oklch(0.71_0.2_46.45)] mb-3">
@@ -585,7 +593,7 @@ const Home = () => {
           CATEGORIES
       ===================================================== */}
       {categories.length > 0 && (
-        <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24">
+        <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
           <SectionHeader
             eyebrow="Explore Topics"
             title="Browse by Category"
@@ -632,7 +640,7 @@ const Home = () => {
       {/* =====================================================
           TESTIMONIALS
       ===================================================== */}
-      <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24">
+      <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
         <SectionHeader
           eyebrow="Loved by Writers"
           title="What Our Community Says"
@@ -699,7 +707,7 @@ const Home = () => {
       {/* =====================================================
           CTA
       ===================================================== */}
-      <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24">
+      <section className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
         <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] p-10 md:p-16 text-center shadow-2xl">
           <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-white/10 rounded-full" />
           <div className="absolute bottom-[-40px] left-[-40px] w-40 h-40 bg-white/10 rounded-full" />
@@ -736,7 +744,7 @@ const Home = () => {
       </section>
 
       {/* RECENT BLOGS */}
-      <section className="relative z-10 py-16 md:py-24">
+      <section className="relative z-10 py-12 md:py-16">
         {publishedBlogs?.length === 0 ? (
           <p className="text-center py-10 text-gray-500 dark:text-gray-400">
             No Blog Found
@@ -747,7 +755,7 @@ const Home = () => {
       </section>
 
       {/* USERS */}
-      <section className="relative z-10 py-16 md:py-24">
+      <section className="relative z-10 ">
         <AllUser />
       </section>
     </div>

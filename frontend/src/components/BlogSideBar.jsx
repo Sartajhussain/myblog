@@ -3,23 +3,27 @@ import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+
 import { API_BASE_URL } from "../utils/api";
-import { getBlogImageFallback, getBlogImageUrl } from "../utils/profileImage";
+import {
+  getBlogImageFallback,
+  getBlogImageUrl,
+} from "../utils/profileImage";
+
 import { setPublicBlogs } from "../redux/blogSlice";
+
 import {
   Tag,
-  Mail,
   Sparkles,
   RefreshCw,
-  ArrowRight,
   X,
   Calendar,
   User as UserIcon,
 } from "lucide-react";
 
+import Newsletter from "./Newsletter";
+
 const BlogSideBar = () => {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
   const [sidebarLoading, setSidebarLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [suggestedBlogs, setSuggestedBlogs] = useState([]);
@@ -27,150 +31,188 @@ const BlogSideBar = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const { user } = useSelector((state) => state.auth);
 
-  // ✅ REDUX se blogs lo
   const { publicBlogs } = useSelector((state) => state.blog);
 
-  // ✅ Agar Redux me blogs nahi hai toh DB se fetch karo
+  // =====================================================
+  // GET BLOGS FROM REDUX OR DATABASE
+  // =====================================================
+
   useEffect(() => {
     if (publicBlogs && publicBlogs.length > 0) {
-      console.log("✅ Sidebar: Using blogs from Redux:", publicBlogs.length);
+      console.log(
+        "✅ Sidebar: Using blogs from Redux:",
+        publicBlogs.length
+      );
+
       processBlogs(publicBlogs);
     } else {
-      console.log("🔄 Sidebar: No blogs in Redux, fetching from DB...");
+      console.log(
+        "🔄 Sidebar: No blogs in Redux, fetching from DB..."
+      );
+
       fetchBlogsFromDB();
     }
   }, [publicBlogs]);
 
-  // ✅ Process blogs - extract categories and suggested
-  const processBlogs = (blogs) => {
-    const publishedBlogs = blogs.filter((blog) => blog?.isPublished === true);
+  // =====================================================
+  // PROCESS BLOGS
+  // =====================================================
 
+  const processBlogs = (blogs) => {
+    const publishedBlogs = blogs.filter(
+      (blog) => blog?.isPublished === true
+    );
+
+    // Get unique categories
     const uniqueCategories = [
-      ...new Set(publishedBlogs.map((item) => item?.category).filter(Boolean)),
+      ...new Set(
+        publishedBlogs
+          .map((item) => item?.category)
+          .filter(Boolean)
+      ),
     ];
+
     setCategories(uniqueCategories);
 
+    // Random suggested blogs
     const randomBlogs = [...publishedBlogs]
-      .filter((b) => b?._id)
+      .filter((blog) => blog?._id)
       .sort(() => Math.random() - 0.5)
       .slice(0, 4);
+
     setSuggestedBlogs(randomBlogs);
   };
 
-  // ✅ FETCH BLOGS FROM DB AND UPDATE REDUX
+  // =====================================================
+  // FETCH BLOGS FROM DATABASE
+  // =====================================================
+
   const fetchBlogsFromDB = async () => {
     try {
       setSidebarLoading(true);
+
       console.log("🔄 Sidebar: Fetching blogs from DB...");
 
-      const { data } = await axios.get(`${API_BASE_URL}/api/v1/blog/feed`, {
-        withCredentials: true,
-        timeout: 30000,
-      });
+      const { data } = await axios.get(
+        `${API_BASE_URL}/api/v1/blog/feed`,
+        {
+          withCredentials: true,
+          timeout: 30000,
+        }
+      );
 
       if (data?.success) {
         const publishedBlogs = (data.blogs || []).filter(
-          (blog) => blog.isPublished === true
+          (blog) => blog?.isPublished === true
         );
 
-        console.log(`✅ Sidebar: ${publishedBlogs.length} blogs fetched from DB`);
+        console.log(
+          `✅ Sidebar: ${publishedBlogs.length} blogs fetched from DB`
+        );
 
+        // Save blogs in Redux
         dispatch(setPublicBlogs(publishedBlogs));
+
+        // Process blogs for sidebar
         processBlogs(publishedBlogs);
       } else {
-        console.error("❌ Sidebar: API returned success false");
+        console.error(
+          "❌ Sidebar: API returned success false"
+        );
       }
     } catch (error) {
       console.error("❌ Sidebar fetch error:", error);
+
       toast.error("Failed to load blogs");
     } finally {
       setSidebarLoading(false);
     }
   };
 
-  /* =======================
-     SUBSCRIBE
-  ======================= */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // =====================================================
+  // HANDLE CATEGORY CLICK
+  // =====================================================
 
-    if (!email) return toast.error("Email required");
-
-    try {
-      setLoading(true);
-
-      const res = await axios.post(
-        `${API_BASE_URL}/api/v1/subscribe`,
-        { email },
-        { withCredentials: true }
-      );
-
-      if (res.data.success) {
-        toast.success("Subscribed successfully 🎉");
-        setEmail("");
-      }
-    } catch (error) {
-      toast.error(error?.response?.data?.message || "Error subscribing");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* =======================
-     HANDLE CATEGORY CLICK
-  ======================= */
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
 
     const filteredBlogs = publicBlogs.filter(
-      (blog) => blog?.category === category && blog?.isPublished === true
+      (blog) =>
+        blog?.category === category &&
+        blog?.isPublished === true
     );
+
     const randomFilteredBlogs = [...filteredBlogs]
       .sort(() => Math.random() - 0.5)
       .slice(0, 4);
+
     setSuggestedBlogs(randomFilteredBlogs);
   };
 
-  /* =======================
-     RESET TO ALL BLOGS
-  ======================= */
+  // =====================================================
+  // RESET TO ALL BLOGS
+  // =====================================================
+
   const resetToAllBlogs = () => {
     setSelectedCategory("");
+
     const randomBlogs = [...publicBlogs]
-      .filter((b) => b?._id && b?.isPublished === true)
+      .filter(
+        (blog) =>
+          blog?._id &&
+          blog?.isPublished === true
+      )
       .sort(() => Math.random() - 0.5)
       .slice(0, 4);
+
     setSuggestedBlogs(randomBlogs);
   };
 
-  // ✅ Loading state
+  // =====================================================
+  // LOADING STATE
+  // =====================================================
+
   if (sidebarLoading && publicBlogs.length === 0) {
     return (
       <div className="w-full">
         <div className="animate-pulse space-y-8">
+          {/* Categories Skeleton */}
           <div>
             <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-2/5 mb-4"></div>
+
             <div className="flex flex-wrap gap-2">
               <div className="h-7 w-16 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+
               <div className="h-7 w-20 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+
               <div className="h-7 w-14 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
             </div>
           </div>
 
+          {/* Newsletter Skeleton */}
           <div>
             <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-3"></div>
+
             <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-full w-full mb-2"></div>
+
             <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-full w-full"></div>
           </div>
 
+          {/* Suggested Blogs Skeleton */}
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="flex gap-3">
+              <div
+                key={i}
+                className="flex gap-3"
+              >
                 <div className="w-14 h-14 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+
                 <div className="flex-1 space-y-2">
                   <div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+
                   <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
                 </div>
               </div>
@@ -183,21 +225,26 @@ const BlogSideBar = () => {
 
   return (
     <div className="w-full flex flex-col divide-y divide-gray-200 dark:divide-gray-800">
+
       {/* =====================================================
           CATEGORY SECTION
       ===================================================== */}
-      <div className="pb-6">
+
+      <div className="py-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
             <Tag className="w-4 h-4 text-[oklch(0.6_0.2_46.45)]" />
+
             Popular Categories
           </h2>
+
           {selectedCategory && (
             <button
               onClick={resetToAllBlogs}
               className="flex items-center gap-1 text-xs font-medium text-[oklch(0.6_0.2_46.45)] hover:opacity-75 transition"
             >
               <X className="w-3 h-3" />
+
               Reset
             </button>
           )}
@@ -205,12 +252,16 @@ const BlogSideBar = () => {
 
         <div className="flex flex-wrap gap-2">
           {categories.length > 0 ? (
-            categories.map((item, index) => {
-              const isActive = selectedCategory === item;
+            categories.map((item) => {
+              const isActive =
+                selectedCategory === item;
+
               return (
                 <button
-                  key={index}
-                  onClick={() => handleCategoryClick(item)}
+                  key={item}
+                  onClick={() =>
+                    handleCategoryClick(item)
+                  }
                   className={`cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-medium capitalize transition-all duration-300 border ${
                     isActive
                       ? "bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] text-white border-transparent shadow-sm"
@@ -230,52 +281,25 @@ const BlogSideBar = () => {
       </div>
 
       {/* =====================================================
-          SUBSCRIBE SECTION
+          SUBSCRIBE NEWSLETTER
+          UI SAME AS ORIGINAL SIDEBAR
       ===================================================== */}
+
       <div className="py-6">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[oklch(0.71_0.2_46.45)]/10 text-[oklch(0.6_0.2_46.45)] flex-shrink-0">
-            <Mail className="w-4 h-4" />
-          </div>
-          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-            Subscribe Newsletter
-          </h3>
-        </div>
-
-        <p className="text-gray-500 dark:text-gray-400 mb-4 text-xs pl-10">
-          Get latest updates in your inbox.
-        </p>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-2.5">
-          <input
-            type="email"
-            placeholder="Your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="px-4 py-2.5 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-[oklch(0.71_0.2_46.45)]/40 focus:border-[oklch(0.71_0.2_46.45)]/50 transition"
-            required
-          />
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="group flex items-center justify-center gap-2 bg-gradient-to-r from-[oklch(0.71_0.2_46.45)] to-[oklch(0.8_0.15_60)] hover:opacity-90 transition disabled:opacity-60 px-5 py-2.5 rounded-full text-white text-sm font-medium"
-          >
-            {loading ? "Subscribing..." : "Subscribe"}
-            {!loading && (
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            )}
-          </button>
-        </form>
+        <Newsletter />
       </div>
 
       {/* =====================================================
           SUGGESTED BLOGS SECTION
       ===================================================== */}
+
       <div className="py-6">
         <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-4">
           <Sparkles className="w-4 h-4 text-[oklch(0.6_0.2_46.45)]" />
-          {selectedCategory ? `Suggested ${selectedCategory}` : "Suggested Blogs"}
+
+          {selectedCategory
+            ? `Suggested ${selectedCategory}`
+            : "Suggested Blogs"}
         </h3>
 
         <div className="flex flex-col gap-1">
@@ -285,8 +309,11 @@ const BlogSideBar = () => {
                 key={item._id}
                 className="flex gap-3 items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/60 p-2 -mx-2 rounded-xl transition-colors duration-200"
                 onClick={() => {
-                  if (user) navigate(`/view-blog/${item._id}`);
-                  else navigate("/login");
+                  if (user) {
+                    navigate(`/view-blog/${item._id}`);
+                  } else {
+                    navigate("/login");
+                  }
                 }}
               >
                 <img
@@ -295,7 +322,11 @@ const BlogSideBar = () => {
                   className="w-14 h-14 object-cover rounded-xl flex-shrink-0"
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = getBlogImageFallback(item?.title || "Blog");
+
+                    e.currentTarget.src =
+                      getBlogImageFallback(
+                        item?.title || "Blog"
+                      );
                   }}
                 />
 
@@ -307,16 +338,26 @@ const BlogSideBar = () => {
                   <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1">
                     <span className="flex items-center gap-1">
                       <UserIcon className="w-3 h-3" />
-                      {item?.author?.firstName || "Unknown"}
+
+                      {item?.author?.firstName ||
+                        "Unknown"}
                     </span>
+
                     <span>•</span>
+
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
+
                       {item?.createdAt
-                        ? new Date(item?.createdAt).toLocaleDateString("en-IN", {
-                            day: "numeric",
-                            month: "short",
-                          })
+                        ? new Date(
+                            item.createdAt
+                          ).toLocaleDateString(
+                            "en-IN",
+                            {
+                              day: "numeric",
+                              month: "short",
+                            }
+                          )
                         : "No date"}
                     </span>
                   </div>
@@ -334,16 +375,24 @@ const BlogSideBar = () => {
       {/* =====================================================
           REFRESH BUTTON
       ===================================================== */}
-      <div className="pt-5">
+
+      <div className="py-6">
         <button
           onClick={fetchBlogsFromDB}
           disabled={sidebarLoading}
           className="w-full flex items-center justify-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-[oklch(0.6_0.2_46.45)] disabled:opacity-50 transition-colors"
         >
           <RefreshCw
-            className={`w-3.5 h-3.5 ${sidebarLoading ? "animate-spin" : ""}`}
+            className={`w-3.5 h-3.5 ${
+              sidebarLoading
+                ? "animate-spin"
+                : ""
+            }`}
           />
-          {sidebarLoading ? "Loading..." : "Refresh suggestions"}
+
+          {sidebarLoading
+            ? "Loading..."
+            : "Refresh suggestions"}
         </button>
       </div>
     </div>
