@@ -42,10 +42,7 @@ const BlogSideBar = () => {
 
   useEffect(() => {
     if (publicBlogs && publicBlogs.length > 0) {
-      console.log(
-        "✅ Sidebar: Using blogs from Redux:",
-        publicBlogs.length
-      );
+      
 
       processBlogs(publicBlogs);
     } else {
