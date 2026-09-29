@@ -59,15 +59,38 @@ const Navbar = () => {
   const isActive = (path) =>
     location.pathname === path;
 
-  /* SEARCH FILTER */
- const searchResults =
-  search.trim() === ""
-    ? []
-    : publicBlogs?.filter((b) =>
-        b.title
-          ?.toLowerCase()
-          .includes(search.toLowerCase())
-      );
+  /* SEARCH FILTER — Title + Author + Category + Subtitle */
+  const searchResults =
+    search.trim() === ""
+      ? []
+      : publicBlogs?.filter((b) => {
+        const q = search.toLowerCase().trim();
+
+        // 1. Title match
+        const titleMatch = b.title?.toLowerCase().includes(q);
+
+        // 2. Category match
+        const categoryMatch = b.category?.toLowerCase().includes(q);
+
+        // 3. Author match (firstName + lastName)
+        const authorName =
+          `${b.author?.firstName || ""} ${b.author?.lastName || ""}`.toLowerCase();
+        const authorMatch = authorName.includes(q);
+
+        // 4. Subtitle match (bonus)
+        const subtitleMatch = b.subtitle?.toLowerCase().includes(q);
+
+        // 5. Description / content match (optional)
+        const contentMatch = b.description?.toLowerCase().includes(q);
+
+        return (
+          titleMatch ||
+          categoryMatch ||
+          authorMatch ||
+          subtitleMatch ||
+          contentMatch
+        );
+      });
 
   /* OPEN BLOG */
   const handleClick = (id) => {

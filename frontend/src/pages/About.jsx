@@ -63,7 +63,7 @@ const About = () => {
     {
       title: "Komplytek Academy - E-Learning",
       desc: "E-learning e-commerce platform supporting course purchases and access management.",
-      link: "https://komplytek.com/academy/",
+      link: "https://komplytek.com/",
       tech: ["Php", "CodeIgniter", "MySQL", "reactjs"],
     },
   ];

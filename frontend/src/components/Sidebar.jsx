@@ -143,7 +143,7 @@ const Sidebar = () => {
             className="mt-auto pt-4 border-t border-gray-200 dark:border-slate-700 cursor-pointer"
             onClick={() => navigate("/dashboard/profile")}
           >
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-100/70 dark:bg-slate-800/60 backdrop-blur-sm group hover:bg-[oklch(0.71_0.2_46.45)]/10 dark:hover:bg-[oklch(0.71_0.2_46.45)]/15 transition-colors">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[oklch(0.71_0.2_46.45)]/10 dark:bg-[oklch(0.71_0.2_46.45)]/15 backdrop-blur-sm group transition-colors">
               <div className="relative shrink-0">
                 <img
                   src={avatarUrl}
@@ -152,7 +152,7 @@ const Sidebar = () => {
                     e.target.onerror = null;
                     e.target.src = userimg;
                   }}
-                  className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-300 dark:ring-gray-600 group-hover:ring-[oklch(0.71_0.2_46.45)] transition-all duration-200"
+                 className="w-10 h-10 rounded-full object-cover ring-2 ring-[oklch(0.71_0.2_46.45)] transition-all duration-200"
                 />
               </div>
               <div className="flex-1 min-w-0">

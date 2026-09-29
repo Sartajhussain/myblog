@@ -4,105 +4,351 @@ import jwt from "jsonwebtoken";
 import { getDataUri } from "../utils/dataUri.js";
 import cloudinary from "../utils/cloudinary.js";
 import { sendVerificationMail } from "../utils/sendMail.js";
+import { generateOtp } from "../utils/generateOtp.js";
+import {
+  sendWelcomeMail,
+} from "../utils/sendMail.js";
 
 // ================= HELPER =================
 const generateOtp = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
 
 // ================= REGISTER =================
+
 export const userRegister = async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+    } = req.body;
 
-    if (!firstName || !lastName || !email || !password) {
+    // =================================================
+    // VALIDATION
+    // =================================================
+
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !password
+    ) {
       return res.status(400).json({
         success: false,
-        message: "please fill all the details",
+        message: "Please fill all the details",
       });
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    const normalizedEmail =
+      email.trim().toLowerCase();
+
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(normalizedEmail)) {
       return res.status(400).json({
         success: false,
-        message: "please enter a valid email",
+        message: "Please enter a valid email",
       });
     }
 
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
-        message: "password must be at least 6 characters",
+        message:
+          "Password must be at least 6 characters",
       });
     }
 
-    const existingUser = await User.findOne({ email });
+    // =================================================
+    // CHECK EXISTING USER
+    // =================================================
 
-    // ✅ Agar user hai lekin verified nahi -> naya OTP bhejo
-    if (existingUser && !existingUser.isVerified) {
+    const existingUser = await User.findOne({
+      email: normalizedEmail,
+    });
+
+    // =================================================
+    // EXISTING BUT NOT VERIFIED
+    // =================================================
+
+    if (
+      existingUser &&
+      !existingUser.isVerified
+    ) {
       const otp = generateOtp();
 
       existingUser.verifyOtp = otp;
-      existingUser.verifyOtpExpires = Date.now() + 10 * 60 * 1000;
+
+      existingUser.verifyOtpExpires =
+        Date.now() + 10 * 60 * 1000;
+
       await existingUser.save();
 
       try {
-        await sendVerificationMail(email, otp, existingUser.firstName);
-      } catch (mailErr) {
-        console.log("Email send failed:", mailErr.message);
+        console.log(
+          `📧 Sending verification OTP to ${normalizedEmail}`
+        );
+
+        await sendVerificationMail(
+          normalizedEmail,
+          otp,
+          existingUser.firstName
+        );
+
+        console.log(
+          `✅ Verification OTP sent to ${normalizedEmail}`
+        );
+
+      } catch (mailError) {
+        console.error(
+          "❌ REGISTRATION EMAIL ERROR:",
+          mailError.message
+        );
+
+        return res.status(500).json({
+          success: false,
+          message:
+            "User exists but verification email could not be sent. Please try again.",
+        });
       }
 
       return res.status(200).json({
         success: true,
-        message: "OTP resent to your email. Please verify.",
+        message:
+          "OTP resent to your email. Please verify.",
         email: existingUser.email,
       });
     }
 
-    // ✅ Agar user already verified hai
+    // =================================================
+    // USER ALREADY EXISTS + VERIFIED
+    // =================================================
+
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "user already exists",
+        message: "User already exists",
       });
     }
 
-    // ✅ Naya user banao + OTP generate
-    const hashpassword = await bcrypt.hash(password, 10);
+    // =================================================
+    // HASH PASSWORD
+    // =================================================
+
+    const hashedPassword =
+      await bcrypt.hash(password, 10);
+
+    // =================================================
+    // GENERATE OTP
+    // =================================================
+
     const otp = generateOtp();
 
+    // =================================================
+    // CREATE USER
+    // =================================================
+
     const newUser = await User.create({
-      firstName,
-      lastName,
-      email,
-      password: hashpassword,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+
+      email: normalizedEmail,
+
+      password: hashedPassword,
+
       isVerified: false,
+
       verifyOtp: otp,
-      verifyOtpExpires: Date.now() + 10 * 60 * 1000,
+
+      verifyOtpExpires:
+        Date.now() + 10 * 60 * 1000,
     });
 
-    // ✅ Email bhejo
+    // =================================================
+    // SEND VERIFICATION EMAIL
+    // =================================================
+
     try {
-      await sendVerificationMail(email, otp, firstName);
-    } catch (mailErr) {
-      console.log("Email send failed:", mailErr.message);
+      console.log(
+        `📧 Sending registration OTP to ${normalizedEmail}`
+      );
+
+      await sendVerificationMail(
+        normalizedEmail,
+        otp,
+        newUser.firstName
+      );
+
+      console.log(
+        `✅ Registration OTP sent to ${normalizedEmail}`
+      );
+
+    } catch (mailError) {
+      console.error(
+        "❌ REGISTRATION EMAIL ERROR:",
+        mailError.message
+      );
+
+      /*
+       * Email fail hone par user ko delete kar rahe hain.
+       * Isse database me unverified user unnecessarily
+       * nahi rahega.
+       */
+
+      await User.findByIdAndDelete(
+        newUser._id
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Registration successful but verification email could not be sent. Please try again.",
+      });
     }
+
+    // =================================================
+    // SUCCESS
+    // =================================================
 
     return res.status(201).json({
       success: true,
-      message: "Registered! Please check your email for OTP.",
+      message:
+        "Registered successfully! Please check your email for OTP.",
       email: newUser.email,
     });
+
   } catch (error) {
-    console.log("error while registering user", error);
+    console.error(
+      "❌ ERROR WHILE REGISTERING USER:",
+      error
+    );
+
     return res.status(500).json({
       success: false,
-      message: "failed to register user",
+      message: "Failed to register user",
       error: error.message,
     });
   }
 };
 
+
+// =====================================================
+// VERIFY EMAIL OTP
+// =====================================================
+
+export const verifyEmailOtp = async (
+  req,
+  res
+) => {
+  try {
+    const {
+      email,
+      otp,
+    } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Email and OTP are required",
+      });
+    }
+
+    const normalizedEmail =
+      email.trim().toLowerCase();
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    }).select("+verifyOtp +verifyOtpExpires");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Email is already verified",
+      });
+    }
+
+    if (
+      !user.verifyOtp ||
+      user.verifyOtp !== otp
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+    }
+
+    if (
+      !user.verifyOtpExpires ||
+      user.verifyOtpExpires < Date.now()
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP expired",
+      });
+    }
+
+    // =================================================
+    // VERIFY USER
+    // =================================================
+
+    user.isVerified = true;
+
+    user.verifyOtp = undefined;
+
+    user.verifyOtpExpires = undefined;
+
+    await user.save();
+
+    // =================================================
+    // OPTIONAL WELCOME EMAIL
+    // =================================================
+
+    try {
+      await sendWelcomeMail(
+        user.email,
+        user.firstName
+      );
+    } catch (welcomeError) {
+      console.error(
+        "⚠️ Welcome email failed:",
+        welcomeError.message
+      );
+
+      /*
+       * Welcome email fail hone par verification
+       * ko fail nahi karna hai.
+       */
+    }
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Email verified successfully",
+    });
+
+  } catch (error) {
+    console.error(
+      "❌ VERIFY EMAIL ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
 // ================= LOGIN =================
 export const login = async (req, res) => {
   try {

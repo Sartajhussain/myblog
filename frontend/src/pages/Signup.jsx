@@ -194,7 +194,7 @@ const Signup = () => {
       {/* =====================================================
           LEFT — MODERN ANIMATED PANEL
       ===================================================== */}
-            {/* =====================================================
+      {/* =====================================================
           LEFT — MODERN ANIMATED PANEL
           (matches app theme: gray + orange accent)
       ===================================================== */}
@@ -271,11 +271,10 @@ const Signup = () => {
             {taglines.map((_, i) => (
               <div
                 key={i}
-                className={`h-1.5 rounded-full transition-all duration-500 ${
-                  i === taglineIndex
+                className={`h-1.5 rounded-full transition-all duration-500 ${i === taglineIndex
                     ? "w-8 bg-[oklch(0.71_0.2_46.45)]"
                     : "w-1.5 bg-gray-400 dark:bg-gray-600"
-                }`}
+                  }`}
               ></div>
             ))}
           </div>
@@ -299,20 +298,22 @@ const Signup = () => {
                 <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1.5 text-xs">
                   First Name
                 </label>
+
                 <input
                   type="text"
                   placeholder="First name"
-                  className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 outline-none text-sm transition-colors ${
-                    errors.firstName && touched.firstName
+                  autoComplete="given-name"
+                  className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 outline-none text-sm transition-colors ${errors.firstName && touched.firstName
                       ? "border-red-500 focus:ring-2 focus:ring-red-500"
                       : "border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
-                  }`}
+                    }`}
                   value={firstName}
                   name="firstName"
                   onChange={handleChange}
                   onBlur={handleBlur}
                 />
-                <p className="text-[8px] leading-[10px] mt-0.5 min-h-[10px] text-red-500">
+
+                <p className="text-xs leading-4 mt-0.5 min-h-[16px] text-red-500">
                   {touched.firstName && errors.firstName ? errors.firstName : ""}
                 </p>
               </div>
@@ -322,20 +323,22 @@ const Signup = () => {
                 <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1.5 text-xs">
                   Last Name
                 </label>
+
                 <input
                   type="text"
                   placeholder="Last name"
-                  className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 outline-none text-sm transition-colors ${
-                    errors.lastName && touched.lastName
+                  autoComplete="family-name"
+                  className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 outline-none text-sm transition-colors ${errors.lastName && touched.lastName
                       ? "border-red-500 focus:ring-2 focus:ring-red-500"
                       : "border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
-                  }`}
+                    }`}
                   value={lastName}
                   name="lastName"
                   onChange={handleChange}
                   onBlur={handleBlur}
                 />
-                <p className="text-[8px] leading-[10px] mt-0.5 min-h-[10px] text-red-500">
+
+                <p className="text-xs leading-4 mt-0.5 min-h-[16px] text-red-500">
                   {touched.lastName && errors.lastName ? errors.lastName : ""}
                 </p>
               </div>
@@ -346,21 +349,22 @@ const Signup = () => {
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1.5 text-xs">
                 Email
               </label>
+
               <input
                 type="email"
                 placeholder="Enter your email"
-                autoComplete="new-password"
-                className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 outline-none text-sm transition-colors ${
-                  errors.email && touched.email
+                autoComplete="email"
+                className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 outline-none text-sm transition-colors ${errors.email && touched.email
                     ? "border-red-500 focus:ring-2 focus:ring-red-500"
                     : "border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
-                }`}
+                  }`}
                 value={email}
                 name="email"
                 onChange={handleChange}
                 onBlur={handleBlur}
               />
-              <p className="text-[8px] leading-[10px] mt-0.5 min-h-[10px] text-red-500">
+
+              <p className="text-xs leading-4 mt-0.5 min-h-[16px] text-red-500">
                 {touched.email && errors.email ? errors.email : ""}
               </p>
             </div>
@@ -370,20 +374,22 @@ const Signup = () => {
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1.5 text-xs">
                 Password
               </label>
+
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Create a password"
-                  className={`w-full px-3 py-2 pr-10 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 outline-none text-sm transition-colors ${
-                    errors.password && touched.password
+                  autoComplete="new-password"
+                  className={`w-full px-3 py-2 pr-10 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 outline-none text-sm transition-colors ${errors.password && touched.password
                       ? "border-red-500 focus:ring-2 focus:ring-red-500"
                       : "border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
-                  }`}
+                    }`}
                   value={password}
                   name="password"
                   onChange={handleChange}
                   onBlur={handleBlur}
                 />
+
                 <div
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300 cursor-pointer"
                   onClick={() => setShowPassword(!showPassword)}
@@ -392,6 +398,7 @@ const Signup = () => {
                 </div>
               </div>
 
+              {/* PASSWORD STRENGTH */}
               <div className="mt-1 h-0.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className={`h-full ${getStrengthColor()} transition-all duration-300 rounded-full`}
@@ -399,11 +406,13 @@ const Signup = () => {
                 ></div>
               </div>
 
-              <div className="flex justify-between items-center mt-0.5 min-h-[10px]">
-                <p className="text-[8px] leading-[10px] text-red-500">
+              {/* PASSWORD ERROR + STRENGTH */}
+              <div className="flex justify-between items-center mt-0.5 min-h-[16px]">
+                <p className="text-xs leading-4 text-red-500">
                   {touched.password && errors.password ? errors.password : ""}
                 </p>
-                <p className="text-[8px] leading-[10px] text-gray-500 dark:text-gray-400">
+
+                <p className="text-xs leading-4 text-gray-500 dark:text-gray-400">
                   {password && passwordStrength ? passwordStrength : ""}
                 </p>
               </div>

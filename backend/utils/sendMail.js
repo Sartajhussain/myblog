@@ -29,10 +29,12 @@ const emailWrapper = (content) => `
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
   />
+
   <title>${BRAND_NAME}</title>
 </head>
 
@@ -234,6 +236,7 @@ const otpBox = (otp) => `
         >
           ${otp}
         </p>
+
       </div>
 
     </td>
@@ -299,8 +302,16 @@ const safeSend = async ({
       throw new Error("EMAIL_FROM is missing");
     }
 
+    if (!to) {
+      throw new Error("Recipient email is missing");
+    }
+
     console.log(
       `📧 [${type}] Sending email to ${to}...`
+    );
+
+    console.log(
+      `📤 [${type}] From: ${EMAIL_FROM}`
     );
 
     const { data, error } = await resend.emails.send({
@@ -336,11 +347,10 @@ const safeSend = async ({
     return data;
 
   } catch (error) {
-
     console.error(
       `❌ [${type}] EMAIL ERROR:`,
       {
-        message: error.message,
+        message: error?.message,
       }
     );
 
@@ -352,11 +362,7 @@ const safeSend = async ({
 // PASSWORD RESET OTP
 // =====================================================
 
-export const sendMail = async (
-  email,
-  otp
-) => {
-
+export const sendMail = async (email, otp) => {
   const content = `
     ${emailHeader()}
 
@@ -391,7 +397,9 @@ export const sendMail = async (
             ${BRAND_NAME}
           </b>
           account password.
+
           Use the OTP below to proceed.
+
           This code is valid for
           <b style="color:#111827;">
             5 minutes
@@ -422,8 +430,7 @@ export const sendMail = async (
 
   return safeSend({
     to: email,
-    subject:
-      `🔐 Password Reset OTP - ${BRAND_NAME}`,
+    subject: `🔐 Password Reset OTP - ${BRAND_NAME}`,
     html: emailWrapper(content),
     type: "PASSWORD_RESET",
   });
@@ -438,7 +445,6 @@ export const sendVerificationMail = async (
   otp,
   firstName = "User"
 ) => {
-
   const content = `
     ${emailHeader()}
 
@@ -503,8 +509,7 @@ export const sendVerificationMail = async (
 
   return safeSend({
     to: email,
-    subject:
-      `✉️ Verify Your Email - ${BRAND_NAME}`,
+    subject: `✉️ Verify Your Email - ${BRAND_NAME}`,
     html: emailWrapper(content),
     type: "VERIFICATION",
   });
@@ -518,7 +523,6 @@ export const sendWelcomeMail = async (
   email,
   firstName = "User"
 ) => {
-
   const frontendUrl =
     process.env.FRONTEND_URL ||
     "http://localhost:5173";
@@ -553,6 +557,7 @@ export const sendWelcomeMail = async (
           "
         >
           Your email has been verified successfully.
+
           Welcome to
           <b style="color:#111827;">
             ${BRAND_NAME}
@@ -599,8 +604,7 @@ export const sendWelcomeMail = async (
 
   return safeSend({
     to: email,
-    subject:
-      `🎉 Welcome to ${BRAND_NAME}!`,
+    subject: `🎉 Welcome to ${BRAND_NAME}!`,
     html: emailWrapper(content),
     type: "WELCOME",
   });
