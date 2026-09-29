@@ -4,11 +4,6 @@ import jwt from "jsonwebtoken";
 import { getDataUri } from "../utils/dataUri.js";
 import cloudinary from "../utils/cloudinary.js";
 import { sendVerificationMail } from "../utils/sendMail.js";
-import { generateOtp } from "../utils/generateOtp.js";
-import {
-  sendWelcomeMail,
-} from "../utils/sendMail.js";
-
 // ================= HELPER =================
 const generateOtp = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
